@@ -1,0 +1,4 @@
+#!/bin/sh
+cd "$(dirname "$0")/ppbps"
+rm -f ~/Library/Logs/Unity/PostprocessBuildPlayer.log
+for f in ppbp_*.py; do python "$f" $1 $2 $3 $4 $5 $6 $7 2>&1 | tee -a ~/Library/Logs/Unity/PostprocessBuildPlayer.log; done

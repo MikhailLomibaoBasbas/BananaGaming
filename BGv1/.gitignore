@@ -1,0 +1,48 @@
+# Xcode
+build/*
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+*.xcworkspace
+!default.xcworkspace
+xcuserdata
+profile
+*.moved-aside
+
+# Unity
+*.booproj
+*.csproj
+*.unityproj
+*.vcproject
+*.userprefs
+*.pidb
+*.sln
+*.exe
+
+# Mac
+.DS_Store
+*.DS_Store
+**/.DS_Store
+**/**/.DS_Store
+
+# Git Conflicts
+*.BASE
+*.MINE
+*.OTHER
+
+# monodevelop project files
+Library
+Temp
+Builds
+
+# python files
+*pyc
+*pyc.meta
+**/**/*pyc
+**/**/*pyc.meta
+
