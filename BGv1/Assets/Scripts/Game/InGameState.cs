@@ -4,7 +4,7 @@ using System.Collections;
 public class InGameState : BasicGameState {
 	
 	public override void OnStart () {
-		view = InGameView.Create();
+		viewUI = InGameView.Create();
 		AddGUIListeners();
 		base.OnStart ();
 	}
@@ -19,11 +19,11 @@ public class InGameState : BasicGameState {
 	}
 	
 	void AddGUIListeners() {
-		(view as InGameView).navigationView.onClickBack += OnClickBack;
+		(viewUI as InGameView).navigationView.onClickBack += OnClickBack;
 	}
 	
 	void RemoveGUIListeners() {
-		(view as InGameView).navigationView.onClickBack -= OnClickBack;
+		(viewUI as InGameView).navigationView.onClickBack -= OnClickBack;
 	}
 	
 	void OnClickBack(GameObject go) {

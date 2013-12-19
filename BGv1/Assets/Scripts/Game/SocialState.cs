@@ -6,7 +6,7 @@ using System.Collections.Generic;
 public class SocialState : BasicGameState {
 	
 	public override void OnStart() {
-		view = SocialView.Create();
+		viewUI = SocialView.Create();
 		AddGUIListeners();
 		InitFacebookInfo();
 		base.OnStart();
@@ -22,11 +22,11 @@ public class SocialState : BasicGameState {
 	}
 	
 	void AddGUIListeners() {
-		(view as SocialView).navigationView.onClickBack += OnClickBack;
+		(viewUI as SocialView).navigationView.onClickBack += OnClickBack;
 	}
 	
 	void RemoveGUIListeners() {
-		(view as SocialView).navigationView.onClickBack -= OnClickBack;
+		(viewUI as SocialView).navigationView.onClickBack -= OnClickBack;
 	}
 	
 	void OnClickBack(GameObject go) {
@@ -34,7 +34,7 @@ public class SocialState : BasicGameState {
 	}
 	
 	void InitFacebookInfo() {
-		SocialView socialView = view as SocialView;
+		SocialView socialView = viewUI as SocialView;
 		socialView.SetName("Loading");
 		
 		if(Facebook.HasOpenSession()) {
@@ -48,7 +48,7 @@ public class SocialState : BasicGameState {
 		Debug.Log("LoginToFacebook");
 		yield return StartCoroutine(Facebook.OpenSession("590648990953596"));//!TODO: Save fbAppId somewhere later
 		
-		SocialView socialView = view as SocialView;
+		SocialView socialView = viewUI as SocialView;
 		if(Facebook.lastResult.success) {
 			socialView.SetName("Logged In Successfully");
 		}else{
@@ -60,7 +60,7 @@ public class SocialState : BasicGameState {
 		Debug.Log("LoadFacebookUserInfo");
 		Facebook.CloseSession();
 		
-		SocialView socialView = view as SocialView;
+		SocialView socialView = viewUI as SocialView;
 		socialView.SetName("Logged Out");
 		yield break;
 	}

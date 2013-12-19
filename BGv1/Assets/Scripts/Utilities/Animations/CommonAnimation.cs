@@ -1,111 +1,90 @@
 using UnityEngine;
 using System.Collections;
 using System.Reflection;
+using System.Collections.Generic;
 
-public class CommonAnimation : CommonCallBack {
-	
+public enum cWrapMode {
+	Once,
+	PingPong,
+	Loop
+}
 
-	public bool startAnimating;
+public class CommonAnimation : CommonCallback {
+
+	//public bool startAnimating;
 	public bool isAnimating = false;
-	public bool isBackAndForth = false;
-	public bool isRepeating = false;
 	public Transform target;
-	public float speed = 1f;
-	protected UISprite targetSprite;
-	protected UISlicedSprite targetSlicedSprite;
-	protected UILabel targetLabel;
-	protected UIPanelAlpha targetPanelAlpha;
-	protected UIFilledSprite targetFilledSprite;
-	protected Rigidbody targetRigidBody;
 	public float animationTime = 0.5f;
 	public float timeAnimating = 0f;
 	protected float ratio = 0;
+	public cWrapMode wrapMode;
 
 	protected bool isInitialized;
 
 	protected float cachedDeltaTime;
 
-	public AnimationComponentType animComponentType;
+	public static T GetComponentCommonAnim<T>(GameObject go) where T: CommonAnimation {
+		T animComponent = default(T);
+		if ((animComponent = go.GetComponent<T> ()) == null) {
+			animComponent = go.AddComponent<T> ();
+			animComponent.Initialize ();
+		}
+		return animComponent;
+	}
 
 	public virtual void Initialize () {
 		if (!isInitialized) {
 			target = transform;
-			if ((targetPanelAlpha = transform.GetComponent<UIPanelAlpha> ()) != null) {
-				animComponentType = AnimationComponentType.UIPanelAlpha;
-			} else if ((targetSlicedSprite = transform.GetComponent<UISlicedSprite> ()) != null) {
-				animComponentType = AnimationComponentType.UISlicedSprite;
-			} else if ((targetLabel = transform.GetComponent<UILabel> ()) != null) {
-				animComponentType = AnimationComponentType.UILabel;
-			} else if ((targetSprite = transform.GetComponent<UISprite> ()) != null) { 
-				animComponentType = AnimationComponentType.UISprite;
-			}  else if ((targetFilledSprite = transform.GetComponent<UIFilledSprite> ()) != null) { 
-				animComponentType = AnimationComponentType.UIFilledSprite;
-			}else if ((targetRigidBody = transform.GetComponent<Rigidbody> ()) != null) { 
-				animComponentType = AnimationComponentType.RigidBody;
-			} else {
-				Debug.LogWarning ("None of the supported components were found");
-				//Destroy (this);
-			}
 			isInitialized = true;
 		}
 	}
 
-
-	public bool UpdateTimeAnimatingFinished (bool timeScaleAffected = true) {
-		if (isAnimating) {
-			 cachedDeltaTime = Time.deltaTime;
-			float tempTimeThisFrame = 0;
-			if (!timeScaleAffected) {
-				float tempTimeScale = Time.timeScale;
-				tempTimeThisFrame = (tempTimeScale != 0) ? cachedDeltaTime / tempTimeScale : Time.fixedDeltaTime;
-			} else {
-				tempTimeThisFrame = cachedDeltaTime;
-			}
-			ratio = timeAnimating / animationTime;
-			timeAnimating += tempTimeThisFrame;
-			return timeAnimating > animationTime;
-		}
-		return false;
+	public virtual void changeTarget (Transform mtarget) {
+		target = mtarget;
 	}
 
-	public virtual void StartAnimation (bool flag, float delay = 0) {
-		if (delay > 0) {
-			object[] par = new object[1];
-			par[0] = flag;
-			static_coroutine.getInstance.DoReflection(this, "setIsAnimating", par, delay);
-		} else {
-			timeAnimating = 0f;
-			isAnimating = flag;
-			doCallback();
-		}
+	public virtual void start (bool flag) {
 	}
 
-	public virtual void setIsAnimating (bool flag) {
-		timeAnimating = 0f;
-		isAnimating = flag;
-		doCallback();
+	public virtual void startDelayed (bool flag, float delay) {
 	}
 
-	protected void SetComponentActive (bool flag) {
-		switch (animComponentType) {
-			case AnimationComponentType.UISprite:
-			targetSprite.enabled = flag;
-			break;
-			case AnimationComponentType.UIPanelAlpha:
-			targetPanelAlpha.alpha = flag ? 1f : 0f;
-			break;
-			case AnimationComponentType.UILabel:
-			targetLabel.enabled = flag;
-			break;
-			case AnimationComponentType.UISlicedSprite:
-			targetSlicedSprite.enabled = flag;
-			break;
-			case AnimationComponentType.UIFilledSprite:
-			targetFilledSprite.enabled = flag;
-			break;
-			default:
-			break;
-		}
+	public virtual void Clean () {
+		target = null;
+		animationTime = 0;
+		timeAnimating = 0;
+		ratio = 0;
+		isAnimating = false;
+		wrapMode = cWrapMode.Once;
 	}
 
+	#region Smooth Offset Effect
+
+	public Vector3 GetSmoothOffsetVector (float ratio, Vector3 p1, Vector3 p2) {
+		float newRatio = GetRiseBounceConversion (ratio);
+		return VectorInterpolate (newRatio, p1, p2);
+	}
+
+	float GetRiseBounceConversion(float ratio) {
+		return (2.5f * (1 - ratio) * ratio * 1.2f + ratio * ratio);
+	}
+
+	Vector3 VectorInterpolate (float ratio, Vector3 p1, Vector3 p2) {
+		return p1 + ratio * (p2 - p1);
+	}
+
+	float floatInterpolate(float ratio, float p1, float p2) { // For Bounce effect
+		float toReturn = p1 + ratio * (p2 - p1);
+		return toReturn;
+	}
+	#endregion
+
+}
+
+public class CommonAnimationElements {
+	public float time;
+	public float delay;
+	public Vector3 position;
+	public Quaternion rotation;
+	public Vector3 rotationEuler;
 }

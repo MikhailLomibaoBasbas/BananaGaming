@@ -27,7 +27,7 @@ public class SlideAnimation : CommonAnimation {
 		tempSlideAnim.Initialize ();
 		tempSlideAnim.setValues (type, time);
 		if (classPtr != null && callbackFunction != null) {
-			tempSlideAnim.addCallBack (classPtr, callbackFunction, null);
+			tempSlideAnim.addCallback (classPtr, callbackFunction, null);
 		}
 		tempSlideAnim.startAnimation (true, slideIn, delay);
 	}

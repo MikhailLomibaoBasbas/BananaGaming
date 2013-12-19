@@ -6,22 +6,26 @@ public class BasicGameState : MonoBehaviour, IState
 	public bool isTransparent {get;set;}
 	public GameObject gameUiRoot {get;set;}
 	public GameStateManager stateManager {get;set;}
-	public IView view {get;set;}
+	public IView viewUI {get;set;}
+	public IView view2D {get; set;}
 	
 	public virtual void OnStart() {
-		if(view != null) view.Show(true);
+		if(viewUI != null) viewUI.Show(true);
+		if(view2D != null) view2D.Show(false);
 	}
 	
 	public virtual void OnUpdate() {
 	}
 	
 	public virtual void OnPause() {
-		if(view != null) view.Hide(true);
+		if(viewUI != null) viewUI.Hide(true);
+		if(view2D != null) view2D.Hide(false);
 		enabled = false;
 	}
 	
 	public virtual void OnResume() {
-		if(view != null) view.Show(true);
+		if(viewUI != null) viewUI.Show(true);
+		if(view2D != null) view2D.Show(false);
 		enabled = true;
 	}
 	
@@ -30,7 +34,8 @@ public class BasicGameState : MonoBehaviour, IState
 	}
 	
 	public virtual void OnEnd() {
-		if(view != null) view.Close(true);
+		if(viewUI != null) viewUI.Close(true);
+		if(view2D != null) view2D.Close(false);
 		Destroy(this);
 	}
 }

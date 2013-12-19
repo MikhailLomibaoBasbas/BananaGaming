@@ -1,28 +1,32 @@
-
-
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
 public class BezierCurveAnimation : CommonAnimation {
 
-	public static BezierCurveAnimation set (GameObject targetGO, List<Vector2> vectorPoints, float time, float delay = 0, bool startImmediately = false, 
-	                                        object classPtr = null, string callbackFcn = null, object[] param = null) 
+
+	public static BezierCurveAnimation set (GameObject targetGO, List<Vector2> vectorPoints, float time, bool mIsGlobel, float delay = 0, cWrapMode wmode = cWrapMode.Once,
+	                                        bool startImmediately = false, object classPtr = null, string callbackFcn = null, object[] param = null) 
 	{
 		BezierCurveAnimation tempAnim;
 		if ((tempAnim = targetGO.GetComponent<BezierCurveAnimation> ()) == null)
 			tempAnim = targetGO.AddComponent<BezierCurveAnimation> ();
 		tempAnim.Initialize();
-		tempAnim.setValues (vectorPoints, time);
+		tempAnim.setValues (vectorPoints, time, mIsGlobel, wmode );
 		if (classPtr != null && callbackFcn != null) {
-			tempAnim.addCallBack (classPtr, callbackFcn, param, false);
+			tempAnim.addCallback (classPtr, callbackFcn, param,true);
 		}
 		if (startImmediately)
-			tempAnim.StartAnimation (true, delay);
+			tempAnim.startDelayed (true, delay);
 		return tempAnim;
 	}
 
-	List<Vector2> vector_Points = new List<Vector2>();
+	public List<Vector2> vectorPointsList = new List<Vector2>();
+	List<List<Vector2>> listOfVectorPointsList = new List<List<Vector2>>();
+	int listCount = 0;
+	int listCurrIndex = 0;
+	float timePerPoint = 0f;
+	bool isGlobal;
 
 	// Use this for initialization
 	void Start () {
@@ -32,29 +36,126 @@ public class BezierCurveAnimation : CommonAnimation {
 	public override void Initialize () {
 		base.Initialize ();
 	}
-	
+
+	public override void changeTarget (Transform mtarget) {
+		base.changeTarget (mtarget);
+	}
+
+	public override void start (bool flag) {
+		if (flag && listOfVectorPointsList != null) {
+			setVariablesByIndex (listCurrIndex = 0);
+		}
+		target.SetPosition ( flag ? vectorPointsList[0]: vectorPointsList[vectorPointsList.Count - 1], isGlobal);
+		timeAnimating = 0f;
+		isAnimating = flag;
+
+		if(!flag)
+			doCallback ();
+		//base.start (flag, delay);
+	}
+
+	public override void startDelayed (bool flag, float delay) {
+		if (delay > 0)
+			static_coroutine.getInstance.DoReflection (this, "start", new object[1] { flag }, delay);
+		else
+			start (flag);
+	}
+
+	public void stop () {
+		isAnimating = false;
+		doCallback ();
+		timeAnimating = 0f;
+		ratio = 0f;
+	}
+
+	public void setValues(List<Vector2> vectors, float time, bool misGlobal, cWrapMode wMode = cWrapMode.Once) {
+		listOfVectorPointsList = null;
+		listCount = 0;
+		isGlobal = misGlobal;
+		wrapMode = wMode;
+		timePerPoint = animationTime = time;
+		vectorPointsList = vectors;
+	}
+
+	public void setValues(List<List<Vector2>> mListofVectorPointList, float time, bool misGlobal, cWrapMode wMode = cWrapMode.Once) {
+		if (mListofVectorPointList.Count < 2) {
+			Debug.LogError (mListofVectorPointList + " must atleast have 2 items");
+			return;
+		}
+		wrapMode = wMode;
+		listOfVectorPointsList = mListofVectorPointList;
+		listCount = listOfVectorPointsList.Count;
+		timePerPoint = animationTime = time;
+		isGlobal = misGlobal;
+	}
+
+	public void setValues(float time, cWrapMode wMode, bool misGlobal, params List<Vector2>[] vectorsList) {
+		if (vectorsList.Length < 2) {
+			Debug.LogError (vectorsList + " must atleast have 2 items");
+			return;
+		}
+		wrapMode = wMode;
+		listOfVectorPointsList = new List<List<Vector2>> (vectorsList);
+		listCount = listOfVectorPointsList.Count;
+		timePerPoint = animationTime = time;
+		isGlobal = misGlobal;
+	}
+
 	// Update is called once per frame
 	void Update () {
 		if(isAnimating) {
-			if (!UpdateTimeAnimatingFinished ()) {
-				float ratio = timeAnimating / animationTime;
-				//Debug.Log (vector_Points [0] + " " + vector_Points [2] + " " + ratio);
-				transform.localPosition = apply_bezier_n (ratio, vector_Points);
+			timeAnimating += Time.deltaTime;
+			if (timeAnimating < timePerPoint) {
+				//Debug.LogWarning (target.name + " " + timeAnimating);
+				float ratio = timeAnimating / timePerPoint;
+				target.SetPosition( apply_bezier_n (ratio, vectorPointsList), isGlobal);
 			} else {
-				StartAnimation (false);
-				doCallback ();
+				if(listCount > 0) {
+					if (listCurrIndex < listCount - 1) {
+						isAnimating = false;
+						ratio = 0;
+						timeAnimating = 0;
+						setVariablesByIndex (++listCurrIndex);
+						isAnimating = true;
+					} else {
+						checkAnimationFinished ();
+					}
+				} else {
+					checkAnimationFinished();
+				}
 			}
 		}
 	}
 
-	public override void StartAnimation (bool flag, float delay = 0) {
-		transform.localPosition = flag ? vector_Points[0]: vector_Points[vector_Points.Count - 1];
-		base.StartAnimation (flag, delay);
+	void setVariablesByIndex (int index) {
+		vectorPointsList = listOfVectorPointsList [index];
+		timePerPoint = animationTime / listCount;
 	}
 
-	public void setValues(List<Vector2> vectors, float time) {
-		animationTime = time;
-		vector_Points = vectors;
+	void checkAnimationFinished () {
+		switch (wrapMode) {
+		case cWrapMode.Once:
+			start (false);
+			break;
+		case cWrapMode.Loop:
+			start (true);
+			break;
+		case cWrapMode.PingPong:
+			if (listCount > 0)
+				listOfVectorPointsList.Reverse ();
+			else
+				vectorPointsList.Reverse ();
+			start (true);
+			break;
+		}
+	}
+	
+	public override void Clean () {
+		base.Clean ();
+		vectorPointsList = null;
+		listOfVectorPointsList = null;
+		listCount = 0;
+		listCurrIndex = 0;
 	}
 
 	/*Logic comes from the DEV GOD, JEFF ORTIGA! -Khail*/

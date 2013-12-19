@@ -40,6 +40,6 @@ public class SampleView : BasicView
 
 	public override void Close (bool animated) {
 		//base.Close (animated);
-		FadeAnimation.setAnimation (gameObject, FadeType.FadeOut, 0.8f, Color.clear, true);
+		//FadeAnimation.setAnimation (gameObject, FadeType.FadeOut, 0.8f, Color.clear, true);
 	}
 }

@@ -9,8 +9,8 @@ public class SampleState : BasicGameState {
 		//Note: Initialize this State's View and All the necessary Initialization 
 		//Methods here.
 		// e.g. view = myView.Create();
-		view = SampleView.Create ();
-		m_sampleView = (SampleView)view;
+		viewUI = SampleView.Create ();
+		m_sampleView = (SampleView)viewUI;
 		AddGUIListeners();
 		base.OnStart ();
 	}

@@ -4,8 +4,23 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 
+
+
 public class BasicView : MonoBehaviour, IView
 {
+	public enum ViewTransitionType {
+		Fade, // For 2D only
+		Scale,
+		Move, // Buggy for 3DView
+		TweenToLeft,
+		TweenToRight,
+		TweenFromLeft,
+		TweenFromRight,
+		Default
+	}
+
+	protected ViewTransitionType transitionType = ViewTransitionType.Default;
+
 	#region Factory 
 	public static T Create<T>(string resourceName) where T : Component {
 		GameObject gameUiRoot = GetGameRootObject();
@@ -17,7 +32,8 @@ public class BasicView : MonoBehaviour, IView
 		T view = default(T);
 		if(panelPrefab != null) {
 			GameObject panel = GameObject.Instantiate(panelPrefab, Vector3.zero, Quaternion.identity) as GameObject;
-			panel.transform.parent = parentObj.transform;
+			if(parentObj != null)
+				panel.transform.parent = parentObj.transform;
 			panel.transform.localScale = Vector3.one;
 			view = panel.GetComponent<T>();
 			if(view == null) view = panel.AddComponent<T>();
@@ -32,17 +48,26 @@ public class BasicView : MonoBehaviour, IView
 		//return null;
 	}
 
+	private static Camera _camera;
+	public static Camera GetCamera {
+		get {
+			if(_camera == null)
+				_camera = Game.instance.gameUiRoot.transform.FindChild("Camera").camera;
+			return _camera;
+		}
+	}
+
 	#endregion
 
 	#region Button EventListener Methods
 
 	private Dictionary<GameObject,  UIEventListener.VoidDelegate> _buttonMap = new Dictionary<GameObject, UIEventListener.VoidDelegate>();
-	public Dictionary<GameObject, UIEventListener.VoidDelegate> getButtonMap {get {return _buttonMap;}}
+	public Dictionary<GameObject, UIEventListener.VoidDelegate> GetButtonMap {get {return _buttonMap;}}
 
-	protected void AddButtonClickListener (string childName, UIEventListener.VoidDelegate listener) {
+	protected virtual void AddButtonClickListener (string childName, UIEventListener.VoidDelegate listener) {
 		GameObject tempGO = GetChild (childName);
 		if (tempGO != null) {
-			if (tempGO.GetComponent<UIButton> () != null && (BoxCollider)tempGO.collider != null) {
+			if (tempGO.GetComponent<UIButton> () != null || (tempGO.GetComponent<UIImageButton> () != null) || (tempGO.collider as BoxCollider) != null) {
 				if(_buttonMap.ContainsKey(tempGO))
 				   return;
 				UIEventListener.Get (tempGO).onClick += listener;
@@ -56,8 +81,8 @@ public class BasicView : MonoBehaviour, IView
 
 	}
 
-	public void RemoveButtonClickHandlers () {
-		List<GameObject> buttonKeysList = new List<GameObject> (getButtonMap.Keys);
+	public virtual void RemoveButtonClickHandlers () {
+		List<GameObject> buttonKeysList = new List<GameObject> (GetButtonMap.Keys);
 		for (int i = 0; i < buttonKeysList.Count; i++) {
 			GameObject tempGO = buttonKeysList [i];
 			UIEventListener.Get (tempGO).onClick -= _buttonMap [tempGO];
@@ -112,29 +137,58 @@ public class BasicView : MonoBehaviour, IView
 	
 	public virtual void Show(bool animated) {
 		if(animated) {
-			if(gameObject.activeSelf) {
-				TweenFromRight();
-			}else{
-				TweenFromLeft();
+			switch(transitionType) {
+				case ViewTransitionType.Default:
+				case ViewTransitionType.TweenFromLeft:
+				case ViewTransitionType.TweenFromRight:
+					if (gameObject.activeSelf) {
+						TweenFromRight ();
+					} else {
+						TweenFromLeft ();
+					}
+					break;
+				default:
+					StartTransition (transitionType);
+					break;
 			}
 		}
+		transitionType = ViewTransitionType.Default;
 		gameObject.SetActive(true);
 	}
 	
 	public virtual void Hide(bool animated) {
 		if(animated) {
-			TweenToLeft("Disable");
+			switch(transitionType) {
+			case ViewTransitionType.Default:
+			case ViewTransitionType.TweenToLeft:
+				TweenToLeft("Disable");
+				break;
+			default:
+				StartTransition (transitionType, "Disable");
+				break;
+			}
 		}else{
 			Disable();
 		}
+		transitionType = ViewTransitionType.Default;
 	}
 	
 	public virtual void Close(bool animated) {
 		if(animated) {
-			TweenToRight("DelayedDestroy");
+			switch(transitionType) {
+			case ViewTransitionType.Default:
+			case ViewTransitionType.TweenToRight:
+				TweenToRight("DelayedDestroy");
+				break;
+			default:
+				StartTransition (transitionType, "DelayedDestroy");
+				break;
+			}
+
 		}else{
 			GameObject.Destroy(gameObject);
 		}
+		transitionType = ViewTransitionType.Default;
 	}
 	
 	public void Enable() {
@@ -152,7 +206,68 @@ public class BasicView : MonoBehaviour, IView
 	public void DelayedDestroy() {
 		GameObject.Destroy(gameObject, 1f);
 	}
-	
+
+	public void Destroy() {
+		GameObject.Destroy (gameObject);
+	}
+
+	void StartTransition (ViewTransitionType type, string onComplete = null) {
+		bool onCompleteNull = (onComplete == null);
+		FadeTypeV2 fadeType = (onCompleteNull ? FadeTypeV2.FadeIn : FadeTypeV2.FadeOut);
+		switch (type) {
+		case ViewTransitionType.Fade:
+			Fade (fadeType, onComplete);
+			break;
+		case ViewTransitionType.Scale:
+			Scale (fadeType, onComplete);
+			break;
+		case ViewTransitionType.Move:
+			Move (fadeType, onComplete);
+			break;
+		case ViewTransitionType.TweenFromLeft:
+			break;
+		case ViewTransitionType.TweenFromRight:
+			break;
+		case ViewTransitionType.TweenToLeft:
+			break;
+		case ViewTransitionType.TweenToRight:
+			break;
+		default:
+			break;
+		}
+	}
+
+	FadeAnimationV2 fadeAnim = null;
+	void Fade(FadeTypeV2 type, string onComplete = null) {
+		if(fadeAnim == null)
+			fadeAnim = FadeAnimationV2.set 
+			(gameObject, 0.4f, type, false, cWrapMode.Once);
+		if (onComplete != null)
+			fadeAnim.addCallback (this, onComplete, null);
+		fadeAnim.start (true);
+	}
+
+	void Scale (FadeTypeV2 fadeType, string onComplete = null) { //By default, accompanied by fade animation
+		Fade (fadeType);
+		bool onCompleteNull = (onComplete == null);
+		if(!onCompleteNull)
+			onComplete = "Destroy";
+		Vector3 scaleFrom = transform.localScale * (onCompleteNull ? 0.1f : 1.0f);
+		Vector3 scaleTo = transform.localScale * (onCompleteNull ? 1.0f : 0.1f);
+		ScaleAnimation.set (gameObject, scaleFrom, scaleTo, 0.3f, cWrapMode.Once, 0, onCompleteNull,
+		                             this, onComplete, null, true);
+	}
+
+	void Move (FadeTypeV2 fadeType, string onComplete = null) {
+		Fade (fadeType);
+		bool onCompleteNull = (onComplete == null);
+		Vector3 moveFrom =(onCompleteNull ? Vector3.up * Screen.height : Vector3.zero);
+		Vector3 MoveTo = (onCompleteNull ?Vector3.zero : Vector3.up * Screen.height);
+		MoveAnimationV2 tempAnim = MoveAnimationV2.set (gameObject, moveFrom, MoveTo, 0.6f, true, cWrapMode.Once, false);
+		if(onComplete != null)
+			tempAnim.addCallback (this, "onComplete", null, true);
+		tempAnim.start (true);
+	}
 
 	void TweenFromRight() {
 		ResetPosition();

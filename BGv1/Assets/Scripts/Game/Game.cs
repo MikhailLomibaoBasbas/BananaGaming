@@ -18,6 +18,8 @@ public class Game : MonoSingleton<Game> {
 	
 	public GameStateType defaultGameState;
 	public GameObject gameUiRoot;
+	public GameObject game2DRoot;
+	public float defaultPixelToUnits;
 
 	public override void Init () {
 		DontDestroyOnLoad(gameObject);

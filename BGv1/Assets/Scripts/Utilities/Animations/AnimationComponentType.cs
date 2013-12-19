@@ -8,5 +8,6 @@ public enum AnimationComponentType {
 	UISprite,
 	UIFilledSprite,
 	RigidBody,
+	Material, //for 3D. assuming the color can be editted
 	None
 }

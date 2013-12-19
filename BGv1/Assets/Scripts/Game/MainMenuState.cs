@@ -4,7 +4,7 @@ using System.Collections;
 public class MainMenuState : BasicGameState {
 	
 	public override void OnStart() {
-		view = MainMenuView.Create();
+		viewUI = MainMenuView.Create();
 		AddGUIListeners();
 		base.OnStart();
 	}
@@ -28,15 +28,15 @@ public class MainMenuState : BasicGameState {
 	}
 	
 	void AddGUIListeners() {
-		(view as MainMenuView).AddSampleButtonClickListener (OnClickSample);
-		(view as MainMenuView).onClickPlay += OnClickPlay;
-		(view as MainMenuView).onClickSocialPage += OnClickSocial;
+		(viewUI as MainMenuView).AddSampleButtonClickListener (OnClickSample);
+		(viewUI as MainMenuView).onClickPlay += OnClickPlay;
+		(viewUI as MainMenuView).onClickSocialPage += OnClickSocial;
 	}
 	
 	void RemoveGUIListeners() {
-		(view as MainMenuView).RemoveButtonClickHandlers ();
-		(view as MainMenuView).onClickPlay -= OnClickPlay;
-		(view as MainMenuView).onClickSocialPage -= OnClickSocial;
+		(viewUI as MainMenuView).RemoveButtonClickHandlers ();
+		(viewUI as MainMenuView).onClickPlay -= OnClickPlay;
+		(viewUI as MainMenuView).onClickSocialPage -= OnClickSocial;
 	}
 	
 	void OnClickPlay(GameObject go) {
