@@ -141,6 +141,7 @@ public class AnimationsMashUp : MonoBehaviour {
 		}
 
 		if (isBezierActive) {
+			//Debug.LogError(gameObject + " " + target);
 			getbezierAnim.startDelayed (true, delay);
 			isBezierActive = cachedAnimations;
 		}

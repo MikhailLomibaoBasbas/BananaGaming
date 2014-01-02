@@ -48,12 +48,12 @@ public class BasicView : MonoBehaviour, IView
 		//return null;
 	}
 
-	private static Camera _camera;
-	public static Camera GetCamera {
+	private static Camera _uICamera;
+	public static Camera GetUICamera {
 		get {
-			if(_camera == null)
-				_camera = Game.instance.gameUiRoot.transform.FindChild("Camera").camera;
-			return _camera;
+			if(_uICamera == null)
+				_uICamera = Game.instance.gameUiRoot.transform.FindChild("Camera").camera;
+			return _uICamera;
 		}
 	}
 

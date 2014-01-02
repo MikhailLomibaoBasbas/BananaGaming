@@ -40,7 +40,7 @@ public class MainMenuState : BasicGameState {
 	}
 	
 	void OnClickPlay(GameObject go) {
-		Game.instance.PushState(GameStateType.IN_GAME);
+		Game.instance.PushState(GameStateType.GAME);
 	}
 	
 	void OnClickSocial(GameObject go) {
