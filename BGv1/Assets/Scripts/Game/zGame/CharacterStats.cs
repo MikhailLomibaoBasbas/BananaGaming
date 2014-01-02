@@ -33,7 +33,7 @@ public class CharacterStats {
 	public float getAttackTime {
 		get {
 			if(_attackTime == default(float)) 
-				_attackTime =  _BAT / (1 + (_attackSpeed / 100));
+				_attackTime =  _BAT / (1 + (_attackSpeed / 100f));
 			return _attackTime;
 		}
 	}
@@ -41,7 +41,7 @@ public class CharacterStats {
 	public float getAttackPerSecond{
 		get {
 			if(_attackPerSecond == default(float)) {
-			   _attackPerSecond =  (1 + (_attackSpeed / 100)) / 1 /*_BAT*/; // Special case where BAT is not used because Animator divides the _BAT automatically
+				_attackPerSecond =  (1 + (_attackSpeed / 100)) / _BAT; //1f; //*_BAT*/; // Special case where BAT is not used because Animator divides the _BAT automatically
 			}
 			return _attackPerSecond;
 		}
@@ -60,7 +60,7 @@ public class CharacterStats {
 			if(_translateUnitsPerSecond == default(float)) {
 				if(_moveSpeed > _moveSpeedCap)
 					_moveSpeed = _moveSpeedCap;
-				_translateUnitsPerSecond = ((_moveSpeed / 100f) + _flatBonusMoveSpeed) * (1 + (_bonusPercentageMoveSpeed / 100));
+				_translateUnitsPerSecond = ((_moveSpeed /*/ 100f*/) + _flatBonusMoveSpeed) * (1 + (_bonusPercentageMoveSpeed / 100));
 			}
 			return _translateUnitsPerSecond;
 		}

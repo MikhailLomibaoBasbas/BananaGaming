@@ -4,8 +4,8 @@ using System.Collections;
 
 public enum GameStateType {
 	MAIN_MENU,
-	IN_GAME,
 	SOCIAL,
+	GAME,
 	SHOP,
 	GAME_CENTER,
 	GAME_OVER,
@@ -13,6 +13,13 @@ public enum GameStateType {
 }
 
 public class Game : MonoSingleton<Game> {
+	public enum LayerType {
+		Player = 10,
+		Enemy = 11,
+		PlayerAttack = 12,
+		EnemyAttack = 13,
+		HurtDead = 14
+	}
 	
 	private GameStateManager _stateManager;
 	
@@ -25,7 +32,12 @@ public class Game : MonoSingleton<Game> {
 		DontDestroyOnLoad(gameObject);
 		InitializeGUI();
 		InitializeState();
+		InitBasic2DViewStatic();
 		Debug.Log("Game Initialized");
+	}
+
+	void InitBasic2DViewStatic () {
+		Camera cam = Basic2DView.get2DCamera;
 	}
 	
 	void InitializeGUI() {
@@ -35,7 +47,7 @@ public class Game : MonoSingleton<Game> {
 	void InitializeState() {
 		_stateManager = new GameStateManager(gameObject);
 		_stateManager.RegisterState(Cast.ToString<GameStateType>(GameStateType.MAIN_MENU), typeof(MainMenuState));
-		_stateManager.RegisterState(Cast.ToString<GameStateType>(GameStateType.IN_GAME), typeof(InGameState));
+		_stateManager.RegisterState(Cast.ToString<GameStateType>(GameStateType.GAME), typeof(GameState));
 		_stateManager.RegisterState(Cast.ToString<GameStateType>(GameStateType.GAME_OVER), typeof(GameOverState));
 		_stateManager.RegisterState(Cast.ToString<GameStateType>(GameStateType.SOCIAL), typeof(SocialState));
 		_stateManager.RegisterState(Cast.ToString<GameStateType>(GameStateType.SAMPLE), typeof(SampleState));
