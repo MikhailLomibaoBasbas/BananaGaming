@@ -9,6 +9,8 @@ public class TouchTracker {
 	private float totalTime = 0.0f;
 	public Touch firstTouch;
 
+	public bool isEnded = true;
+
 	public TouchTracker(Touch touch){
 		this.fingerId = firstTouch.fingerId;
 		this.firstTouch = firstTouch;
@@ -30,10 +32,12 @@ public class TouchTracker {
 	}
 
 	public void Begin(){
+		isEnded = false;
 		Debug.Log ("Begin");
 	}
 
 	public void End(){
+		isEnded = true;
 		Debug.Log ("End");
 	}
 }
