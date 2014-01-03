@@ -40,10 +40,10 @@ public class PlayerController : BasicCharacterController {
 		//Basic2DView.get2DCamera.transform.parent = cachedTransform;
 		_attackCircleCollider = transform.FindChild("attackCollider").GetComponent<CircleCollider2D>();
 		_attackCircleCollider.enabled = false;
-				InputController.instance.onNavMove += OnNavigationMove;
+		InputController.instance.onNavMove += OnNavigationMove;
 	}
 	private void OnNavigationMove(Vector3 normalizedDisplacement) {
-				Debug.Log (normalizedDisplacement);
+				//Debug.Log (normalizedDisplacement);
 				cachedTransform.position += normalizedDisplacement * getTranslateUnitsPerSecond * cachedDeltaTime;// * _currentAcceleration;
 	}
 

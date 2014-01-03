@@ -43,13 +43,21 @@ public class TouchManager {
 			TouchTracker tracker = (TouchTracker)trackers[x];
 			if (!tracker.isDirty){
 				endedTrackers.Add(tracker);
+				tracker.End ();
 			}
 		}
 
-		for (int x = 0; x < endedTrackers.Count; x++){
-			EndTracking((TouchTracker)endedTrackers[x]);		
-		}
+		
 	}
+
+
+		public void EndTrackers()
+		{
+				for (int x = 0; x < endedTrackers.Count; x++){
+			//Debug.LogError ("PAUSELALA");
+						EndTracking((TouchTracker)endedTrackers[x]);		
+				}
+		}
 
 	public TouchTracker BeginTracking(Touch touch){
 		TouchTracker tracker = new TouchTracker (touch);
@@ -60,8 +68,6 @@ public class TouchManager {
 	}
 
 	public void EndTracking(TouchTracker tracker){
-		tracker.End();
-
 		trackers.Remove(tracker);
 		trackerLookup[tracker.fingerId] = null;
 	}

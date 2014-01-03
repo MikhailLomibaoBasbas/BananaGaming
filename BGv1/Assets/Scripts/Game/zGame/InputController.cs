@@ -1,5 +1,6 @@
 ﻿﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class InputController : MonoBehaviour {
 	public Camera uiCamera;
@@ -8,6 +9,7 @@ public class InputController : MonoBehaviour {
 	private TouchManager touchManager;
 	private GameObject navGO;
 
+		private Dictionary<TouchTracker,GameObject> copyTouch = new Dictionary<TouchTracker, GameObject>();
 	public delegate void OnNavMove (Vector3 normalizedDisplacement);
 	public event OnNavMove onNavMove;
 	public static InputController instance = null;
@@ -27,15 +29,28 @@ public class InputController : MonoBehaviour {
 		int uiLayer = 1 << 8;
 		for (int i = 0; i < trackers.Count; i++) {
 			TouchTracker touch = (TouchTracker)trackers [i];
-			Debug.Log ("TOUCH : " + trackers.Count);
-			if (Physics.Raycast (uiCamera.ScreenPointToRay (touch.selfTouch.position), out hit, 20, uiLayer)) {
-				Debug.Log ("Name :" + hit.transform.gameObject.name);
-				tapped (hit.transform.gameObject, touch.selfTouch);
+
+			if (!touch.isEnded && Physics.Raycast (uiCamera.ScreenPointToRay (touch.selfTouch.position), out hit, 20, uiLayer)) 
+			{
+					Debug.Log ("Name :" + hit.transform.gameObject.name);
+					navGO = hit.transform.gameObject;
+					if (!copyTouch.ContainsKey(touch))
+						copyTouch.Add (touch, navGO);
+
+					tapped (hit.transform.gameObject, touch);
+			} else {
+					if (copyTouch.ContainsKey (touch)) {									
+							tapped (copyTouch [touch], touch);
+							copyTouch.Remove (touch);
+					}
 			}
 		}
+
+		//Debug.LogError (trackers.Count);
+		touchManager.EndTrackers ();
 	}
 
-	private void tapped(GameObject go, Touch touch){
+	private void tapped(GameObject go, TouchTracker touch){
 		switch(go.name){
 			case "btnNav":
 				movePlayer (go, touch);
@@ -43,11 +58,26 @@ public class InputController : MonoBehaviour {
 		}
 	}
 
-	private void movePlayer(GameObject go, Touch touch){
-		Vector3 pos = uiCamera.ScreenToWorldPoint(touch.position);
-		go.transform.position = pos;
-		if (onNavMove != null) {
-			onNavMove ((pos - Vector3.zero).normalized);
-		}
+	private void movePlayer(GameObject go, TouchTracker touch){
+				if (!touch.isEnded) {
+
+						Vector3 pos = uiCamera.ScreenToWorldPoint (touch.selfTouch.position);
+						go.transform.position = pos;
+						Vector3 posGO = go.transform.localPosition;
+						//posGO.x = Mathf.Clamp (posGO.x, -40f, 40f);
+						//posGO.y = Mathf.Clamp (posGO.y, -40f, 40f);
+						Vector3 dir = posGO - Vector3.zero;
+						if (dir.magnitude > 40)
+								posGO = dir.normalized * 40;
+
+
+						go.transform.localPosition = posGO;
+
+
+						if (onNavMove != null) {
+								onNavMove ((go.transform.localPosition - Vector3.zero).normalized);
+						}
+				} else
+						go.transform.localPosition = Vector3.zero;
 	}
 }
