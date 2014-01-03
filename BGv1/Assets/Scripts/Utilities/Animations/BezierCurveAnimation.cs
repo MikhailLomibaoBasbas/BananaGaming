@@ -29,7 +29,7 @@ public class BezierCurveAnimation : CommonAnimation {
 	bool isGlobal;
 
 	// Use this for initialization
-	void Start () {
+	void Awake() {
 		Initialize();
 	}
 
@@ -106,7 +106,6 @@ public class BezierCurveAnimation : CommonAnimation {
 		if(isAnimating) {
 			timeAnimating += Time.deltaTime;
 			if (timeAnimating < timePerPoint) {
-				//Debug.LogWarning (target.name + " " + timeAnimating);
 				float ratio = timeAnimating / timePerPoint;
 				target.SetPosition( apply_bezier_n (ratio, vectorPointsList), isGlobal);
 			} else {

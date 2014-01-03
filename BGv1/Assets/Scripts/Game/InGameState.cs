@@ -6,6 +6,7 @@ public class InGameState : BasicGameState {
 	public override void OnStart () {
 		viewUI = InGameView.Create();
 		AddGUIListeners();
+				Debug.Log ("Ingame State");
 		base.OnStart ();
 	}
 	
@@ -19,11 +20,11 @@ public class InGameState : BasicGameState {
 	}
 	
 	void AddGUIListeners() {
-		(viewUI as InGameView).navigationView.onClickBack += OnClickBack;
+		//(viewUI as InGameView).navigationView.onClickBack += OnClickBack;
 	}
 	
 	void RemoveGUIListeners() {
-		(viewUI as InGameView).navigationView.onClickBack -= OnClickBack;
+		//(viewUI as InGameView).navigationView.onClickBack -= OnClickBack;
 	}
 	
 	void OnClickBack(GameObject go) {

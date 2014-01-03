@@ -4,22 +4,23 @@ using System.Collections.Generic;
 
 public class Basic2DView : BasicView {
 
-	public static T Create<T>(string resourceName) where T: Component {
-		return Create<T>(resourceName, Game.instance.game2DRoot);
+	public static T Create<T>(string resourcePath) where T: Component {
+		return Create<T>(resourcePath, getGame2DRoot);
 	}
+	public static GameObject getGame2DRoot {get{return Game.instance.game2DRoot;}}
 
-	public static T Create<T>(string resourceName, GameObject parent) where T: Component {
-		return Create<T>(resourceName, parent);
-	}
-
-	private static Camera _camera = null;
-	public static Camera getCamera {
+	private static Camera _2Dcamera = null;
+	public static Camera get2DCamera {
 		get {
-			if(_camera == null) {
-				_camera = Game.instance.game2DRoot.transform.FindChild("Camera").camera;
-				_camera.orthographicSize = (Screen.height / 2 )/ Game.instance.defaultPixelToUnits;
+			if(_2Dcamera == null) {
+				_2Dcamera = Game.instance.game2DRoot.transform.FindChild("Camera").camera;
+				if(Application.platform == RuntimePlatform.IPhonePlayer) {
+					_2Dcamera.orthographicSize = (Screen.height / 2 )/ Game.instance.defaultPixelToUnits;
+				} else {
+					_2Dcamera.orthographicSize = (640 / 2 )/ Game.instance.defaultPixelToUnits;
+				}
 			}
-			return _camera;
+			return _2Dcamera;
 		}
 	}
 

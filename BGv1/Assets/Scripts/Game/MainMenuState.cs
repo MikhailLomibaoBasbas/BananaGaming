@@ -28,26 +28,21 @@ public class MainMenuState : BasicGameState {
 	}
 	
 	void AddGUIListeners() {
-		(viewUI as MainMenuView).AddSampleButtonClickListener (OnClickSample);
 		(viewUI as MainMenuView).onClickPlay += OnClickPlay;
-		(viewUI as MainMenuView).onClickSocialPage += OnClickSocial;
+				(viewUI as MainMenuView).onClickOption += OnClickOption;
 	}
 	
 	void RemoveGUIListeners() {
 		(viewUI as MainMenuView).RemoveButtonClickHandlers ();
 		(viewUI as MainMenuView).onClickPlay -= OnClickPlay;
-		(viewUI as MainMenuView).onClickSocialPage -= OnClickSocial;
+				(viewUI as MainMenuView).onClickOption -= OnClickOption;
 	}
 	
 	void OnClickPlay(GameObject go) {
-		Game.instance.PushState(GameStateType.IN_GAME);
+		Game.instance.PushState(GameStateType.GAME);
 	}
 	
-	void OnClickSocial(GameObject go) {
-		Game.instance.PushState(GameStateType.SOCIAL);
-	}
-
-	void OnClickSample(GameObject go) {
-		Game.instance.PushState(GameStateType.SAMPLE);
+	void OnClickOption(GameObject go) {
+		//Game.instance.PushState(GameStateType.SOCIAL);
 	}
 }

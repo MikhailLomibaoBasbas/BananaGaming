@@ -476,7 +476,7 @@ internal class FadeAnimationV2Components {
 	private Color[] originalWidgetColorList;
 	private int widgetCount = 0;
 
-	private List<Material> materials = null;
+	private List<Material> materials = new List<Material>();
 	private Color[] originalMaterialColorList;
 	private int materialListCount = 0;
 
@@ -586,10 +586,12 @@ internal class FadeAnimationV2Components {
 			if (renderers.Length > 0) {
 				for (int i = 0; i < renderers.Length; i++) {
 					Material tempMat = renderers [i].material;
-					if (tempMat != null && 
-						tempMat.HasProperty("_Color"))
-						materials.Add (tempMat);
-					materialListCount = materials.Count;
+					if (tempMat != null) {
+						if(tempMat.HasProperty("_Color")) {
+							materials.Add (tempMat);
+						materialListCount = materials.Count;
+						}
+					}
 				}
 			}
 		}

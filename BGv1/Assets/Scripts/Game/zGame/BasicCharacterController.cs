@@ -3,12 +3,6 @@ using System.Collections;
 
 public class BasicCharacterController : MonoBehaviour, ICharacterController {
 
-	public enum CharacterType {
-		Enemy = 9,
-		Player = 8,
-		HurtDead = 12
-	}
-	
 	public enum CharacterState {
 		Idle,
 		Move,
@@ -32,20 +26,29 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 
 	public float fpa;
 	public float fps;
-	private float defaultAnimTime;
+	public float baseAttackTime;
+	private float _defaultAnimTime = default(float);
+	protected float defaultAnimTime{
+		get{
+			if(_defaultAnimTime == default(float))
+				_defaultAnimTime = fpa / fps;
+			return _defaultAnimTime;
+		}
+
+	}
 	public int health;
 	public float attackSpeed;
 	public float moveSpeed;
 	public bool attackEnabled;
 	public float rcDistanceToAttack; //For Raycast
-	public Vector2 flinchForce;
+	public float flinchForce;
 	public AudioClip[] audioClips;
 	protected bool isIdle;
 	protected bool isMoving;
 	protected bool isAttacking;
 	protected bool isDead;
 	protected bool isHurt;
-	Animator animator;
+	protected Animator animator;
 	public Transform cachedTransform{get;set;}
 	public Rigidbody2D cachedRigidBody2D{get;set;}
 	protected CharacterStats characterStats;
@@ -65,16 +68,21 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 	protected int originalLayer;
 	protected float rcDirectionMult; //-1 or 1 only, -1 = left, 1 = right
 	protected int rcLayerMaskTarget;
-	protected int colHurtLayer;
+	public Game.LayerType hurtTriggerType;
+	//public Game.layer hurtTriggerType;
+	public bool hasHurtInvulnerability;
+	private int hurtTrigger;
 
 	private float movementCap;
+
+	private float _attackDelayMult = 0.63f;
 
 	#region Computed Values Getters
 	public float getTranslateUnitsPerSecond {
 		get {return characterStats.getTranslateUnitsPerSecond;}
 	}
 	public float getMoveAnimSpeed {
-		get { return getTranslateUnitsPerSecond / 7.33f;}
+		get { return getTranslateUnitsPerSecond / (float)Screen.width / 2f;/*7.33f;*/}
 	}
 	public float getAttackPerSecond {
 		get { return characterStats.getAttackPerSecond;}
@@ -86,7 +94,7 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 
 	#region UpdateCharacterStats
 	public void UpdateCharacterStats () {
-		characterStats = new CharacterStats(health, defaultAnimTime, attackSpeed, moveSpeed);
+		characterStats = new CharacterStats(health, defaultAnimTime * baseAttackTime, attackSpeed, moveSpeed);
 	}
 	#endregion
 
@@ -103,17 +111,20 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 		}
 	}
 	public virtual void Init () {
+		isIdle = true;
+		currentState = lastState = CharacterState.Idle;
 		cachedTransform = transform;
 		cachedRigidBody2D = rigidbody2D;
 		animator = GetComponent<Animator>();
-		//Debug.LogError(animator);
 		animator.speed = 1f;
 		mRenderer = GetComponentInChildren<Renderer>();
 		isActiveInGame = true;
-		defaultAnimTime = fpa / fps;
 		currentState = CharacterState.None;
 		originalPos = cachedTransform.position;
 		originalLayer = gameObject.layer;
+		hurtTrigger = (int)hurtTriggerType;
+		//Debug.LogError(collider2D.GetType() == typeof(BoxCollider2D));
+		//Physics2D.IgnoreLayerCollision(hurtTrigger, gameObject.layer, true);
 		InitRaycast();
 		InitCharacterStats();
 	}
@@ -121,7 +132,7 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 		rcDirectionMult = 1f;
 	}
 	protected virtual void InitCharacterStats () {
-		characterStats = new CharacterStats(health, defaultAnimTime, attackSpeed, moveSpeed);
+		UpdateCharacterStats();
 	}
 	#endregion
 
@@ -141,10 +152,10 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 				UpdateAttackAction();
 				return;
 			}
-			if(AreTargetsNear()) {
+			/*if(AreTargetsNear()) {
 				UpdateTargetsNearAction();
 				return;
-			}
+			}*/
 		}
 		if(isHurt) {
 			UpdateHurtAction();
@@ -167,17 +178,19 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 	// Hurt Checker
 	void OnTriggerEnter2D (Collider2D collider) { // If this does not work. Try OnCollisionEnter2D(Collision2D collision)
 		GameObject colGO = collider.gameObject;
-		if(colGO.layer == colHurtLayer) {
+		if(colGO.layer == hurtTrigger) {
 			DoCharacterState(CharacterState.Hurt);
-
-			Physics2D.IgnoreLayerCollision(colHurtLayer, gameObject.layer, true);
+			cachedTransform.position -= Vector3.right * (collider.transform.position - cachedTransform.position).normalized.x * flinchForce;
+			if(hasHurtInvulnerability)
+				Physics2D.IgnoreLayerCollision(hurtTrigger, gameObject.layer, true);
 		} 
 	}
 	void OnCollisionEnter2D(Collision2D collision) {
 		GameObject colGO = collision.gameObject;
-		if(colGO.layer == colHurtLayer) {
+		if(colGO.layer == hurtTrigger) {
 			DoCharacterState(CharacterState.Hurt);
-			Physics2D.IgnoreLayerCollision(colHurtLayer, gameObject.layer, true);
+			if(hasHurtInvulnerability)
+				Physics2D.IgnoreLayerCollision(hurtTrigger, gameObject.layer, true);
 		}
 	}
 	// End Hurt Check
@@ -187,12 +200,12 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 	bool AreTargetsNear () {
 		Debug.DrawRay(cachedTransform.position, Vector2.right * rcDirectionMult * rcDistanceToAttack, Color.white);
 		return (Physics2D.Raycast(cachedTransform.position, Vector2.right * rcDirectionMult, rcDistanceToAttack, rcLayerMaskTarget));
-	}
+	}	
 	//End TargetCheck
 
 
 	public virtual void UpdateDeadAction () {}
-	public virtual void UpdateMoveAction () {/*UpdateTranslate();*/ UpdateTranslate2();}
+	public virtual void UpdateMoveAction () {/*UpdateTranslate(); UpdateTranslate2();*/}
 	public virtual void UpdateIdleAction () {}
 	public virtual void UpdateAttackAction () {}
 	public virtual void UpdateHurtAction () {}
@@ -241,9 +254,10 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 	}
 	void Attack () {
 		SetCurrentState(CharacterState.Attack);
-		animator.speed = characterStats.getAttackPerSecond;
+		//Debug.LogError(getAttackTime + " " + getAttackPerSecond);
+		animator.speed = getAttackPerSecond;
 		DoCharacterStateStartEvent();
-		StopCharacterStateWithDelay(characterStats.getAttackTime);
+		StopCharacterStateWithDelay(characterStats.getAttackTime * _attackDelayMult);
 	}
 	void Move(bool mWillTranslate = false) {
 		SetCurrentState(CharacterState.Move);
@@ -255,7 +269,7 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 		animator.speed = 1f;
 		--health;
 		
-		cachedRigidBody2D.velocity = (flinchForce);
+		//cachedRigidBody2D.velocity = (flinchForce);
 		DoCharacterStateStartEvent();
 		StopCharacterStateWithDefaultDelay();
 	}
@@ -269,14 +283,11 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 	}
 
 	void SetCurrentState (CharacterState state) {
-		//Debug.LogWarning(cachedTransform + " " + state);
 		if(state != CharacterState.None && state != CharacterState.Move && state != CharacterState.Idle)
 			isOccupied = true;
 		gameObject.layer = (state == CharacterState.Hurt || state == CharacterState.Dead) ?
-			(int)CharacterType.HurtDead: originalLayer;
+			(int)Game.LayerType.HurtDead: originalLayer;
 		CancelInvoke("StopCharacterState");
-		//if(gameObject.name == "PlayAround-Hero2")
-			//Debug.LogError(gameObject + " " + state);
 		animator.SetBool("isHurt", isHurt = state == CharacterState.Hurt);
 		animator.SetBool("isMoving", isMoving = state == CharacterState.Move);
 		animator.SetBool("isIdle", isIdle = state == CharacterState.Idle);
@@ -310,10 +321,12 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 	void StopCharacterState() {
 		isOccupied = false;
 		if(currentState == CharacterState.Hurt) {
-			Physics2D.IgnoreLayerCollision(colHurtLayer, gameObject.layer, false);
+			if(hasHurtInvulnerability)
+				Physics2D.IgnoreLayerCollision(hurtTrigger, gameObject.layer, false);
 		}
+		if(onCharacterStateFinished == null)
+			DoCharacterState(CharacterState.Idle);
 		DoCharacterStateFinishedEvent();
-		DoCharacterState(CharacterState.None);
 	}
 	protected void DoCharacterStateFinishedEvent () {
 		if(onCharacterStateFinished != null)
@@ -395,7 +408,6 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 			if(Vector3.Distance(translateToPos, cachedTransform.position) > 0.1f) {
 				cachedTransform.position += Vector3.right * _translateMultiplier * cachedDeltaTime * (characterStats.getTranslateUnitsPerSecond + _playerTPS);
 			} else {
-				//Debug.LogError("sss");
 				cachedTransform.position = translateToPos;
 				isTranslating = false;
 				translateFrPos = default(Vector2);
