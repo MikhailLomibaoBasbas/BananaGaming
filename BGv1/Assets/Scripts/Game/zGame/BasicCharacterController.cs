@@ -183,6 +183,7 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 			cachedTransform.position -= Vector3.right * (collider.transform.position - cachedTransform.position).normalized.x * flinchForce;
 			if(hasHurtInvulnerability)
 				Physics2D.IgnoreLayerCollision(hurtTrigger, gameObject.layer, true);
+			//colGO.SetActive(false);
 		} 
 	}
 	void OnCollisionEnter2D(Collision2D collision) {
@@ -191,6 +192,7 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 			DoCharacterState(CharacterState.Hurt);
 			if(hasHurtInvulnerability)
 				Physics2D.IgnoreLayerCollision(hurtTrigger, gameObject.layer, true);
+			//colGO.SetActive(false);
 		}
 	}
 	// End Hurt Check

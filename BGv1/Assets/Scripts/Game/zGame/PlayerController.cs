@@ -1,14 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class PlayerController : BasicCharacterController {
-
-	public enum WeaponType {
-		Knife,
-		Pistol,
-		Shotgun,
-		AK47
-	}
 
 	private static PlayerController instance;
 	public static PlayerController GetInstance {
@@ -21,39 +15,69 @@ public class PlayerController : BasicCharacterController {
 
 	//Base Attack Time Variables
 	private float _bAT_cd_time;
-	private bool _onBATCooldown;
+	private bool _onKnifeBATCooldown;
 	private bool _isAutomatic;
 
 	private float _currentAcceleration;
 	private float _accelerationRate = 5f;
 	private bool _isMoveKeysPressed;
 	private CameraFollow _cameraFollow;
-	private CircleCollider2D _attackCircleCollider;
+
 
 	public Vector2 minClamp;
 	public Vector2 maxClamp;
 
 	private float _baseAttackTimeErrorMult = 1.5f;
 
+	public Weapon.WeaponType currentWeaponType;
+	private Dictionary<string, WeaponController> _weaponControllerMap = new Dictionary<string, WeaponController>();
+	private WeaponController _currentWeapon;
+	private float _knifeBAT = 1f;
+	private CircleCollider2D _knifeCircleCollider;
+
+
+
+	
 	public override void Init (){
 		base.Init ();
-		//Basic2DView.get2DCamera.transform.parent = cachedTransform;
-		_attackCircleCollider = transform.FindChild("attackCollider").GetComponent<CircleCollider2D>();
-		_attackCircleCollider.enabled = false;
+		Invoke("DoInit", 0.01f);
+	}
+	private void DoInit () {
+		_knifeCircleCollider = transform.FindChild("Knife").GetComponentInChildren<CircleCollider2D>();
+		_knifeCircleCollider.enabled = false;
+		
+		_weaponControllerMap = new Dictionary<string, WeaponController>();
+		WeaponController[] weapons = GetComponentsInChildren<WeaponController>(true);
+		foreach(WeaponController wp in weapons) {
+			if(wp.isUnlocked) {
+				_weaponControllerMap.Add(wp.name, wp);
+				//Debug.LogError(wp.name);
+			}
+		}
+		_currentWeapon = _weaponControllerMap[currentWeaponType.ToString()];
 	}
 
 	public override void OnUpdate () {
 		base.OnUpdate ();
-		if(Input.GetMouseButtonDown(0)) {
-			if(!_onBATCooldown){ 
-				DoCharacterState(CharacterState.Attack);
-				_attackCircleCollider.enabled = true;
-				_onBATCooldown = true;
-				Invoke("DisableAttackCollider", getAttackTime * 0.2f);
+		if(Input.GetMouseButton(0)) {
+			if(!_onKnifeBATCooldown) {
+				_currentWeapon.Attack();
 			}
 		}
-		OnBATCooldownUpdate();
+		if(Input.GetMouseButtonDown(1)) {
+			if(!_onKnifeBATCooldown && _currentWeapon.isAttacking){ 
+				DoCharacterState(CharacterState.Attack);
+				_knifeCircleCollider.enabled = true;
+				_onKnifeBATCooldown = true;
+				Invoke("DisableAttackCollider", _knifeBAT);
+			}
+		}
+		if(Input.GetKeyDown(KeyCode.Q)) {
+			ChangeWeapon();
+		}
+		OnKnifeBATCooldownUpdate();
 		UpdateClamp();
+
 
 		if(!isHurt) {
 			_isMoveKeysPressed = false;
@@ -61,7 +85,7 @@ public class PlayerController : BasicCharacterController {
 				transform.position += -Vector3.right * getTranslateUnitsPerSecond * cachedDeltaTime * _currentAcceleration;
 				if(!isMoving)
 					DoCharacterState(CharacterState.Move);
-				if(!_onBATCooldown)
+				if(!_onKnifeBATCooldown)
 					transform.localScale = new Vector3(-1f, 1f, 1f);
 				_isMoveKeysPressed = true;
 			}
@@ -69,7 +93,7 @@ public class PlayerController : BasicCharacterController {
 				transform.position += Vector3.right * getTranslateUnitsPerSecond * cachedDeltaTime * _currentAcceleration;
 				if(!isMoving)
 					DoCharacterState(CharacterState.Move);
-				if(!_onBATCooldown)
+				if(!_onKnifeBATCooldown)
 					transform.localScale = new Vector3(1f, 1f, 1f);
 				_isMoveKeysPressed = true;
 			}
@@ -124,21 +148,42 @@ public class PlayerController : BasicCharacterController {
 			animator.SetFloat("Acceleration", _currentAcceleration);
 	}
 	
-	private void DisableAttackCollider() { _attackCircleCollider.enabled = false;}
+	private void DisableAttackCollider() { _knifeCircleCollider.enabled = false;}
 
-	private void OnBATCooldownUpdate () {
+	private void OnKnifeBATCooldownUpdate () {
 		if(_bAT_cd_time < getAttackTime) {
 			_bAT_cd_time += cachedDeltaTime;
 		} else {
 			_bAT_cd_time = 0;
-			_onBATCooldown = false;
-			_attackCircleCollider.enabled = false;
+			_onKnifeBATCooldown = false;
+			_knifeCircleCollider.enabled = false;
 		}
 	}
 
 	public override void UpdateHurtAction () {
 
 	}
+
+	private void ChangeWeapon () {
+		foreach(WeaponController wp in _weaponControllerMap.Values) {
+			wp.SetGameObjectActive(false);
+		}
+		int weaponInt = (int)currentWeaponType;
+		do {
+			weaponInt++;
+			if(weaponInt > (int)Weapon.WeaponType.AK47)
+				weaponInt = 0;
+			currentWeaponType = (Weapon.WeaponType)weaponInt;
+		} while(!_weaponControllerMap.ContainsKey(currentWeaponType.ToString()));
+
+		_currentWeapon = _weaponControllerMap[currentWeaponType.ToString()];
+		_currentWeapon.SetGameObjectActive(true);
+		//Animator.SetBool("changeWeaponName", true);
+		//Invoke("SopChangeWeaponNameAnimator", time); 
+
+		Debug.Log("Current Weapon: " + _currentWeapon.name);
+	}
+
 
 
 }
