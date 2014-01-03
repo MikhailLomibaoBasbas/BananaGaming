@@ -29,6 +29,8 @@ public class PlayerController : BasicCharacterController {
 
 	private float _baseAttackTimeErrorMult = 1.5f;
 
+	private bool _isAttackPressed;
+
 	public Weapon.WeaponType currentWeaponType;
 	private Dictionary<string, WeaponController> _weaponControllerMap = new Dictionary<string, WeaponController>();
 	private WeaponController _currentWeapon;
@@ -36,16 +38,16 @@ public class PlayerController : BasicCharacterController {
 	private CircleCollider2D _knifeCircleCollider;
 
 
-
+	private Vector3 _originalScale;
 	
 	public override void Init (){
 		base.Init ();
 		Invoke("DoInit", 0.01f);
 	}
 	private void DoInit () {
+		_originalScale = cachedTransform.localScale;
 		_knifeCircleCollider = transform.FindChild("Knife").GetComponentInChildren<CircleCollider2D>();
 		_knifeCircleCollider.enabled = false;
-		
 		_weaponControllerMap = new Dictionary<string, WeaponController>();
 		WeaponController[] weapons = GetComponentsInChildren<WeaponController>(true);
 		foreach(WeaponController wp in weapons) {
@@ -54,7 +56,12 @@ public class PlayerController : BasicCharacterController {
 				//Debug.LogError(wp.name);
 			}
 		}
-		_currentWeapon = _weaponControllerMap[currentWeaponType.ToString()];
+		//_currentWeapon = _weaponControllerMap[currentWeaponType.ToString()];
+		ChangeWeapon(currentWeaponType);
+	}
+	private void OnNavigationMove(Vector3 normalizedDisplacement) {
+			Debug.Log (normalizedDisplacement);
+			cachedTransform.position += normalizedDisplacement * getTranslateUnitsPerSecond * cachedDeltaTime;// * _currentAcceleration;
 	}
 
 	public override void OnUpdate () {
@@ -72,6 +79,12 @@ public class PlayerController : BasicCharacterController {
 				Invoke("DisableAttackCollider", _knifeBAT);
 			}
 		}
+		if(Input.GetMouseButtonDown(0)) {
+			_isAttackPressed = true;
+		}
+		if(Input.GetMouseButtonUp(0)) {
+			_isAttackPressed = false;
+		}
 		if(Input.GetKeyDown(KeyCode.Q)) {
 			ChangeWeapon();
 		}
@@ -85,16 +98,22 @@ public class PlayerController : BasicCharacterController {
 				transform.position += -Vector3.right * getTranslateUnitsPerSecond * cachedDeltaTime * _currentAcceleration;
 				if(!isMoving)
 					DoCharacterState(CharacterState.Move);
-				if(!_onKnifeBATCooldown)
-					transform.localScale = new Vector3(-1f, 1f, 1f);
+				if(!_onKnifeBATCooldown && !_isAttackPressed) {
+					Vector3 tempScale = _originalScale;
+					tempScale.x *= -1f;
+					cachedTransform.localScale = tempScale;
+				}
 				_isMoveKeysPressed = true;
 			}
 			if(Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) {
 				transform.position += Vector3.right * getTranslateUnitsPerSecond * cachedDeltaTime * _currentAcceleration;
 				if(!isMoving)
 					DoCharacterState(CharacterState.Move);
-				if(!_onKnifeBATCooldown)
-					transform.localScale = new Vector3(1f, 1f, 1f);
+				if(!_onKnifeBATCooldown && !_isAttackPressed) {
+					Vector3 tempScale = _originalScale;
+					tempScale.x *= 1f;
+					cachedTransform.localScale = tempScale;
+				}
 				_isMoveKeysPressed = true;
 			}
 			if(Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) {
@@ -116,15 +135,8 @@ public class PlayerController : BasicCharacterController {
 
 	void UpdateClamp () {
 		Vector3 tempPos = transform.position;
-		if(tempPos.x < minClamp.x)
-			tempPos.x = minClamp.x;
-		if(tempPos.x > maxClamp.x)
-			tempPos.x = maxClamp.x;
-		if(tempPos.y < minClamp.y)
-			tempPos.y = minClamp.y;
-		if(tempPos.y > maxClamp.y)
-			tempPos.y = maxClamp.y;
-		transform.position = tempPos;
+		transform.position = new Vector3(Mathf.Clamp(tempPos.x, minClamp.x, maxClamp.x),
+		                                 Mathf.Clamp(tempPos.y, minClamp.y, maxClamp.y));
 	}
 
 	private void OnCurrentAccelerationUpdate () {
@@ -182,6 +194,13 @@ public class PlayerController : BasicCharacterController {
 		//Invoke("SopChangeWeaponNameAnimator", time); 
 
 		Debug.Log("Current Weapon: " + _currentWeapon.name);
+	}
+	private void ChangeWeapon(Weapon.WeaponType type) {
+		foreach(WeaponController wp in _weaponControllerMap.Values) {
+			wp.SetGameObjectActive(false);
+		}
+		_currentWeapon = _weaponControllerMap[currentWeaponType.ToString()];
+		_currentWeapon.SetGameObjectActive(true);
 	}
 
 

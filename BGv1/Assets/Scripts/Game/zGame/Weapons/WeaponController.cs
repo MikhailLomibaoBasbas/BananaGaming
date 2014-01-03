@@ -4,7 +4,8 @@ using System.Collections.Generic;
 
 public class WeaponController : MonoBehaviour {
 	public Weapon.WeaponType type;
-	private List<Projectile> _projectiles;
+	private List<SingleTargetProjectile> s_projectiles = null;
+	private List<AOETargetProjectile> a_projectiles = null;
 	private Weapon _weapon;
 
 	private bool _isAttacking;
@@ -12,28 +13,45 @@ public class WeaponController : MonoBehaviour {
 	private float _batRecoveryTime;
 
 	private const string AMMO_CONTAINER_PATH = "ammoContainer";
+	private Transform _ammoContainerTrans;
 
 	public bool isUnlocked {get{return _weapon.isUnlocked;}}
 
+	private bool _isAOEAttacking;
+
 	void Awake () {
 		_weapon = WeaponDataController.getInstance.weaponsMap[type.ToString()];
-		if(type != Weapon.WeaponType.Shotgun) 
-			InitProjectile();
+		_ammoContainerTrans = transform.FindChild(AMMO_CONTAINER_PATH);
+		InitWeapons();
 		_isAttacking = false;
 		if(!isUnlocked)
 			gameObject.SetActive(false);
 	}
 
+	private void InitWeapons () {
+		if(_weapon.isAOE) 
+			InitAOEProjectile();
+		else 
+			InitSingleProjectile();
+	}
 
-	private void InitProjectile () {
-		Transform ammoContainerTrans = transform.FindChild(AMMO_CONTAINER_PATH);
-		_projectiles = new List<Projectile>(
-			ammoContainerTrans.GetComponentsInChildren<Projectile>(true)
+
+	private void InitSingleProjectile () {
+		s_projectiles = new List<SingleTargetProjectile>(
+			_ammoContainerTrans.GetComponentsInChildren<SingleTargetProjectile>(true)
 			);
-		foreach(Projectile pr in _projectiles) {
-			pr.SetValues(ammoContainerTrans, _weapon.projectileTime, _weapon.projectileDistance);
+		foreach(SingleTargetProjectile pr in s_projectiles) {
+			pr.SetValues(_ammoContainerTrans, _weapon.projectileTime, _weapon.projectileDistance);
 		}
+	}
 
+	private void InitAOEProjectile () {
+		a_projectiles = new List<AOETargetProjectile>(
+			_ammoContainerTrans.GetComponentsInChildren<AOETargetProjectile>(true)
+			);
+		foreach(AOETargetProjectile pr in a_projectiles) {
+			pr.SetValues(_ammoContainerTrans, _weapon.projectileTime, _weapon.projectileDistance);
+		}
 	}
 
 
@@ -54,41 +72,52 @@ public class WeaponController : MonoBehaviour {
 
 	public void Hide () {
 		gameObject.SetActive(false);
-		foreach(Projectile pr in _projectiles) {
-			if(pr.isActive)
-				pr.Hide();
+		if(!_weapon.isAOE) { 
+			foreach(SingleTargetProjectile pr in s_projectiles) {
+				if(pr.isActive)
+					pr.Hide();
+			}
+		} else {
+			foreach(AOETargetProjectile pr in a_projectiles) {
+				if(pr.isActive)
+					pr.Hide();
+			}
 		}
 	}
 
 	public void Attack () {
 		if(!_isAttacking /*&& _weapon.currentAmmo > 0*/) {
-			switch(type) {
-			case Weapon.WeaponType.Shotgun:
-				DoAOETargetAttack();
-				break;
-			case Weapon.WeaponType.AK47:
-			case Weapon.WeaponType.Pistol:
-				break;
-			default:
-				break;
-			}
+			if(_weapon.isAOE)
+				StartAOETargetAttack();
+			else
+				StartSingleTargetAttack();
 		}
 	}
 
-	void DoSingleTargetAttack () {
-		foreach(Projectile pr in _projectiles) {
+	private void StartSingleTargetAttack () {
+		foreach(SingleTargetProjectile pr in s_projectiles) {
 			if(!pr.isActive) {
 				pr.Show(transform.position.x > transform.parent.position.x);
 				_isAttacking = true;
 				_batRecoveryTime = 0;
-				//Debug.LogError(_weapon.currentAmmo);
 				//_weapon.currentAmmo--;
 				break;
 			}
 		}
 	}
 
-	void DoAOETargetAttack () {
-
+	private void StartAOETargetAttack () {
+		foreach(AOETargetProjectile pr in a_projectiles) {
+			if(!pr.isActive) {
+				pr.Show(true);
+				_isAttacking = true;
+				_batRecoveryTime = 0;
+				//_weapon.currentAmmo--;
+				break;
+			}
+		}
 	}
+
+
+
 }

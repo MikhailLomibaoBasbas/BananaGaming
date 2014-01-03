@@ -16,9 +16,9 @@ public class WeaponDataController {
 	public Dictionary<string, Weapon> weaponsMap;
 	public WeaponDataController(){
 		weaponsMap = new Dictionary<string, Weapon>();
-		Weapon pistol = new Weapon("5nrjh6oi5i", "Pistol", 0.4f, 1000, 1, 0.5f, 0, 0, Weapon.WeaponType.Pistol, true);
-		Weapon shotGun = new Weapon("ok0ck8z9sn", "Shotgun", 0.5f, 900, 5, 1.5f, 30, 30, Weapon.WeaponType.Shotgun, true);
-		Weapon ak47 = new Weapon("5fogt8di5i", "AK47", 0.3f, 1200, 2, 0.05f, 200, 200, Weapon.WeaponType.AK47, false);
+		Weapon pistol = new Weapon("5nrjh6oi5i", "Pistol", 0.4f, 1500, 1, false, 0.5f, 0, 0, Weapon.WeaponType.Pistol, true);
+		Weapon shotGun = new Weapon("ok0ck8z9sn", "Shotgun", 0.1f, 800, 5, true, 1.5f, 30, 30, Weapon.WeaponType.Shotgun, true); // Instant
+		Weapon ak47 = new Weapon("5fogt8di5i", "AK47", 0.3f, 2000, 2, false, 0.1f,  200, 200, Weapon.WeaponType.AK47, true);
 
 		weaponsMap.Add(pistol.name, pistol);
 		weaponsMap.Add(shotGun.name, shotGun);

@@ -37,4 +37,16 @@ public class Game2DView : Basic2DView {
 		_towerGO = GetChild("Tower").transform;
 	}
 
+	public void SummonEnemyAtContainer1(EnemyController.EnemyType type, int count) {
+		int i = 0;
+		foreach(EnemyController ec in _enemyControllers1) {
+			if(ec.enemyType == type) {
+				ec.setActiveInScene(true, Vector3.up * Random.Range(-Screen.height / 2f, Screen.height / 2f), false);
+				i++;
+			}
+			if(i == count)
+				break;
+		}
+	}
+
 }
