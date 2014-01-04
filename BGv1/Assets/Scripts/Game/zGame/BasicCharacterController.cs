@@ -51,6 +51,7 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 	protected Animator animator;
 	public Transform cachedTransform{get;set;}
 	public Rigidbody2D cachedRigidBody2D{get;set;}
+	public Collider2D cachedCollider2D{get;set;}
 	protected CharacterStats characterStats;
 
 	private CharacterState lastState;
@@ -61,7 +62,7 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 	bool isOccupied;
 
 	bool isInitalized = false;
-	bool isActiveInGame = false;
+	protected bool isActiveInGame = false;
 	protected float cachedDeltaTime;
 
 	//For Raycast and Collider
@@ -76,6 +77,8 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 	private float movementCap;
 
 	private float _attackDelayMult = 0.63f;
+
+
 
 	#region Computed Values Getters
 	public float getTranslateUnitsPerSecond {
@@ -115,6 +118,7 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 		currentState = lastState = CharacterState.Idle;
 		cachedTransform = transform;
 		cachedRigidBody2D = rigidbody2D;
+		cachedCollider2D = collider2D;
 		animator = GetComponent<Animator>();
 		animator.speed = 1f;
 		mRenderer = GetComponentInChildren<Renderer>();
@@ -179,7 +183,10 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 	void OnTriggerEnter2D (Collider2D collider) { // If this does not work. Try OnCollisionEnter2D(Collision2D collision)
 		GameObject colGO = collider.gameObject;
 		if(colGO.layer == hurtTrigger) {
-			DoCharacterState(CharacterState.Hurt);
+			int tempDmg = colGO.GetComponent<Projectile>().GetDamage();
+			health -= tempDmg;
+		
+			DoCharacterState( (health > 0) ? CharacterState.Hurt: CharacterState.Dead);
 			cachedTransform.position -= Vector3.right * (collider.transform.position - cachedTransform.position).normalized.x * flinchForce;
 			if(hasHurtInvulnerability)
 				Physics2D.IgnoreLayerCollision(hurtTrigger, gameObject.layer, true);
@@ -189,7 +196,9 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 	void OnCollisionEnter2D(Collision2D collision) {
 		GameObject colGO = collision.gameObject;
 		if(colGO.layer == hurtTrigger) {
-			DoCharacterState(CharacterState.Hurt);
+			int tempDmg = colGO.GetComponent<Projectile>().GetDamage();
+			health -= tempDmg;
+			DoCharacterState( (health > 0) ? CharacterState.Hurt: CharacterState.Dead);
 			if(hasHurtInvulnerability)
 				Physics2D.IgnoreLayerCollision(hurtTrigger, gameObject.layer, true);
 			//colGO.SetActive(false);
@@ -269,13 +278,13 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 	 void Hurt () {
 		SetCurrentState(CharacterState.Hurt);
 		animator.speed = 1f;
-		--health;
 		
 		//cachedRigidBody2D.velocity = (flinchForce);
 		DoCharacterStateStartEvent();
 		StopCharacterStateWithDefaultDelay();
 	}
 	void Dead () {
+
 		SetCurrentState(CharacterState.Dead);
 		DoCharacterStateStartEvent();
 		StopCharacterStateWithDefaultDelay();
@@ -322,10 +331,13 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 	}
 	void StopCharacterState() {
 		isOccupied = false;
-		if(currentState == CharacterState.Hurt) {
+		switch(currentState) {
+		case CharacterState.Hurt:
 			if(hasHurtInvulnerability)
 				Physics2D.IgnoreLayerCollision(hurtTrigger, gameObject.layer, false);
+			break;
 		}
+
 		if(onCharacterStateFinished == null)
 			DoCharacterState(CharacterState.Idle);
 		DoCharacterStateFinishedEvent();
@@ -333,11 +345,15 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 	protected void DoCharacterStateFinishedEvent () {
 		if(onCharacterStateFinished != null)
 			onCharacterStateFinished(currentState, this);
+		CharacterStateStarted(currentState);
 	}
 	protected void DoCharacterStateStartEvent () {
 		if(onCharacterStateStart != null)
 			onCharacterStateStart(currentState, this);
+		CharacterStateFinished(currentState);
 	}
+	protected virtual void CharacterStateStarted (CharacterState state) {}
+	protected virtual void CharacterStateFinished(CharacterState state){}
 	#endregion
 
 	#region Value Changer

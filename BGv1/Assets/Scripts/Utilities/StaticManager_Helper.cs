@@ -125,17 +125,6 @@ public static class StaticManager_Helper {
 			mTransform.localRotation = mRotation;
 	}
 
-	public static string ConvertIntToCurrency(this int intVar) {
-		string valString = intVar.ToString ();
-		if (valString.Length <= 3)
-			return valString;
-		int valIndex = valString.Length - 3;
-		while(valIndex >= 0) {
-			valString = valString.Insert (valIndex, ",");
-			valIndex -= 3;
-		}
-		return valString;
-	}
 
 	public static Vector3 getSineWavePoints (Vector3 moveFr, Vector3 moveT, float ratio, 
 	                           float ampli = 50f, float centerAmpli = 0f, float frequency = 1f, float phase = 0f) {
@@ -234,5 +223,20 @@ public static class StaticManager_Helper {
 		root.gameObject.layer = layer;
 		foreach(Transform child in root)
 			ChangeHierarchyLayer(child, layer);
+	}
+
+	public static int[] GetRandomNonRepeatingNumbers(int count, int fromNum, int toNum) {
+		List<int> numbers = new List<int>();
+		for(int i = 0; i < (toNum - fromNum) + 1; i++) {
+			numbers.Add(fromNum + i);
+		}
+		int[] resultNumbers = new int[count];
+		for(int i = 0; i < count; i++) {
+			int randIndex = Random.Range(0, numbers.Count);
+			//Debug.LogError(randIndex);
+			resultNumbers[i] = numbers[randIndex];
+			numbers.RemoveAt(randIndex);
+		}
+		return resultNumbers;
 	}
 }
