@@ -71,7 +71,7 @@ public class RotateAnimation : CommonAnimation {
 
 
 	// Use this for initialization
-	void Start () {
+	void Awake () {
 		Initialize ();
 	}
 
@@ -213,6 +213,7 @@ public class RotateAnimation : CommonAnimation {
 		_rotateTo = Quaternion.Euler (_rtEulerAngles = eulerAngleList [index+1]);
 		
 		Debug.LogWarning ("setEulerList " + _rfEulerAngles + " - " + _rtEulerAngles);
+		Debug.LogWarning(target + " " + animationTime);
 		animationTime = timePerPoint;
 	}
 

@@ -100,7 +100,7 @@ public class PlayerController : BasicCharacterController {
 					DoCharacterState(CharacterState.Move);
 				if(!_onKnifeBATCooldown && !_isAttackPressed) {
 					Vector3 tempScale = _originalScale;
-					tempScale.x *= -1f;
+					tempScale.x *= 1f;
 					cachedTransform.localScale = tempScale;
 				}
 				_isMoveKeysPressed = true;
@@ -111,7 +111,7 @@ public class PlayerController : BasicCharacterController {
 					DoCharacterState(CharacterState.Move);
 				if(!_onKnifeBATCooldown && !_isAttackPressed) {
 					Vector3 tempScale = _originalScale;
-					tempScale.x *= 1f;
+					tempScale.x *= -1f;
 					cachedTransform.localScale = tempScale;
 				}
 				_isMoveKeysPressed = true;
@@ -178,7 +178,7 @@ public class PlayerController : BasicCharacterController {
 
 	private void ChangeWeapon () {
 		foreach(WeaponController wp in _weaponControllerMap.Values) {
-			wp.SetGameObjectActive(false);
+			wp.Hide();
 		}
 		int weaponInt = (int)currentWeaponType;
 		do {
@@ -189,7 +189,7 @@ public class PlayerController : BasicCharacterController {
 		} while(!_weaponControllerMap.ContainsKey(currentWeaponType.ToString()));
 
 		_currentWeapon = _weaponControllerMap[currentWeaponType.ToString()];
-		_currentWeapon.SetGameObjectActive(true);
+		_currentWeapon.Show();
 		//Animator.SetBool("changeWeaponName", true);
 		//Invoke("SopChangeWeaponNameAnimator", time); 
 
@@ -197,10 +197,10 @@ public class PlayerController : BasicCharacterController {
 	}
 	private void ChangeWeapon(Weapon.WeaponType type) {
 		foreach(WeaponController wp in _weaponControllerMap.Values) {
-			wp.SetGameObjectActive(false);
+			wp.Hide();
 		}
 		_currentWeapon = _weaponControllerMap[currentWeaponType.ToString()];
-		_currentWeapon.SetGameObjectActive(true);
+		_currentWeapon.Show();
 	}
 
 

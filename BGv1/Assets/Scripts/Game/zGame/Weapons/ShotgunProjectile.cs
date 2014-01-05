@@ -2,9 +2,11 @@
 using System.Collections;
 
 public class ShotgunProjectile : Projectile {
+	PolygonCollider2D _polygonCollider2D;
 
 	protected override void Init () {
 		base.Init ();
+		_polygonCollider2D = _collider2D as PolygonCollider2D;
 	}
 
 	public override void Show (bool isRight) {
@@ -23,6 +25,7 @@ public class ShotgunProjectile : Projectile {
 		CancelInvoke("Hide");
 		_updateEnabled = false;
 		Invoke("Hide", _time);
+		//int tempDamage = _spriteRenderer.bounds.size.x;
 		return _damage;
 	}
 }

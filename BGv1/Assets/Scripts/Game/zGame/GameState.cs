@@ -68,24 +68,23 @@ public class GameState : BasicGameState {
 		_enemiesSummonedThisStage += enemiesToSummon;
 		if(_enemiesSummonedThisStage > _stageManager.GetRequiredKills)
 			enemiesToSummon -= (_enemiesSummonedThisStage - _stageManager.GetRequiredKills);
-		Debug.LogError(enemiesToSummon);
+		//Debug.LogError(enemiesToSummon);
 		m_game2DView.SummonEnemyAtContainer1(EnemyController.EnemyType.Normal, enemiesToSummon);
 		Invoke("SummonEnemies", _stageManager.GetRandomDelayEnemyWave);
 		_stageManager.RefreshValuesForNextWave();
-	}
-	private void SummonBoss () {
 	}
 
 	private void OnEnemyDead(int score) {
 		_score += score;
 		_enemiesKilled++;
 		_enemiesKilledThisStage++;
-		//Debug.LogError(_enemiesSummonedThisStage + " " + _stageManager.GetRequiredKills);
 		if(_enemiesKilledThisStage >= _stageManager.GetRequiredKills) {
 			CancelInvoke("SummonEnemies");
 			StartStage(++_stage);
 		}
 	}
+
+
 
 
 }

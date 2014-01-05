@@ -40,6 +40,8 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 	public float attackSpeed;
 	public float moveSpeed;
 	public bool attackEnabled;
+	public bool bloodEnabled;
+	private Animator[] _bloodSplatterAnimators;
 	public float rcDistanceToAttack; //For Raycast
 	public float flinchForce;
 	public AudioClip[] audioClips;
@@ -85,7 +87,7 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 		get {return characterStats.getTranslateUnitsPerSecond;}
 	}
 	public float getMoveAnimSpeed {
-		get { return getTranslateUnitsPerSecond / (float)Screen.width / 2f;/*7.33f;*/}
+		get { return getTranslateUnitsPerSecond / 300f;/*7.33f;*/}
 	}
 	public float getAttackPerSecond {
 		get { return characterStats.getAttackPerSecond;}
@@ -131,12 +133,24 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 		//Physics2D.IgnoreLayerCollision(hurtTrigger, gameObject.layer, true);
 		InitRaycast();
 		InitCharacterStats();
+		InitBloodSplatter();
 	}
 	protected virtual void InitRaycast () {
 		rcDirectionMult = 1f;
 	}
 	protected virtual void InitCharacterStats () {
 		UpdateCharacterStats();
+	}
+	private void InitBloodSplatter () {
+		if(bloodEnabled) {
+			Transform tempBSContainer = null;
+			if((tempBSContainer = cachedTransform.FindChild("_BloodSplatterContainer")) != null) {
+				_bloodSplatterAnimators = tempBSContainer.GetComponentsInChildren<Animator>();
+				for(int i = 0; i < _bloodSplatterAnimators.Length; i++) {
+					_bloodSplatterAnimators[i].SetGameObjectActive(false);
+				}
+			}
+		}
 	}
 	#endregion
 
@@ -272,14 +286,15 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 	}
 	void Move(bool mWillTranslate = false) {
 		SetCurrentState(CharacterState.Move);
+		Debug.Log(getMoveAnimSpeed);
 		animator.speed = getMoveAnimSpeed;
 		DoCharacterStateStartEvent();
 	}
 	 void Hurt () {
 		SetCurrentState(CharacterState.Hurt);
 		animator.speed = 1f;
-		
 		//cachedRigidBody2D.velocity = (flinchForce);
+		StartBloodAnim();
 		DoCharacterStateStartEvent();
 		StopCharacterStateWithDefaultDelay();
 	}
@@ -439,6 +454,31 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 
 	public void GoToOriginalPosition () {
 		cachedTransform.position = originalPos;
+	}
+	#endregion
+
+	#region Blood Anim
+	private void StartBloodAnim () {
+		if(bloodEnabled) 
+			StartCoroutine(StartBloodAnimCoroutine());
+	}
+	private IEnumerator StartBloodAnimCoroutine () {
+		Animator bsAnimator = null;
+		for(int i = 0; i < _bloodSplatterAnimators.Length; i++) {
+			bsAnimator = _bloodSplatterAnimators[i];
+			if(!bsAnimator.gameObject.activeSelf) {
+				//Debug.LogError("hahaha");
+				bsAnimator.SetGameObjectActive(true);
+				string triggerStr = Random.Range(0, 100) < 70 ? "Splat1": "Splat2";
+				//Debug.LogError(triggerStr);
+				bsAnimator.SetTrigger(triggerStr);
+				break;
+			}
+		}
+		if(bsAnimator == null)
+			yield break;
+		yield return new WaitForSeconds(44f / 60f);
+		bsAnimator.SetGameObjectActive(false);
 	}
 	#endregion
 }

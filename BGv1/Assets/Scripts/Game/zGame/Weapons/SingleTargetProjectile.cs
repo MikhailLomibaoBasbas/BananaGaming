@@ -8,6 +8,8 @@ public class SingleTargetProjectile : Projectile {
 
 	protected override void Init () {
 		base.Init ();
+		//Debug.LogError(_cachedTransform.parent.parent + " " +  _cachedTransform);
+		//Debug.LogError(_collider2D);
 	}
 
 	public override void Show (bool isRight = true) {

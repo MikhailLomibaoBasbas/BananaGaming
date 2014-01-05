@@ -19,13 +19,23 @@ public class WeaponController : MonoBehaviour {
 
 	private bool _isAOEAttacking;
 
+	private GameObject _gunShotEffectGO;
+
+	AnimationsMashUp _recoilAnimationMashup;
+
 	void Awake () {
 		_weapon = WeaponDataController.getInstance.weaponsMap[type.ToString()];
 		_ammoContainerTrans = transform.FindChild(AMMO_CONTAINER_PATH);
 		InitWeapons();
 		_isAttacking = false;
+		_gunShotEffectGO = transform.FindChild("gs_effect").gameObject;
+		_gunShotEffectGO.SetActive(false);
 		if(!isUnlocked)
 			gameObject.SetActive(false);
+		_recoilAnimationMashup = StaticAnimationsManager.getInstance.getAvailableAnimMashUp;
+		_recoilAnimationMashup.target = transform;
+		_recoilAnimationMashup.setRotateAnim(Vector3.back * 5f, Vector3.zero, false);
+		_recoilAnimationMashup.animationTime = 0.25f;
 	}
 
 	private void InitWeapons () {
@@ -93,14 +103,20 @@ public class WeaponController : MonoBehaviour {
 				StartSingleTargetAttack();
 		}
 	}
+	private IEnumerator startFireffects () {
+		_gunShotEffectGO.SetActive(true);
+		_recoilAnimationMashup.start(true);
+		yield return new WaitForSeconds(5f / 60f);
+		_gunShotEffectGO.SetActive(false);
+	}
 
 	private void StartSingleTargetAttack () {
 		foreach(SingleTargetProjectile pr in s_projectiles) {
 			if(!pr.isActive) {
 				pr.Show(transform.position.x > transform.parent.position.x);
+				StartCoroutine(startFireffects());
 				_isAttacking = true;
 				_batRecoveryTime = 0;
-				//_weapon.currentAmmo--;
 				break;
 			}
 		}
@@ -110,6 +126,8 @@ public class WeaponController : MonoBehaviour {
 		foreach(ShotgunProjectile pr in a_projectiles) {
 			if(!pr.isActive) {
 				pr.Show(true);
+				StartCoroutine(startFireffects());
+				//iTween.RotateTo(gameObject, Vector3.zero, 0.8f);
 				_isAttacking = true;
 				_batRecoveryTime = 0;
 				//_weapon.currentAmmo--;

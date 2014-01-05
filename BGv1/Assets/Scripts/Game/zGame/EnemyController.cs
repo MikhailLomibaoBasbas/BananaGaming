@@ -15,7 +15,7 @@ public class EnemyController : BasicCharacterController {
 	}
 
 	private static string GetEnemyResourcePath(EnemyType type) {
-		return "Prefabs/2D/Enemy" + type.ToString();
+		return "Prefabs/2D/Enemy/Enemy" + type.ToString();
 	}
 	public static EnemyController Create (EnemyType type, GameObject parentObj) {
 		GameObject enemyGO = StaticManager_Helper.CreatePrefab(GetEnemyResourcePath(type), parentObj);
