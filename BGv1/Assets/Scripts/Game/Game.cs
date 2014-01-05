@@ -28,6 +28,8 @@ public class Game : MonoSingleton<Game> {
 	public GameObject game2DRoot;
 	public float defaultPixelToUnits;
 
+	private OptionData _optionData;
+
 	public override void Init () {
 		DontDestroyOnLoad(gameObject);
 		InitializeGUI();
@@ -42,12 +44,14 @@ public class Game : MonoSingleton<Game> {
 	
 	void InitializeGUI() {
 		Assert.NotNull(gameUiRoot, "GameUI Root gameObject is missing or has not been set.");
+		_optionData = new OptionData ();
 	}
 	
 	void InitializeState() {
 		_stateManager = new GameStateManager(gameObject);
 		_stateManager.RegisterState(Cast.ToString<GameStateType>(GameStateType.MAIN_MENU), typeof(MainMenuState));
 		_stateManager.RegisterState(Cast.ToString<GameStateType>(GameStateType.GAME), typeof(GameState));
+		_stateManager.RegisterState(Cast.ToString<GameStateType>(GameStateType.SHOP), typeof(WeaponState));
 		_stateManager.RegisterState(Cast.ToString<GameStateType>(GameStateType.GAME_OVER), typeof(GameOverState));
 		_stateManager.RegisterState(Cast.ToString<GameStateType>(GameStateType.SOCIAL), typeof(SocialState));
 		_stateManager.RegisterState(Cast.ToString<GameStateType>(GameStateType.SAMPLE), typeof(SampleState));
