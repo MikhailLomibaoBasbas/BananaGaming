@@ -8,6 +8,7 @@ public enum GameStateType {
 	GAME,
 	SHOP,
 	GAME_CENTER,
+	PAUSE,
 	GAME_OVER,
 	SAMPLE
 }
@@ -52,6 +53,7 @@ public class Game : MonoSingleton<Game> {
 		_stateManager.RegisterState(Cast.ToString<GameStateType>(GameStateType.MAIN_MENU), typeof(MainMenuState));
 		_stateManager.RegisterState(Cast.ToString<GameStateType>(GameStateType.GAME), typeof(GameState));
 		_stateManager.RegisterState(Cast.ToString<GameStateType>(GameStateType.SHOP), typeof(WeaponState));
+		_stateManager.RegisterState(Cast.ToString<GameStateType>(GameStateType.PAUSE), typeof(PauseState));
 		_stateManager.RegisterState(Cast.ToString<GameStateType>(GameStateType.GAME_OVER), typeof(GameOverState));
 		_stateManager.RegisterState(Cast.ToString<GameStateType>(GameStateType.SOCIAL), typeof(SocialState));
 		_stateManager.RegisterState(Cast.ToString<GameStateType>(GameStateType.SAMPLE), typeof(SampleState));
