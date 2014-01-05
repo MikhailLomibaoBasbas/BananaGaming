@@ -6,23 +6,24 @@ public class EnemyController : BasicCharacterController {
 
 	public enum EnemyType {
 		Normal, 
-		Reactive, 
-		Aggressive, 
 		Stealth,
-		Jumper,
-		Tank,
-		Dog
+		Aggressive,
+		Jumper
+		//Tank,
+		//Dog,
+		//Summoner
 	}
 
-	private static List<EnemyController> enemies = new List<EnemyController>();
-	public static EnemyController Create (string resourcePath, GameObject parentObj, EnemyType type) {
-		EnemyController enemy = StaticManager_Helper.CreateComponent<EnemyController>(resourcePath, parentObj);
-		enemy.enemyType = type;
+	private static string GetEnemyResourcePath(EnemyType type) {
+		return "Prefabs/2D/Enemy" + type.ToString();
+	}
+	public static EnemyController Create (EnemyType type, GameObject parentObj) {
+		GameObject enemyGO = StaticManager_Helper.CreatePrefab(GetEnemyResourcePath(type), parentObj);
+		EnemyController enemy = enemyGO.GetComponent<EnemyController>();
 		return enemy;
 	}
-	private static string GetEnemyResourcePath(EnemyType type) {
-		return "Prefabs/2D/" + type.ToString();
-	}
+
+	public int score;
 
 	public float moveDuration;
 	protected float _currentMoveDurTime;
@@ -33,41 +34,82 @@ public class EnemyController : BasicCharacterController {
 	public float attackCooldown;
 	protected bool _isAttackOnCooldown;
 	protected float _currentAttackCooldown;
-
+	
 	public Transform originalTarget;
+
 	protected Transform _currentTarget;
+	public Transform setCurrentTarget {
+		set {
+			_currentTarget = value;
+		}
+	}
+
+	private int _originalHealth;
+	public int getOriginalHealth {get{return _originalHealth;}}
+	private float _originalMoveSpeed;
+	public float getOriginalMoveSpeed {get{return _originalMoveSpeed;}}
+
 
 	public EnemyType enemyType;
 	protected SpriteRenderer _spriteRenderer;
 
 	private CircleCollider2D _attackCircleCollider;
 
-	private float getTargetDistance {get {return Vector3.Distance(_currentTarget.position, cachedTransform.position);}}
 
+	private float getTargetDistance {get {return Vector3.Distance(_currentTarget.position, cachedTransform.position);}}
 	private float _distanceThreshold = 80f;
 
-	public void setActiveInScene (bool flag, Vector3 pos = default(Vector3), bool isGlobal = true) {
-		gameObject.SetActive(flag);
-		enabled = flag;
-		if(flag)
-			if(pos != default(Vector3))
-				cachedTransform.SetPosition(pos, isGlobal);
-	}
+	public delegate void OnEnemyDeadFinished (int score);
+	public event OnEnemyDeadFinished onEnemyDeadFinished = null;
+
+	private bool _canMove = false;
 
 	public override void Init () {
 		//Before Base Init Statements
 		_currentTarget = originalTarget;
-
+		_originalHealth = health;
+		_originalMoveSpeed = moveSpeed;
 		base.Init ();
 
 		//After Base Init Statements
 		_attackCircleCollider = transform.FindChild("attackCollider").GetComponent<CircleCollider2D>();
 		_attackCircleCollider.enabled = false;
-		SetCharacterStateStartEventListener(OnEnemyStateStarted);
-		SetCharacterStateFinishedEventListener(OnEnemyStateFinished);
+		//SetCharacterStateStartEventListener(OnEnemyStateStarted);
+		//SetCharacterStateFinishedEventListener(OnEnemyStateFinished);
 		_spriteRenderer = GetComponent<SpriteRenderer>();
+		//move();
+	}
+
+	public void setActiveInScene (bool flag, Vector3 pos = default(Vector3), bool isGlobal = true, bool withDelay = true) {
+		float delay = (withDelay) ? Random.Range(0.5f, 1.0f): 0.1f;
+		//Debug.LogError(Time.time + " " + delay);
+		isActiveInGame = flag;
+		enabled = flag;
+		if(flag) {
+			health = _originalHealth;
+			gameObject.SetActive(flag);
+			if(pos != default(Vector3))
+				cachedTransform.SetPosition(pos, isGlobal);
+			iTween.ColorTo(gameObject, Color.white, delay);
+			Invoke("PostSetActiveScene_True", delay);
+		} else {
+			_canMove = false;
+			cachedCollider2D.enabled = false;
+			iTween.ColorTo(gameObject, Color.clear, delay);
+			Invoke("PostSetActiveInScene_False", delay);
+		}
+	}
+	private void PostSetActiveScene_True() {
+		//Debug.LogError("fds");
+		_canMove = true;
+		cachedCollider2D.enabled  = true;
 		move();
 	}
+	private void PostSetActiveInScene_False() {
+		gameObject.SetActive(false);
+		cachedTransform.localPosition = Vector3.zero;
+	}
+
 
 	private void move () {
 		DoCharacterState(CharacterState.Move);
@@ -104,7 +146,7 @@ public class EnemyController : BasicCharacterController {
 	}
 
 	private void UpdateMoveCooldownAction () {
-		if(getTargetDistance < _distanceThreshold)
+		if(getTargetDistance < _distanceThreshold )
 			return;
 		_currentMoveCoolTime += cachedDeltaTime;
 		if(_currentMoveCoolTime < moveCooldown) {
@@ -126,19 +168,20 @@ public class EnemyController : BasicCharacterController {
 	}
 
 	public override void UpdateMoveAction () {
+		if(!_canMove)
+			return;
 		_currentMoveDurTime += cachedDeltaTime;
 		if(_currentMoveDurTime < moveDuration) {
 			Vector3 normDir = (_currentTarget.position - cachedTransform.position).normalized;
 			cachedTransform.position += normDir * moveSpeed * cachedDeltaTime;
-			cachedTransform.localScale = new Vector3( (normDir.x > 0) ? 1: -1, 1, 1);
+			cachedTransform.localScale = new Vector3( ((normDir.x > 0) ? 1: -1), 1, 1);
 		} else {
 			_currentMoveDurTime = 0;
 			idle();
 		}
 	}
-
-
-	private void OnEnemyStateStarted (CharacterState state, BasicCharacterController instance) {
+	
+	protected override void CharacterStateStarted (CharacterState state) {
 		switch(state) {
 		case CharacterState.Hurt:
 			break;
@@ -147,18 +190,22 @@ public class EnemyController : BasicCharacterController {
 			break;
 		}
 	}
-
-	private void OnEnemyStateFinished (CharacterState state, BasicCharacterController instance) {
+	protected override void CharacterStateFinished (CharacterState state){
 		switch(state) {
-			case CharacterState.Hurt:
-				if(_currentMoveDurTime != 0)
-					move();
-				else
-					idle();
-				break;
-			case CharacterState.Attack:
+		case CharacterState.Hurt:
+			if(_currentMoveDurTime != 0)
+				move();
+			else
 				idle();
-				break;
+			break;
+		case CharacterState.Attack:
+			idle();
+			break;
+		case CharacterState.Dead:
+			if(onEnemyDeadFinished != null)
+				onEnemyDeadFinished(score);
+			setActiveInScene(false);
+			break;
 		}
 	}
 
@@ -206,7 +253,7 @@ public class EnemyController : BasicCharacterController {
 
 	bool didJump = false;
 	private void UpdateJumper () {
-		float jumpThreshold = 1000f;
+		float jumpThreshold = 800;
 		float distance = (Vector3.Distance(cachedTransform.position, PlayerController.GetInstance.cachedTransform.position));
 		if(distance < jumpThreshold) {
 			if(didJump)

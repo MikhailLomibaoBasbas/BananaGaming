@@ -1,11 +1,11 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
 public class WeaponController : MonoBehaviour {
 	public Weapon.WeaponType type;
 	private List<SingleTargetProjectile> s_projectiles = null;
-	private List<AOETargetProjectile> a_projectiles = null;
+	private List<ShotgunProjectile> a_projectiles = null;
 	private Weapon _weapon;
 
 	private bool _isAttacking;
@@ -41,16 +41,16 @@ public class WeaponController : MonoBehaviour {
 			_ammoContainerTrans.GetComponentsInChildren<SingleTargetProjectile>(true)
 			);
 		foreach(SingleTargetProjectile pr in s_projectiles) {
-			pr.SetValues(_ammoContainerTrans, _weapon.projectileTime, _weapon.projectileDistance);
+			pr.SetValues(_ammoContainerTrans, _weapon.projectileTime, _weapon.projectileDistance, _weapon.damage);
 		}
 	}
 
 	private void InitAOEProjectile () {
-		a_projectiles = new List<AOETargetProjectile>(
-			_ammoContainerTrans.GetComponentsInChildren<AOETargetProjectile>(true)
+		a_projectiles = new List<ShotgunProjectile>(
+			_ammoContainerTrans.GetComponentsInChildren<ShotgunProjectile>(true)
 			);
-		foreach(AOETargetProjectile pr in a_projectiles) {
-			pr.SetValues(_ammoContainerTrans, _weapon.projectileTime, _weapon.projectileDistance);
+		foreach(ShotgunProjectile pr in a_projectiles) {
+			pr.SetValues(_ammoContainerTrans, _weapon.projectileTime, _weapon.projectileDistance,  _weapon.damage);
 		}
 	}
 
@@ -78,7 +78,7 @@ public class WeaponController : MonoBehaviour {
 					pr.Hide();
 			}
 		} else {
-			foreach(AOETargetProjectile pr in a_projectiles) {
+			foreach(ShotgunProjectile pr in a_projectiles) {
 				if(pr.isActive)
 					pr.Hide();
 			}
@@ -107,7 +107,7 @@ public class WeaponController : MonoBehaviour {
 	}
 
 	private void StartAOETargetAttack () {
-		foreach(AOETargetProjectile pr in a_projectiles) {
+		foreach(ShotgunProjectile pr in a_projectiles) {
 			if(!pr.isActive) {
 				pr.Show(true);
 				_isAttacking = true;

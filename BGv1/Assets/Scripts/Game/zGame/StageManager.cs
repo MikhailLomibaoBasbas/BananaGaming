@@ -3,70 +3,74 @@ using System.Collections;
 
 public class StageManager {
 	private int _stageNum;
-	private Vector2 _minMaxZombiePerWave = new Vector2(0.1f, 0.2f);
+	private Vector2 _minMaxEnemiesPerWave = new Vector2(0.2f, 0.3f);
 	private Vector2 _minMaxDelayInSecPerWave = new Vector2(5, 10); 
 	private int _maxWave = 4;
 	private int _baseRequiredKills = 5;
 	private int _requiredKillsIncrementPerStage = 5;
 
-	private bool _needsRefresh;
+	private bool _needsRefresh {
+		set {
+			_randomEnemiesSummonCountNeedsRefresh = value;
+			_randomDelayNeedsRefresh = value;
+			_requiredKillsNeedsRefresh = value;
+		}
+	}
 
+	private bool _requiredKillsNeedsRefresh;
 	private int _requiredKills = 0;
 	public int GetRequiredKills {
 		get {
-			if(_needsRefresh)
+			if(_requiredKillsNeedsRefresh) {
 				_requiredKills = _baseRequiredKills + (_requiredKillsIncrementPerStage * _stageNum);
+				_requiredKillsNeedsRefresh = false;
+			}
 			return _requiredKills;
 		}
 	}
 
-
-	private int _zombiesInCurrentWave = default(int);
-	public int GetZombiesInCurrentWave {
+	private bool _randomEnemiesSummonCountNeedsRefresh;
+	private int _randomEnemiesSummonCount;
+	public int GetRandomEnemiesSummonCount {
 		get {
-			if(_zombiesInCurrentWave == default(int))
-				_zombiesInCurrentWave = GetRandomZombiesWave;
-			return _zombiesInCurrentWave;
-		}
-	}
-	public int GetRandomZombiesWave {
-		get {
-			if(_needsRefresh) {
-				_zombiesInCurrentWave = Random.Range((int)_minMaxZombiePerWave.x, (int)_minMaxZombiePerWave.y);
-				return _zombiesInCurrentWave;
+			if(_randomEnemiesSummonCountNeedsRefresh) {
+				_randomEnemiesSummonCount = System.Convert.ToInt32(Random.Range(_minMaxEnemiesPerWave.x * GetRequiredKills, _minMaxEnemiesPerWave.y * GetRequiredKills));
+				_randomEnemiesSummonCountNeedsRefresh = false;
 			}
-			return default(int);
+			return _randomEnemiesSummonCount;
 		}
 	}
-
-
-	private float _delayForNextWave = default(float);
-	public float GetDelayForNextWave {
+	private bool _randomDelayNeedsRefresh;
+	private float _randomDelayEnemy;
+	public float GetRandomDelayEnemyWave {
 		get {
-			if(_delayForNextWave == default(float))
-				_delayForNextWave = GetRandomDelayZombieWave;
-			return _delayForNextWave;
-		}
-	}
-	public float GetRandomDelayZombieWave {
-		get {
-			if(_needsRefresh) {
-				_delayForNextWave = Random.Range(_minMaxDelayInSecPerWave.x, _minMaxDelayInSecPerWave.y);
-				return _delayForNextWave;
+			if(_randomDelayNeedsRefresh) {
+				_randomDelayEnemy =  Random.Range(_minMaxDelayInSecPerWave.x, _minMaxDelayInSecPerWave.y);
+				_randomDelayNeedsRefresh = false;
 			}
-			return default(float);
+			return _randomDelayEnemy;
 		}
 	}
 
 
 	public void SetStage(int val) {
 		_stageNum = val;
-		_needsRefresh = true;
-		_zombiesInCurrentWave = default(int);
-		_delayForNextWave = default(float);
+		RefreshValues();
 	}
+
+	public void RefreshValuesForNextWave () {
+		_randomDelayNeedsRefresh = 
+			_randomEnemiesSummonCountNeedsRefresh = true;
+	}
+
+	public void RefreshValues () {
+		_needsRefresh = true;
+	}
+
 
 	public StageManager (int stage) {
 		SetStage(stage);
 	}
+	public StageManager(){}
+
 }

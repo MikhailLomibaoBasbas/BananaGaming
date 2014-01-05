@@ -4,7 +4,7 @@ using System.Collections;
 public class InGameState : BasicGameState {
 	
 	public override void OnStart () {
-		viewUI = InGameView.Create();
+		viewUI = GameUIView.Create();
 		AddGUIListeners();
 				Debug.Log ("Ingame State");
 		base.OnStart ();

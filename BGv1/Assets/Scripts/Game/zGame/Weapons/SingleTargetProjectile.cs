@@ -27,8 +27,7 @@ public class SingleTargetProjectile : Projectile {
 		_currTime = 0;
 	}
 
-	// Update is called once per frame
-	void Update () {
+	public override void OnUpdate () {
 		if(_isActive) {
 			if(_currTime < _time) {
 				_cachedTransform.position = Vector3.Lerp(_startPos, _endPos, 
@@ -37,14 +36,6 @@ public class SingleTargetProjectile : Projectile {
 				_cachedTransform.position = _endPos;
 				Hide();
 			}
-		}
-	}
-
-	void OntriggerEnter2D (Collider2D collider) {
-		GameObject colGO = collider.gameObject;
-		if(colGO.layer == targetTriggerLayer) {
-			_animator.SetBool("", true);
-			Hide();
 		}
 	}
 
