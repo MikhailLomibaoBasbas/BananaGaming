@@ -2,9 +2,13 @@ using UnityEngine;
 using System.Collections;
 
 public class MainMenuState : BasicGameState {
-	
+
+	private MainMenuView mMenuView;
 	public override void OnStart() {
 		viewUI = MainMenuView.Create();
+		mMenuView = (MainMenuView)viewUI;
+
+		static_audiomanager.getInstance.play_bgm ("Audio/Bgm/MainMenu");
 		AddGUIListeners();
 		base.OnStart();
 	}
@@ -29,20 +33,39 @@ public class MainMenuState : BasicGameState {
 	
 	void AddGUIListeners() {
 		(viewUI as MainMenuView).onClickPlay += OnClickPlay;
-				(viewUI as MainMenuView).onClickOption += OnClickOption;
+		(viewUI as MainMenuView).onClickMusic += OnClickMusic;
+		(viewUI as MainMenuView).onClickSound += OnClickSound;
 	}
 	
 	void RemoveGUIListeners() {
 		(viewUI as MainMenuView).RemoveButtonClickHandlers ();
 		(viewUI as MainMenuView).onClickPlay -= OnClickPlay;
-				(viewUI as MainMenuView).onClickOption -= OnClickOption;
+		(viewUI as MainMenuView).onClickMusic -= OnClickMusic;
+		(viewUI as MainMenuView).onClickSound -= OnClickSound;
 	}
 	
 	void OnClickPlay(GameObject go) {
-		Game.instance.PushState(GameStateType.GAME);
+		static_audiomanager.getInstance.play_sfx ("Audio/Sfx/Switch1", mMenuView.transform.position);
+		Game.instance.PushState(GameStateType.SHOP);
 	}
 	
-	void OnClickOption(GameObject go) {
+	void OnClickMusic(GameObject go) {
+		static_audiomanager.getInstance.play_sfx ("Audio/Sfx/Switch1", mMenuView.transform.position);
+		if (OptionData.getInstance.BGMON != 1)
+			mMenuView.SetMusicOn (true);
+		else
+			mMenuView.SetMusicOn (false);
+		OptionData.getInstance.BGMON = (OptionData.getInstance.BGMON != 1) ? 1 : 0;
+		//Game.instance.PushState(GameStateType.SOCIAL);
+	}
+
+	void OnClickSound(GameObject go) {
+		static_audiomanager.getInstance.play_sfx ("Audio/Sfx/Switch1", mMenuView.transform.position);
+		if (OptionData.getInstance.SFXON != 1)
+			mMenuView.SetSoundOn (true);
+		else
+			mMenuView.SetSoundOn (false);
+		OptionData.getInstance.SFXON = (OptionData.getInstance.SFXON != 1) ? 1 : 0;
 		//Game.instance.PushState(GameStateType.SOCIAL);
 	}
 }

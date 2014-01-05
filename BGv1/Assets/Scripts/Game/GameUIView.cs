@@ -10,9 +10,9 @@ public class GameUIView : BasicView
 	private const string BTN_NAV= "AnchorBottomleft/btnNav";
 	private const string BTN_SWITCH = "AnchorBottomRight/btnSwitch";
 	private const string SLIDER_PLAYERHEALTH = "AnchorTopLeft/PlayerStatus/PlayerHealth";
-	private const string SLIDER_TOWERHEALTH = "AnchorTopRight/TowerStatus/TowerHealth";
+	private const string SLIDER_TOWERHEALTH = "AnchorTopLeft/TowerStatus/TowerHealth";
 
-	private const string LBL_COIN = "AnchorTop/lblCoin";
+	private const string LBL_COIN = "AnchorTopRight/lblCoin";
 	private const string LBL_STAGE = "AnchorTop/lblStage";
 
 	public UIEventListener.VoidDelegate onClickShoot = null;

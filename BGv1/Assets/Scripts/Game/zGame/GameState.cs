@@ -23,6 +23,7 @@ public class GameState : BasicGameState {
 		m_gameUIView = (GameUIView) viewUI;
 
 		_stageManager = new StageManager();
+		static_audiomanager.getInstance.play_bgm ("Audio/Bgm/InGame");
 		StartStage(_stage = 1);
 		AddListener();
 		base.OnStart ();
