@@ -286,7 +286,7 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 	}
 	void Move(bool mWillTranslate = false) {
 		SetCurrentState(CharacterState.Move);
-		Debug.Log(getMoveAnimSpeed);
+		//Debug.Log(getMoveAnimSpeed);
 		animator.speed = getMoveAnimSpeed;
 		DoCharacterStateStartEvent();
 	}
@@ -294,13 +294,15 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 		SetCurrentState(CharacterState.Hurt);
 		animator.speed = 1f;
 		//cachedRigidBody2D.velocity = (flinchForce);
+		//if(hasHurtInvulnerability)
+			//gameObject.layer = (int)Game.LayerType.HurtDead;
 		StartBloodAnim();
 		DoCharacterStateStartEvent();
 		StopCharacterStateWithDefaultDelay();
 	}
 	void Dead () {
-
 		SetCurrentState(CharacterState.Dead);
+		gameObject.layer = (int)Game.LayerType.HurtDead;
 		DoCharacterStateStartEvent();
 		StopCharacterStateWithDefaultDelay();
 	}
@@ -311,20 +313,17 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 	void SetCurrentState (CharacterState state) {
 		if(state != CharacterState.None && state != CharacterState.Move && state != CharacterState.Idle)
 			isOccupied = true;
-		gameObject.layer = (state == CharacterState.Hurt || state == CharacterState.Dead) ?
-			(int)Game.LayerType.HurtDead: originalLayer;
+		/*gameObject.layer = (state == CharacterState.Hurt || state == CharacterState.Dead) ?
+			(int)Game.LayerType.HurtDead: originalLayer;*/
 		CancelInvoke("StopCharacterState");
 		animator.SetBool("isHurt", isHurt = state == CharacterState.Hurt);
 		animator.SetBool("isMoving", isMoving = state == CharacterState.Move);
 		animator.SetBool("isIdle", isIdle = state == CharacterState.Idle);
 		animator.SetBool("isAttacking", isAttacking = state == CharacterState.Attack);
-
 		isDead = state == CharacterState.Dead;
 		if(isDead)
 			animator.SetTrigger("isDead");
-		
 			currentState = state;
-
 	}
 	#region Callback
 	public void SetCharacterStateFinishedEventListener (OnCharacterStateFinished eventListener) {
@@ -345,30 +344,37 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 		StopCharacterStateWithDelay(defaultAnimTime);
 	}
 	void StopCharacterState() {
+		DoCharacterStateFinishedEvent();
 		isOccupied = false;
-		switch(currentState) {
-		case CharacterState.Hurt:
-			if(hasHurtInvulnerability)
-				Physics2D.IgnoreLayerCollision(hurtTrigger, gameObject.layer, false);
-			break;
-		}
-
 		if(onCharacterStateFinished == null)
 			DoCharacterState(CharacterState.Idle);
-		DoCharacterStateFinishedEvent();
+
 	}
 	protected void DoCharacterStateFinishedEvent () {
 		if(onCharacterStateFinished != null)
 			onCharacterStateFinished(currentState, this);
-		CharacterStateStarted(currentState);
+		CharacterStateFinished(currentState);
 	}
 	protected void DoCharacterStateStartEvent () {
 		if(onCharacterStateStart != null)
 			onCharacterStateStart(currentState, this);
-		CharacterStateFinished(currentState);
+		CharacterStateStarted(currentState);
 	}
-	protected virtual void CharacterStateStarted (CharacterState state) {}
-	protected virtual void CharacterStateFinished(CharacterState state){}
+	protected virtual void CharacterStateStarted (CharacterState state) {
+	}
+	protected virtual void CharacterStateFinished(CharacterState state){
+		switch(state) {
+		case CharacterState.Hurt:
+			if(hasHurtInvulnerability) {
+				gameObject.layer = originalLayer;
+				Physics2D.IgnoreLayerCollision(hurtTrigger, gameObject.layer, false);
+			}
+			break;
+		case CharacterState.Dead:
+			gameObject.layer = originalLayer;
+			break;
+		}
+	}
 	#endregion
 
 	#region Value Changer

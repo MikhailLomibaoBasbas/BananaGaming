@@ -25,6 +25,7 @@ public class ShotgunProjectile : Projectile {
 		CancelInvoke("Hide");
 		_updateEnabled = false;
 		Invoke("Hide", _time);
+		//Hide();
 		//int tempDamage = _spriteRenderer.bounds.size.x;
 		return _damage;
 	}

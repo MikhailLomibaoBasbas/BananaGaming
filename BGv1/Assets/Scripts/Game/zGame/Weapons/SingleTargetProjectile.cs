@@ -19,14 +19,13 @@ public class SingleTargetProjectile : Projectile {
 		_endPos = _startPos;
 		_endPos.x += (_distance * multiplier);
 		_endPos.y += Random.Range(minMaxYDisplacement.x, minMaxYDisplacement.y);
-		_currTime = 0;
 	}
 
 	public override void Hide () {
 		base.Hide();
 		_startPos = default(Vector3);
 		_endPos = default(Vector3);
-		_currTime = 0;
+
 	}
 
 	public override void OnUpdate () {
