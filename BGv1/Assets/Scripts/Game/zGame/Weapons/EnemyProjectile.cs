@@ -7,6 +7,7 @@ public class EnemyProjectile : Projectile {
 	}
 
 	public override void Show (bool isRight) {
+		//Debug.LogError("fds");
 		SetActiveInScene(true);
 		Invoke("Hide", _time);
 	}

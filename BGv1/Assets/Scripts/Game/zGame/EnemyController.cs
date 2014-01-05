@@ -15,7 +15,7 @@ public class EnemyController : BasicCharacterController {
 	}
 
 	private static string GetEnemyResourcePath(EnemyType type) {
-		return "Prefabs/2D/Enemy" + type.ToString();
+		return "Prefabs/2D/Enemy/Enemy" + type.ToString();
 	}
 	public static EnemyController Create (EnemyType type, GameObject parentObj) {
 		GameObject enemyGO = StaticManager_Helper.CreatePrefab(GetEnemyResourcePath(type), parentObj);
@@ -34,6 +34,8 @@ public class EnemyController : BasicCharacterController {
 	public float attackCooldown;
 	protected bool _isAttackOnCooldown;
 	protected float _currentAttackCooldown;
+
+	public int damage;
 	
 	public Transform originalTarget;
 
@@ -50,10 +52,12 @@ public class EnemyController : BasicCharacterController {
 	public float getOriginalMoveSpeed {get{return _originalMoveSpeed;}}
 
 
+
 	public EnemyType enemyType;
 	protected SpriteRenderer _spriteRenderer;
 
 	private CircleCollider2D _attackCircleCollider;
+	private EnemyProjectile _enemyProjectile;
 
 
 	private float getTargetDistance {get {return Vector3.Distance(_currentTarget.position, cachedTransform.position);}}
@@ -72,8 +76,11 @@ public class EnemyController : BasicCharacterController {
 		base.Init ();
 
 		//After Base Init Statements
-		_attackCircleCollider = transform.FindChild("attackCollider").GetComponent<CircleCollider2D>();
-		_attackCircleCollider.enabled = false;
+		//_attackCircleCollider = transform.FindChild("attackCollider").GetComponent<CircleCollider2D>();
+		//_attackCircleCollider.enabled = false;
+		_enemyProjectile = transform.FindChild("attackCollider").GetComponent<EnemyProjectile>();
+		Debug.Log(getAttackTime);
+		_enemyProjectile.SetValues(null, getAttackTime, 0f, damage);
 		//SetCharacterStateStartEventListener(OnEnemyStateStarted);
 		//SetCharacterStateFinishedEventListener(OnEnemyStateFinished);
 		_spriteRenderer = GetComponent<SpriteRenderer>();
@@ -125,8 +132,9 @@ public class EnemyController : BasicCharacterController {
 	private void attack () {
 		cachedTransform.localScale = new Vector3(_currentTarget.position.x < cachedTransform.position.x ? -1f: 1f, 1f ,1f);
 		DoCharacterState(CharacterState.Attack);
-		_attackCircleCollider.enabled = true;
-		Invoke("DisableAttackCollider", getAttackTime * 0.20f);
+		_enemyProjectile.Show(true);
+		//_attackCircleCollider.enabled = true;
+		//Invoke("DisableAttackCollider", getAttackTime * 0.20f);
 	}
 	private void DisableAttackCollider() { _attackCircleCollider.enabled = false;}
 
@@ -182,6 +190,7 @@ public class EnemyController : BasicCharacterController {
 	}
 	
 	protected override void CharacterStateStarted (CharacterState state) {
+		base.CharacterStateStarted(state);
 		switch(state) {
 		case CharacterState.Hurt:
 			break;
@@ -191,6 +200,7 @@ public class EnemyController : BasicCharacterController {
 		}
 	}
 	protected override void CharacterStateFinished (CharacterState state){
+		base.CharacterStateFinished(state);
 		switch(state) {
 		case CharacterState.Hurt:
 			if(_currentMoveDurTime != 0)

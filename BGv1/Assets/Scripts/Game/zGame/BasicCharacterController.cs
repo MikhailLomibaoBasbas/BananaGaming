@@ -40,6 +40,8 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 	public float attackSpeed;
 	public float moveSpeed;
 	public bool attackEnabled;
+	public bool bloodEnabled;
+	private Animator[] _bloodSplatterAnimators;
 	public float rcDistanceToAttack; //For Raycast
 	public float flinchForce;
 	public AudioClip[] audioClips;
@@ -85,7 +87,7 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 		get {return characterStats.getTranslateUnitsPerSecond;}
 	}
 	public float getMoveAnimSpeed {
-		get { return getTranslateUnitsPerSecond / (float)Screen.width / 2f;/*7.33f;*/}
+		get { return getTranslateUnitsPerSecond / 300f;/*7.33f;*/}
 	}
 	public float getAttackPerSecond {
 		get { return characterStats.getAttackPerSecond;}
@@ -131,12 +133,24 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 		//Physics2D.IgnoreLayerCollision(hurtTrigger, gameObject.layer, true);
 		InitRaycast();
 		InitCharacterStats();
+		InitBloodSplatter();
 	}
 	protected virtual void InitRaycast () {
 		rcDirectionMult = 1f;
 	}
 	protected virtual void InitCharacterStats () {
 		UpdateCharacterStats();
+	}
+	private void InitBloodSplatter () {
+		if(bloodEnabled) {
+			Transform tempBSContainer = null;
+			if((tempBSContainer = cachedTransform.FindChild("_BloodSplatterContainer")) != null) {
+				_bloodSplatterAnimators = tempBSContainer.GetComponentsInChildren<Animator>();
+				for(int i = 0; i < _bloodSplatterAnimators.Length; i++) {
+					_bloodSplatterAnimators[i].SetGameObjectActive(false);
+				}
+			}
+		}
 	}
 	#endregion
 
@@ -272,20 +286,23 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 	}
 	void Move(bool mWillTranslate = false) {
 		SetCurrentState(CharacterState.Move);
+		//Debug.Log(getMoveAnimSpeed);
 		animator.speed = getMoveAnimSpeed;
 		DoCharacterStateStartEvent();
 	}
 	 void Hurt () {
 		SetCurrentState(CharacterState.Hurt);
 		animator.speed = 1f;
-		
 		//cachedRigidBody2D.velocity = (flinchForce);
+		//if(hasHurtInvulnerability)
+			//gameObject.layer = (int)Game.LayerType.HurtDead;
+		StartBloodAnim();
 		DoCharacterStateStartEvent();
 		StopCharacterStateWithDefaultDelay();
 	}
 	void Dead () {
-
 		SetCurrentState(CharacterState.Dead);
+		gameObject.layer = (int)Game.LayerType.HurtDead;
 		DoCharacterStateStartEvent();
 		StopCharacterStateWithDefaultDelay();
 	}
@@ -296,20 +313,17 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 	void SetCurrentState (CharacterState state) {
 		if(state != CharacterState.None && state != CharacterState.Move && state != CharacterState.Idle)
 			isOccupied = true;
-		gameObject.layer = (state == CharacterState.Hurt || state == CharacterState.Dead) ?
-			(int)Game.LayerType.HurtDead: originalLayer;
+		/*gameObject.layer = (state == CharacterState.Hurt || state == CharacterState.Dead) ?
+			(int)Game.LayerType.HurtDead: originalLayer;*/
 		CancelInvoke("StopCharacterState");
 		animator.SetBool("isHurt", isHurt = state == CharacterState.Hurt);
 		animator.SetBool("isMoving", isMoving = state == CharacterState.Move);
 		animator.SetBool("isIdle", isIdle = state == CharacterState.Idle);
 		animator.SetBool("isAttacking", isAttacking = state == CharacterState.Attack);
-
 		isDead = state == CharacterState.Dead;
 		if(isDead)
 			animator.SetTrigger("isDead");
-		
 			currentState = state;
-
 	}
 	#region Callback
 	public void SetCharacterStateFinishedEventListener (OnCharacterStateFinished eventListener) {
@@ -330,30 +344,37 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 		StopCharacterStateWithDelay(defaultAnimTime);
 	}
 	void StopCharacterState() {
+		DoCharacterStateFinishedEvent();
 		isOccupied = false;
-		switch(currentState) {
-		case CharacterState.Hurt:
-			if(hasHurtInvulnerability)
-				Physics2D.IgnoreLayerCollision(hurtTrigger, gameObject.layer, false);
-			break;
-		}
-
 		if(onCharacterStateFinished == null)
 			DoCharacterState(CharacterState.Idle);
-		DoCharacterStateFinishedEvent();
+
 	}
 	protected void DoCharacterStateFinishedEvent () {
 		if(onCharacterStateFinished != null)
 			onCharacterStateFinished(currentState, this);
-		CharacterStateStarted(currentState);
+		CharacterStateFinished(currentState);
 	}
 	protected void DoCharacterStateStartEvent () {
 		if(onCharacterStateStart != null)
 			onCharacterStateStart(currentState, this);
-		CharacterStateFinished(currentState);
+		CharacterStateStarted(currentState);
 	}
-	protected virtual void CharacterStateStarted (CharacterState state) {}
-	protected virtual void CharacterStateFinished(CharacterState state){}
+	protected virtual void CharacterStateStarted (CharacterState state) {
+	}
+	protected virtual void CharacterStateFinished(CharacterState state){
+		switch(state) {
+		case CharacterState.Hurt:
+			if(hasHurtInvulnerability) {
+				gameObject.layer = originalLayer;
+				Physics2D.IgnoreLayerCollision(hurtTrigger, gameObject.layer, false);
+			}
+			break;
+		case CharacterState.Dead:
+			gameObject.layer = originalLayer;
+			break;
+		}
+	}
 	#endregion
 
 	#region Value Changer
@@ -439,6 +460,31 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 
 	public void GoToOriginalPosition () {
 		cachedTransform.position = originalPos;
+	}
+	#endregion
+
+	#region Blood Anim
+	private void StartBloodAnim () {
+		if(bloodEnabled) 
+			StartCoroutine(StartBloodAnimCoroutine());
+	}
+	private IEnumerator StartBloodAnimCoroutine () {
+		Animator bsAnimator = null;
+		for(int i = 0; i < _bloodSplatterAnimators.Length; i++) {
+			bsAnimator = _bloodSplatterAnimators[i];
+			if(!bsAnimator.gameObject.activeSelf) {
+				//Debug.LogError("hahaha");
+				bsAnimator.SetGameObjectActive(true);
+				string triggerStr = Random.Range(0, 100) < 70 ? "Splat1": "Splat2";
+				//Debug.LogError(triggerStr);
+				bsAnimator.SetTrigger(triggerStr);
+				break;
+			}
+		}
+		if(bsAnimator == null)
+			yield break;
+		yield return new WaitForSeconds(44f / 60f);
+		bsAnimator.SetGameObjectActive(false);
 	}
 	#endregion
 }

@@ -9,6 +9,11 @@ public class StageManager {
 	private int _baseRequiredKills = 5;
 	private int _requiredKillsIncrementPerStage = 5;
 
+	
+	private int _unlockedMonstersCount;
+	private EnemyController.EnemyType[] _enemyDistribution;
+	private EnemyController.EnemyType[] _enemyArrangedDistribution;
+
 	private bool _needsRefresh {
 		set {
 			_randomEnemiesSummonCountNeedsRefresh = value;
@@ -55,7 +60,13 @@ public class StageManager {
 
 	public void SetStage(int val) {
 		_stageNum = val;
+		_unlockedMonstersCount = 1 + (val / 2);
+		if(_unlockedMonstersCount > (int)EnemyController.EnemyType.Jumper + 1)
+			_unlockedMonstersCount = (int)EnemyController.EnemyType.Jumper + 1;
 		RefreshValues();
+	}
+	private void SetEnemyDistribution () {
+
 	}
 
 	public void RefreshValuesForNextWave () {
@@ -69,8 +80,12 @@ public class StageManager {
 
 
 	public StageManager (int stage) {
+
 		SetStage(stage);
 	}
-	public StageManager(){}
+	public StageManager(){
+		_unlockedMonstersCount = 1;
+	}
+	
 
 }
