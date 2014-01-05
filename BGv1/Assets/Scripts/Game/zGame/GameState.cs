@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+﻿﻿using UnityEngine;
 using System.Collections;
 
 public class GameState : BasicGameState {
@@ -46,12 +46,20 @@ public class GameState : BasicGameState {
 
 	private void AddListener () {
 		m_game2DView.AddEnemiesDeadListener(OnEnemyDead);
+		m_gameUIView.onClickPause += OnClickPause;
 	}
 
 	private void RemoveListener () {
 		m_game2DView.RemoveEnemiesDeadListener(OnEnemyDead);
+		m_gameUIView.onClickPause -= OnClickPause;
 	}
 
+
+	void OnClickPause(GameObject go){
+		Debug.Log ("Pause");
+		static_audiomanager.getInstance.play_sfx ("Audio/Sfx/Switch1", m_gameUIView.transform.position);
+		Game.instance.PushState (GameStateType.PAUSE);
+	}
 
 	private void StartStage (int stg) {
 		_stageManager.SetStage(stg);

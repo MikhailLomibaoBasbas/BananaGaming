@@ -6,6 +6,7 @@ public class GameUIView : BasicView
 	private const string IN_GAME_PANEL = "Prefabs/GUI/GamePanel2";//"Prefabs/GUI/GamePanel";
 
 	private const string BTN_SHOOT = "AnchorBottomRight/btnShoot";
+	private const string BTN_PAUSE = "AnchorTopRight/btnPause";
 	private const string BTN_ATTACK = "AnchorBottomRight/btnAttack";
 	private const string BTN_NAV= "AnchorBottomleft/btnNav";
 	private const string BTN_SWITCH = "AnchorBottomRight/btnSwitch";
@@ -18,7 +19,7 @@ public class GameUIView : BasicView
 	public UIEventListener.VoidDelegate onClickShoot = null;
 	public UIEventListener.VoidDelegate onClickAttack = null;
 	public UIEventListener.VoidDelegate onClickSwitch = null;
-
+	public UIEventListener.VoidDelegate onClickPause = null;
 
 	protected UISlider healthSlider;
 	protected UISlider towerSlider;
@@ -32,6 +33,7 @@ public class GameUIView : BasicView
 		UIEventListener.Get(GetChild(BTN_SHOOT)).onClick += OnClickPlay;
 		UIEventListener.Get(GetChild(BTN_ATTACK)).onClick += OnClickAttack;
 		UIEventListener.Get(GetChild(BTN_SWITCH)).onClick += OnClickSwitch;
+		UIEventListener.Get(GetChild(BTN_PAUSE)).onClick += OnClickPause;
 
 		healthSlider = GetChild (SLIDER_PLAYERHEALTH).GetComponent<UISlider> ();
 		towerSlider = GetChild (SLIDER_TOWERHEALTH).GetComponent<UISlider> ();
@@ -51,6 +53,11 @@ public class GameUIView : BasicView
 	void OnClickSwitch(GameObject go) {
 		if(onClickSwitch != null)
 			onClickSwitch(go);
+	}
+
+	void OnClickPause(GameObject go) {
+		if(onClickPause != null)
+			onClickPause(go);
 	}
 
 	private UILabel _stageLabel;
