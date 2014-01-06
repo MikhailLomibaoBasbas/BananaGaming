@@ -62,6 +62,7 @@ public class GameState : BasicGameState {
 	}
 
 	private void StartStage (int stg) {
+		m_game2DView.getPlayerController.minClamp = (stg > 5) ? new Vector2(-1500, -650): new Vector2(-100, -650);
 		_stageManager.SetStage(stg);
 		m_gameUIView.GetStageLabel.text = stg.ToString();
 		_enemiesKilledThisStage = 0;
@@ -74,12 +75,31 @@ public class GameState : BasicGameState {
 
 	public void SummonEnemies () {
 		int enemiesToSummon = _stageManager.GetRandomEnemiesSummonCount;
+		//if(_enemiesSummonedThisStage + enemiesToSummon > _stageManager.GetRequiredKills)
+			//enemiesToSummon = (_stageManager.GetRequiredKills - _enemiesSummonedThisStage);
+		Debug.LogWarning("HAYOP HAYOP HAYOP!!!");
+		Debug.LogWarning("--Enemies to Summon: " + enemiesToSummon);
+		for(int i = _enemiesSummonedThisStage; i < _enemiesSummonedThisStage + enemiesToSummon; i++) {
+			//Debug.LogWarning(_stageManager.GetEnemyArrangedDistribution.Length);
+			if(i > _stageManager.GetRequiredKills)
+				break;
+			if(_stage > 5) {
+				if(i %2 == 0)
+					m_game2DView.SummonEnemyAtContainer1(_stageManager.GetEnemyArrangedDistribution[i], 1);
+				else
+					m_game2DView.SummonEnemyAtContainer2(_stageManager.GetEnemyArrangedDistribution[i], 1);
+			} else {
+				m_game2DView.SummonEnemyAtContainer1(_stageManager.GetEnemyArrangedDistribution[i], 1);
+			}
+		}
 		_enemiesSummonedThisStage += enemiesToSummon;
-		if(_enemiesSummonedThisStage > _stageManager.GetRequiredKills)
-			enemiesToSummon -= (_enemiesSummonedThisStage - _stageManager.GetRequiredKills);
-		//Debug.LogError(enemiesToSummon);
-		m_game2DView.SummonEnemyAtContainer1(EnemyController.EnemyType.Normal, enemiesToSummon);
-		Invoke("SummonEnemies", _stageManager.GetRandomDelayEnemyWave);
+		Debug.Log("----Enemies Summoned This Stage: " + _enemiesSummonedThisStage);
+
+
+
+		///m_game2DView.SummonEnemyAtContainer1(EnemyController.EnemyType.Normal, enemiesToSummon);
+		if(_enemiesSummonedThisStage < _stageManager.GetRequiredKills)
+			Invoke("SummonEnemies", _stageManager.GetRandomDelayEnemyWave);
 		_stageManager.RefreshValuesForNextWave();
 	}
 
@@ -87,8 +107,10 @@ public class GameState : BasicGameState {
 		_score += score;
 		_enemiesKilled++;
 		_enemiesKilledThisStage++;
+		Debug.LogWarning("Enemies Killed: " + _enemiesKilledThisStage);
 		if(_enemiesKilledThisStage >= _stageManager.GetRequiredKills) {
 			CancelInvoke("SummonEnemies");
+			m_game2DView.RemoveAllEnemiesInScene();
 			StartStage(++_stage);
 		}
 	}

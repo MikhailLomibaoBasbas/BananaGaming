@@ -64,7 +64,7 @@ public class CameraFollow : MonoBehaviour {
 			if(_deltaPosition.x != 0)
 				smoothToPos.x = _deltaPosition.x > 0 ? 1: -1;
 			if(_deltaPosition.y != 0)
-				smoothToPos.y = _deltaPosition.y > 0 ? 1: -1;
+				smoothToPos.y = _deltaPosition.y > 0 ? /*1*/ 0.5f: /*-1*/ -0.5f;
 
 			_cachedTransform.localPosition = Vector3.SmoothDamp(_cachedTransform.position,  target.position + smoothToPos * offset,
 			                                                    ref _currentVelocity, smoothTime);

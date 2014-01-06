@@ -70,6 +70,7 @@ public class EnemyController : BasicCharacterController {
 
 	public override void Init () {
 		//Before Base Init Statements
+		//originalTarget = PlayerController.GetInstance.cachedTransform;
 		_currentTarget = originalTarget;
 		_originalHealth = health;
 		_originalMoveSpeed = moveSpeed;
@@ -79,7 +80,7 @@ public class EnemyController : BasicCharacterController {
 		//_attackCircleCollider = transform.FindChild("attackCollider").GetComponent<CircleCollider2D>();
 		//_attackCircleCollider.enabled = false;
 		_enemyProjectile = transform.FindChild("attackCollider").GetComponent<EnemyProjectile>();
-		Debug.Log(getAttackTime);
+		//Debug.Log(getAttackTime);
 		_enemyProjectile.SetValues(null, getAttackTime, 0f, damage);
 		//SetCharacterStateStartEventListener(OnEnemyStateStarted);
 		//SetCharacterStateFinishedEventListener(OnEnemyStateFinished);
@@ -252,7 +253,7 @@ public class EnemyController : BasicCharacterController {
 	}
 
 	private void UpdateStealthEnemy () {
-		float stealthThreshold = 250f;
+		float stealthThreshold = 600f;
 		float distance = (Vector3.Distance(cachedTransform.position, PlayerController.GetInstance.cachedTransform.position));
 		float result =  distance / stealthThreshold > 1 ? 1: (distance / stealthThreshold) - 0.5f;
 		if(result < 0)

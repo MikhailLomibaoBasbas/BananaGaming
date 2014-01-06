@@ -7,9 +7,6 @@ public class Game2DView : Basic2DView {
 	public static Game2DView Create () {
 		return Create<Game2DView>(PREFAB_PATH);
 	}
-	
-	private PlayerController _playerController;
-	public PlayerController getPlayerController {get{return _playerController;}}
 
 	private List<EnemyController> _enemyControllers1;
 	private List<EnemyController> _enemyControllers2;
@@ -17,8 +14,7 @@ public class Game2DView : Basic2DView {
 	private CameraFollow _cameraFollow;
 	public CameraFollow getCameraFollow {get {return _cameraFollow;}}
 
-	private Transform _towerGO;
-	public Transform getTowerGO{get{return _towerGO;}}
+
 	
 	private int enemyCountPerType = 20;
 	
@@ -28,8 +24,6 @@ public class Game2DView : Basic2DView {
 		_cameraFollow = get2DCamera.GetComponent<CameraFollow>();
 		_cameraFollow.target = _playerController.transform;
 		_cameraFollow.isActive = true;
-
-		_towerGO = GetChild("Tower").transform;
 	}
 
 	
@@ -43,15 +37,18 @@ public class Game2DView : Basic2DView {
 			ec.name = "Enemy" + ec.enemyType.ToString();
 			for(int i = 0; i < enemyCountPerType; i++){
 				EnemyController ecCopy =  EnemyController.Instantiate(ec) as EnemyController;
+				ecCopy.name += (" " + (i+1));
 				ecCopy.cachedTransform.parent = GetEnemyContainer1GO.transform;
 				EnemyController ecCopy2 =  EnemyController.Instantiate(ec) as EnemyController;
+				ecCopy2.name += (" " + (i+1));
 				ecCopy2.cachedTransform.parent = GetEnemyContainer2GO.transform;
 				ecCopy.setActiveInScene(false, Vector3.zero, true, false);
 				ecCopy2.setActiveInScene(false, Vector3.zero, true, false);
 				ecCopy.cachedTransform.localPosition = ecCopy2.cachedTransform.localPosition = Vector3.zero;
 				_enemyControllers1.Add(ecCopy);
 				_enemyControllers2.Add(ecCopy2);
-				ecCopy.setCurrentTarget = ecCopy2.setCurrentTarget = _playerController.cachedTransform;
+				ecCopy.originalTarget = ecCopy2.originalTarget = getTowerTrans;
+				ecCopy.setCurrentTarget = ecCopy2.setCurrentTarget = getTowerTrans;
 			}
 			GameObject.Destroy(ec.gameObject);
 		}
@@ -61,6 +58,25 @@ public class Game2DView : Basic2DView {
 			ec.setActiveInScene(false);
 		foreach(EnemyController ec in _enemyControllers2)
 			ec.setActiveInScene(false);*/
+	}
+
+	private const string PLAYER_GO = "PlayerV2";
+	private PlayerController _playerController;
+	public PlayerController getPlayerController {
+		get{
+			if(_playerController == null)
+				_playerController = GetChild(PLAYER_GO).GetComponent<PlayerController>();
+			return _playerController;
+		}
+	}
+
+	private Transform _towerTrans;
+	public Transform getTowerTrans{
+		get{
+			if(_towerTrans == null)
+				_towerTrans = GetChild("Tower").transform;
+			return _towerTrans;
+		}
 	}
 
 
@@ -105,7 +121,7 @@ public class Game2DView : Basic2DView {
 	public void SummonEnemyAtContainer1(EnemyController.EnemyType type, int count) {
 		int i = 0;
 		int[] randIndexPos = StaticManager_Helper.GetRandomNonRepeatingNumbers(count, -4, 4);
-		int step = 9;
+		int step = 7;
 		foreach(EnemyController ec in _enemyControllers1) {
 			if(i >= count)
 				break;
@@ -123,9 +139,6 @@ public class Game2DView : Basic2DView {
 		int i = 0;
 		int[] randIndexPos = StaticManager_Helper.GetRandomNonRepeatingNumbers(count, -4, 4);
 		int step = 9;
-		for(int j = 0; j < randIndexPos.Length; j++) {
-			Debug.LogError(randIndexPos[j]);
-		}
 		foreach(EnemyController ec in _enemyControllers2) {
 			if(ec.enemyType == type) {
 				if(!ec.enabled) {
@@ -135,6 +148,13 @@ public class Game2DView : Basic2DView {
 			}
 			if(i == count)
 				break;
+		}
+	}
+
+	public void RemoveAllEnemiesInScene() {
+		for(int i = 0; i < _enemyControllers1.Count; i++) {
+			_enemyControllers1[i].setActiveInScene(false);
+			_enemyControllers2[i].setActiveInScene(false);
 		}
 	}
 
