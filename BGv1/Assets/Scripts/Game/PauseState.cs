@@ -58,6 +58,6 @@ public class PauseState : BasicGameState {
 	void OnClickMain(GameObject go) {
 		static_audiomanager.getInstance.play_sfx ("Audio/Sfx/Switch1", pauseView.transform.position);
 		stateManager.PopState ();	
-		Game.instance.PushState(GameStateType.MAIN_MENU);
+		Game.instance.PushState(GameStateType.GAME_OVER);
 	}
 }
