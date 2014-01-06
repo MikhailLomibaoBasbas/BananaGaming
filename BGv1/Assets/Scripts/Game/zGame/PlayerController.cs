@@ -41,6 +41,7 @@ public class PlayerController : BasicCharacterController {
 	private Vector3 _originalScale;
 	
 	public override void Init (){
+		instance = this;
 		base.Init ();
 		Invoke("DoInit", 0.01f);
 	}
@@ -90,8 +91,11 @@ public class PlayerController : BasicCharacterController {
 		}
 		OnKnifeBATCooldownUpdate();
 		UpdateClamp();
+	
+		UpdateMoveControls();
+	}
 
-
+	private void UpdateMoveControls () {
 		if(!isHurt) {
 			_isMoveKeysPressed = false;
 			if(Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) {
@@ -106,7 +110,8 @@ public class PlayerController : BasicCharacterController {
 				_isMoveKeysPressed = true;
 			}
 			if(Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) {
-				transform.position += Vector3.right * getTranslateUnitsPerSecond * cachedDeltaTime * _currentAcceleration;
+				cachedRigidBody2D.
+					transform.position += Vector3.right * getTranslateUnitsPerSecond * cachedDeltaTime * _currentAcceleration;
 				if(!isMoving)
 					DoCharacterState(CharacterState.Move);
 				if(!_onKnifeBATCooldown && !_isAttackPressed) {
@@ -122,7 +127,7 @@ public class PlayerController : BasicCharacterController {
 					DoCharacterState(CharacterState.Move);
 				_isMoveKeysPressed = true;
 			}
-
+			
 			if(Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) {
 				transform.position += -Vector3.up * getTranslateUnitsPerSecond * cachedDeltaTime * _currentAcceleration;
 				if(!isMoving)

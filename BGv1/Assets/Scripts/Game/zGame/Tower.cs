@@ -12,10 +12,16 @@ public class Tower : MonoBehaviour {
 	public int health;
 	public Game.LayerType hurtTriggerType;
 	private int _hurtTrigger;
-	private
 
-	void OnTriggerEnter2D(Collider2D collider) {
-		if(collider.gameObject.layer == _hurtTrigger) {
+	void Awake () {
+	}
+
+	private void Init () {
+	}
+
+
+	void OnTriggerEnter2D(Collider2D col) {
+		if(col.gameObject.layer == _hurtTrigger) {
 			health--;
 			GetComponent<SpriteRenderer>().color = Color.red;
 		}

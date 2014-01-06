@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class StageManager {
 	private int _stageNum;
@@ -7,12 +8,13 @@ public class StageManager {
 	private Vector2 _minMaxDelayInSecPerWave = new Vector2(5, 10); 
 	private int _maxWave = 4;
 	private int _baseRequiredKills = 5;
-	private int _requiredKillsIncrementPerStage = 5;
+	private int _requiredKillsIncrementPerStage = 3;
 
 	
 	private int _unlockedMonstersCount;
-	private EnemyController.EnemyType[] _enemyDistribution;
+	private List<EnemyController.EnemyType> _enemyDistribution;
 	private EnemyController.EnemyType[] _enemyArrangedDistribution;
+	public EnemyController.EnemyType[] GetEnemyArrangedDistribution {get {return _enemyArrangedDistribution;}}
 
 	private bool _needsRefresh {
 		set {
@@ -22,7 +24,7 @@ public class StageManager {
 		}
 	}
 
-	private bool _requiredKillsNeedsRefresh;
+	private bool _requiredKillsNeedsRefresh = true;
 	private int _requiredKills = 0;
 	public int GetRequiredKills {
 		get {
@@ -34,7 +36,7 @@ public class StageManager {
 		}
 	}
 
-	private bool _randomEnemiesSummonCountNeedsRefresh;
+	private bool _randomEnemiesSummonCountNeedsRefresh = true;
 	private int _randomEnemiesSummonCount;
 	public int GetRandomEnemiesSummonCount {
 		get {
@@ -45,7 +47,7 @@ public class StageManager {
 			return _randomEnemiesSummonCount;
 		}
 	}
-	private bool _randomDelayNeedsRefresh;
+	private bool _randomDelayNeedsRefresh = true;
 	private float _randomDelayEnemy;
 	public float GetRandomDelayEnemyWave {
 		get {
@@ -59,13 +61,52 @@ public class StageManager {
 
 
 	public void SetStage(int val) {
+		//val = 4;
+		RefreshValues();
 		_stageNum = val;
-		_unlockedMonstersCount = 1 + (val / 2);
+		_enemyArrangedDistribution = null;
+		SetEnemyDistribution (val);
+
+	}
+	private void SetEnemyDistribution (int stage) {
+		_unlockedMonstersCount = 1 + (stage / 2);
 		if(_unlockedMonstersCount > (int)EnemyController.EnemyType.Jumper + 1)
 			_unlockedMonstersCount = (int)EnemyController.EnemyType.Jumper + 1;
-		RefreshValues();
-	}
-	private void SetEnemyDistribution () {
+		float[] ratio = new float[_unlockedMonstersCount];
+		float ocRatio = 1;
+		float cRatio = 1;
+		int i = 1;
+		while (i < _unlockedMonstersCount) {
+			cRatio *= 0.8f;
+			ratio[i] = ocRatio - cRatio;
+			ocRatio = cRatio;
+			//Debug.LogError(i + " " + ratio[i]);
+			i++;
+		}
+		ratio[0] = cRatio;
+		_enemyDistribution = new List<EnemyController.EnemyType>();
+		_enemyArrangedDistribution = new EnemyController.EnemyType[GetRequiredKills];
+		//Debug.LogError("REQ KILLS: " + GetRequiredKills);
+		int indexStored = 0;
+		for(int x = 0; x < _unlockedMonstersCount; x++) {
+			int eTypeCount = (int)(ratio[x] * GetRequiredKills);
+			for(int y = indexStored; y < indexStored + eTypeCount; y++) {
+				_enemyDistribution.Add((EnemyController.EnemyType)x);
+			}
+			indexStored += eTypeCount;
+		}
+		//Debug.LogError(_enemyDistribution.Count + " " + GetRequiredKills);
+		int deficit = GetRequiredKills - _enemyDistribution.Count;
+		for(int x = 0; x < deficit; x++) {
+			_enemyDistribution.Add(EnemyController.EnemyType.Normal);
+		}
+		//Debug.LogError(_enemyDistribution.Count + " " + GetRequiredKills);
+		int edCount = _enemyDistribution.Count;
+		for(int x = 0; x < edCount; x++) {
+			int randIndex = Random.Range(0, _enemyDistribution.Count);
+			_enemyArrangedDistribution[x] = _enemyDistribution[randIndex];
+			_enemyDistribution.RemoveAt(randIndex);
+		}
 
 	}
 
@@ -80,7 +121,6 @@ public class StageManager {
 
 
 	public StageManager (int stage) {
-
 		SetStage(stage);
 	}
 	public StageManager(){
