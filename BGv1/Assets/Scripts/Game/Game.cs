@@ -19,7 +19,15 @@ public class Game : MonoSingleton<Game> {
 		Enemy = 11,
 		PlayerAttack = 12,
 		EnemyAttack = 13,
-		HurtDead = 14
+		HurtDead = 14,
+		Item
+	}
+
+	public enum ItemType {
+		Haste = 10,
+		Heal = 20,
+		Rage = 30,
+		Coin = 60
 	}
 	
 	private GameStateManager _stateManager;

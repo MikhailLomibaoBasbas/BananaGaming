@@ -66,7 +66,7 @@ public class StageManager {
 		_stageNum = val;
 		_enemyArrangedDistribution = null;
 		SetEnemyDistribution (val);
-
+		int tempNormCount = 0;
 	}
 	private void SetEnemyDistribution (int stage) {
 		_unlockedMonstersCount = 1 + (stage / 2);
@@ -77,7 +77,7 @@ public class StageManager {
 		float cRatio = 1;
 		int i = 1;
 		while (i < _unlockedMonstersCount) {
-			cRatio *= 0.8f;
+			cRatio *= 0.7f;
 			ratio[i] = ocRatio - cRatio;
 			ocRatio = cRatio;
 			//Debug.LogError(i + " " + ratio[i]);

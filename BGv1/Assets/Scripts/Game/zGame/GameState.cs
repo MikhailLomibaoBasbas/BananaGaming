@@ -1,4 +1,4 @@
-﻿﻿using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 
 public class GameState : BasicGameState {
@@ -23,10 +23,17 @@ public class GameState : BasicGameState {
 		m_gameUIView = (GameUIView) viewUI;
 
 		_stageManager = new StageManager();
-		static_audiomanager.getInstance.play_bgm ("Audio/Bgm/InGame");
-		StartStage(_stage = 1);
+		//static_audiomanager.getInstance.play_bgm ("Audio/Bgm/InGame");
+		AudioManager.GetInstance.PlayRandomBGMCombination();
+		//StartStage(_stage = 10);
+		Invoke("Test", 0.1f);
 		AddListener();
 		base.OnStart ();
+	}
+	private void Test () {
+		//m_game2DView.SummonEnemyAtContainer1(EnemyController.EnemyType.Jumper, 1);
+		//m_game2DView.SummonEnemyAtContainer2(EnemyController.EnemyType.Aggressive, 1);
+		m_game2DView.SummonEnemyAtContainer1(EnemyController.EnemyType.Normal, 20);
 	}
 
 	public override void OnUpdate () {
@@ -80,9 +87,11 @@ public class GameState : BasicGameState {
 		Debug.LogWarning("HAYOP HAYOP HAYOP!!!");
 		Debug.LogWarning("--Enemies to Summon: " + enemiesToSummon);
 		for(int i = _enemiesSummonedThisStage; i < _enemiesSummonedThisStage + enemiesToSummon; i++) {
+			Debug.Log(i + " " +  _stageManager.GetRequiredKills) ;
 			//Debug.LogWarning(_stageManager.GetEnemyArrangedDistribution.Length);
-			if(i > _stageManager.GetRequiredKills)
+			if(i >= _stageManager.GetRequiredKills) {
 				break;
+			}
 			if(_stage > 5) {
 				if(i %2 == 0)
 					m_game2DView.SummonEnemyAtContainer1(_stageManager.GetEnemyArrangedDistribution[i], 1);

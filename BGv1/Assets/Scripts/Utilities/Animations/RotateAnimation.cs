@@ -143,6 +143,7 @@ public class RotateAnimation : CommonAnimation {
 		ratio = 0;
 		if (!flag)
 			doCallback ();
+		//Debug.LogError(animationTime);
 	}
 
 	public override void startDelayed (bool flag, float delay = 0.00009f) {
@@ -212,8 +213,8 @@ public class RotateAnimation : CommonAnimation {
 		_rotateFrom = Quaternion.Euler (_rfEulerAngles = eulerAngleList [index]);
 		_rotateTo = Quaternion.Euler (_rtEulerAngles = eulerAngleList [index+1]);
 		
-		Debug.LogWarning ("setEulerList " + _rfEulerAngles + " - " + _rtEulerAngles);
-		Debug.LogWarning(target + " " + animationTime);
+		//Debug.LogWarning ("setEulerList " + _rfEulerAngles + " - " + _rtEulerAngles);
+		//Debug.LogWarning(target + " " + animationTime);
 		animationTime = timePerPoint;
 	}
 
