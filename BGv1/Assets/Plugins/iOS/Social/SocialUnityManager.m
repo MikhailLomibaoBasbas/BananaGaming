@@ -12,7 +12,7 @@
 #import "TwitterUnityManager.h"
 #import "ImageResizer.h"
 #import "ViewControllerWrapper.h"
-#import "AppController.h"
+#import "UnityAppController.h"
 
 
 @interface SocialUnityManager () <CustomActivityViewControllerDelegate> {
@@ -66,7 +66,7 @@
 - (void) showCustomActivityViewController {
     // Initialize viewControllerwrapper
     [self cleanViewControllerWrapper];
-    [AppController UnityPause:true];
+    [UnityAppController UnityPause:true];
     self.viewControllerWrapper = [[ViewControllerWrapper alloc] init];
 	[[[UIApplication sharedApplication] keyWindow] addSubview:self.viewControllerWrapper.view];
     self.viewControllerWrapper.view.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height);
@@ -107,7 +107,7 @@
      self.viewControllerWrapper = nil;
      }*/
     [self cleanViewControllerWrapper];
-    [AppController UnityPause:false];
+    [UnityAppController UnityPause:false];
 }
 
 #pragma mark Social Button Actions
@@ -140,7 +140,7 @@
                 }];
             } else {
                 [self stopActivityIndicator];
-                [AppController UnityPause:false];
+                [UnityAppController UnityPause:false];
             }
         }];
     } else {
@@ -173,7 +173,7 @@
                 }];
             } else {
                 [self stopActivityIndicator];
-                [AppController UnityPause:false];
+                [UnityAppController UnityPause:false];
             }
         }];
     } else {
@@ -215,7 +215,7 @@
             }
             case TweetCancelled: {
                 [self cleanViewControllerWrapper];
-                [AppController UnityPause:false];
+                [UnityAppController UnityPause:false];
                 break;
             }
             case TweetNoAccount: {
@@ -242,7 +242,7 @@
 -(void) alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
     NSLog(@"ViewControllerWrapper");
     [self cleanViewControllerWrapper];
-    [AppController UnityPause:false];
+    [UnityAppController UnityPause:false];
 }
 
 #pragma mark - ApplicationDidBecomeActive Methods

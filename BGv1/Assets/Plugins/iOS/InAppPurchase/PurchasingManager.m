@@ -109,8 +109,6 @@
 				NSLog(@"Payment Transaction END Purchased: %@", transaction.transactionIdentifier);
                 [productIds addObject:transaction.payment.productIdentifier];
                 [queue finishTransaction:transaction];
-
-                [self showAlertWithMessage:NSLocalizedString(@"Transaction Succeeded",nil)];
 				purchasing = NO;
 				break;
 			}
@@ -118,7 +116,6 @@
 				NSLog(@"Payment Transaction END Restored: %@", transaction.transactionIdentifier);
                 [productIds addObject:transaction.originalTransaction.payment.productIdentifier];
                 [queue finishTransaction:transaction];
-                
 				purchasing = NO;
 				break;
 			}
@@ -126,7 +123,6 @@
 				NSLog(@"Payment Transaction END Failed: %@ %@", transaction.transactionIdentifier, transaction.error);
                 [errors addObject:transaction.error.localizedDescription];
                 [queue finishTransaction:transaction];
-                [self showAlertWithMessage:NSLocalizedString(@"Transaction Failed",nil)];
 				purchasing = NO;
 				break;
 			}
@@ -142,6 +138,31 @@
 
 -(void)paymentQueue:(SKPaymentQueue *)queue removedTransactions:(NSArray *)transactions {
     
+}
+
+-(void) paymentQueue:(SKPaymentQueue *)queue restoreCompletedTransactionsFailedWithError:(NSError *)error {
+    requestHandler(@"", false, [error localizedDescription]);
+}
+
+-(void) paymentQueueRestoreCompletedTransactionsFinished:(SKPaymentQueue *)queue {
+    NSMutableArray *productIds = [NSMutableArray array];
+    NSLog(@"received restored transactions: %i", queue.transactions.count);
+    for (SKPaymentTransaction *transaction in queue.transactions)
+    {
+        NSString *productID = transaction.payment.productIdentifier;
+        [productIds addObject:productID];
+        NSLog(@"%@",productIds);
+    }
+    requestHandler(/*@"Level2|Level4|Level6|Level8"*/[productIds componentsJoinedByString:PRODUCT_SEPARATOR],
+                   true, @"No Error Lol");
+}
+
+-(void)restorePurchasedItems:(PurchaseResponseBlock) handler{
+    //[[SKPaymentQueue defaultQueue] addTransactionObserver:self];
+    if(requestHandler != NULL)
+        Block_release(requestHandler);
+    requestHandler = handler;
+    [[SKPaymentQueue defaultQueue] restoreCompletedTransactions];
 }
 
 @end

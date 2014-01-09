@@ -8,37 +8,12 @@
 
 #import "MoreAppsUnityManager.h"
 #import "MoreAppsWebViewController.h"
-#import "AppController.h"
+#import "UnityAppController.h"
 #import "ViewControllerWrapper.h"
 
 
-@interface SubUINavigationController : UINavigationController
-
-@end
-
-@implementation SubUINavigationController
-
-#ifdef __IPHONE_6_0
--(BOOL)shouldAutorotate{
-    return YES;
-}
--(NSUInteger) supportedInterfaceOrientations {
-    return UIInterfaceOrientationMaskLandscapeRight | UIInterfaceOrientationMaskLandscapeLeft;
-}
--(UIInterfaceOrientation) preferredInterfaceOrientationForPresentation {
-    return UIInterfaceOrientationLandscapeRight;
-}
-#else
--(BOOL) shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation {
-    return (toInterfaceOrientation == UIInterfaceOrientationLandscapeRigh) || (toInterfaceOrientation == UIInterfaceOrientationLandscapeLeft);
-}
-#endif
-
-
-@end
 @interface MoreAppsUnityManager () <UIWebViewDelegate, MoreAppsWebViewControllerDelegate>
 @property (nonatomic, retain) UIViewController *viewControllerWrapper;
-
 @end
 
 @implementation MoreAppsUnityManager
@@ -56,7 +31,7 @@
         [self.viewControllerWrapper release];
         self.viewControllerWrapper = nil;
     }
-    [AppController UnityPause:true];
+    [UnityAppController UnityPause:true];
     self.viewControllerWrapper = [[ViewControllerWrapper alloc] init];
     [[[UIApplication sharedApplication] keyWindow] addSubview:self.viewControllerWrapper.view];
     self.viewControllerWrapper.view.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height);
@@ -69,7 +44,7 @@
     NSLog(@"%@", urlString);
     MoreAppsWebViewController *webViewController = [[MoreAppsWebViewController alloc] initWithLink:urlString];
     webViewController.delegate = self;
-    SubUINavigationController *navigationController = [[SubUINavigationController alloc] initWithRootViewController:webViewController];
+    UINavigationController *navigationController = [[UINavigationController alloc] initWithRootViewController:webViewController];
     navigationController.view.autoresizingMask = (UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth);
     [navigationController setTitle:@"More Applications"];
     [webViewController setTitle:@"More Applications"];
@@ -81,16 +56,13 @@
     [webViewController.navigationItem setRightBarButtonItem:refreshButton animated:NO];
     UIModalTransitionStyle transitionStyle = UIModalTransitionStyleFlipHorizontal;
     [self presentViewController:navigationController animated:YES modalTransitionStyle: transitionStyle completion:nil];
-
-
 }
 
 -(void) MoreAppsWebViewControllerDidFinished:(MoreAppsWebViewController *)webviewController {
-
     [self.viewControllerWrapper.view removeFromSuperview];
     [self.viewControllerWrapper release];
     self.viewControllerWrapper = nil;
-    [AppController UnityPause:false];
+    [UnityAppController UnityPause:false];
 }
 
 #pragma mark - ApplicationDidBecomeActive Methods
