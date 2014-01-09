@@ -15,7 +15,7 @@
 #define UNITY_FBLISTENER_ONPOSTTOWALL           "OnFbPostToWallResponded"
 #define UNITY_FBLISTENER_ONGRAPHRESPONSE        "OnFbGraphRequestResponded"
 
-@interface FacebookUnityManager : NSObject <FBWebDialogsDelegate>
+@interface FacebookUnityManager : NSObject
 
 @property (nonatomic, retain) FBSession * session;
 @property (nonatomic, retain) NSDictionary * userInfo;

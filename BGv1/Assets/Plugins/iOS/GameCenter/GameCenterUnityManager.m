@@ -10,7 +10,7 @@
 #import <GameKit/GameKit.h>
 #import "Reachability.h"
 #import "ViewControllerWrapper.h"
-#import "AppController.h"
+#import "UnityAppController.h"
 
 const NSString *offPostfix = @"_Offline";
 
@@ -88,7 +88,7 @@ const NSString *offPostfix = @"_Offline";
         [self.viewControllerWrapper release];
         self.viewControllerWrapper = nil;
     }
-    [AppController UnityPause:true];
+    [UnityAppController UnityPause:true];
     self.viewControllerWrapper = [[ViewControllerWrapper alloc] init];
     [[[UIApplication sharedApplication] keyWindow] addSubview:self.viewControllerWrapper.view];
         self.viewControllerWrapper.view.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height);
@@ -107,7 +107,7 @@ const NSString *offPostfix = @"_Offline";
                  if(!error) {
                      if(loginViewController) {
                          [self cleanAuthenticationViewcontrollerWrapper];
-                        [AppController UnityPause:true];
+                        [UnityAppController UnityPause:true];
                         self.authenticationViewControllerWrapper = [[ViewControllerWrapper alloc] init];
                          [[[UIApplication sharedApplication] keyWindow] addSubview:self.authenticationViewControllerWrapper.view];
                          self.authenticationViewControllerWrapper.view.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height);
@@ -115,14 +115,14 @@ const NSString *offPostfix = @"_Offline";
                      } else {
                          if(self.authenticationViewControllerWrapper != nil) {
                              [self cleanAuthenticationViewcontrollerWrapper];
-                             [AppController UnityPause:false];
+                             [UnityAppController UnityPause:false];
                          }
                      }
                  } else {
                      if(self.authenticationViewControllerWrapper != nil) {
                          //[self cleanViewController:self.authenticationViewControllerWrapper andRemoveToSuperView:YES];
                          [self cleanAuthenticationViewcontrollerWrapper];
-                         [AppController UnityPause:false];
+                         [UnityAppController UnityPause:false];
                      }
                  }
                  
@@ -342,7 +342,7 @@ const NSString *offPostfix = @"_Offline";
 -(void) gameCenterViewControllerDidFinish:(GKGameCenterViewController *)gameCenterViewController {
     [gameCenterViewController dismissViewControllerAnimated:YES completion:^{
         [self cleanViewControllerWrapper];
-        [AppController UnityPause:false];
+        [UnityAppController UnityPause:false];
     }];
     [gameCenterViewController release];
     gameCenterViewController = nil;
@@ -351,7 +351,7 @@ const NSString *offPostfix = @"_Offline";
 -(void) achievementViewControllerDidFinish:(GKAchievementViewController *)viewController {
     [viewController dismissViewControllerAnimated:YES completion:^{
         [self cleanViewControllerWrapper];
-        [AppController UnityPause:false];
+        [UnityAppController UnityPause:false];
     }];
     [viewController release];
     viewController = nil;

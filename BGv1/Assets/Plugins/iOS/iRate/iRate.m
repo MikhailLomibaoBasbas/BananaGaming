@@ -37,7 +37,7 @@
 
 #import <Availability.h>
 #if !__has_feature(objc_arc)
-#error This class requires automatic reference counting
+//error This class requires automatic reference counting
 #endif
 
 
@@ -707,7 +707,7 @@ static NSString *const iRateMacAppStoreURLFormat = @"macappstore://itunes.apple.
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:self.messageTitle
                                                         message:self.message
                                                        delegate:(id <UIAlertViewDelegate>)self
-                                              cancelButtonTitle:/*[self.cancelButtonLabel length] ? self.cancelButtonLabel:*/ nil
+                                              cancelButtonTitle:[self.cancelButtonLabel length] ? self.cancelButtonLabel : nil
                                               otherButtonTitles:self.rateButtonLabel, nil];
         if ([self.remindButtonLabel length])
         {

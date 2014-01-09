@@ -42,6 +42,15 @@ NSTimeInterval timeBeforeCancelling = 10.0;
     [self openSession:fbAppId completionBlock:nil];
 }
 
+-(void) facebookReconnect:(NSString*)fbAppId completionBlock: (void (^)(BOOL)) callback {
+    [FBSession.activeSession closeAndClearTokenInformation];
+    [FBSession renewSystemCredentials:^(ACAccountCredentialRenewResult result,
+                                        NSError *error)
+     {
+         [self openSession:fbAppId completionBlock:callback];
+     }];
+}
+
 -(void)openSession:(NSString*)fbAppId completionBlock: (void (^)(BOOL)) callback {
     NSLog(@"%s", __func__);
     NSLog(@"Logging in to FB with FBAPPID: %@", fbAppId);
@@ -58,22 +67,13 @@ NSTimeInterval timeBeforeCancelling = 10.0;
                  case FBSessionStateOpenTokenExtended:
                      callback(true);
                      break;
-                 case FBSessionStateClosedLoginFailed:
+                case FBSessionStateClosedLoginFailed:
                      callback(false);
                      break;
                  default:
                      break;
              }
          }
-     }];
-}
-
--(void) facebookReconnect:(NSString*)fbAppId completionBlock: (void (^)(BOOL)) callback {
-    [FBSession.activeSession closeAndClearTokenInformation];
-    [FBSession renewSystemCredentials:^(ACAccountCredentialRenewResult result,
-                                        NSError *error)
-     {
-         [self openSession:fbAppId completionBlock:callback];
      }];
 }
 
@@ -117,39 +117,6 @@ NSTimeInterval timeBeforeCancelling = 10.0;
                               selfPointer.userFriends = result[@"data"];
                               callback(error==nil);
                           }];
-}
-
--(void) presentWebDialogRequestModallyWithMessage:(NSString *) message title:(NSString *) title parameters:(NSDictionary *) parameters
-                                         callback:(void(^)(BOOL)) callback {
-    NSLog(@"%s", __func__);
-    /*FBFrictionlessRecipientCache *friendCache = [[[FBFrictionlessRecipientCache alloc] init] autorelease];
-    [friendCache prefetchAndCacheForSession:self.session];*/
-    [FBWebDialogs presentRequestsDialogModallyWithSession:self.session message:message title:title parameters:parameters
-                handler:^(FBWebDialogResult result, NSURL *resultURL, NSError *error){
-                    NSLog(@"%@", [resultURL absoluteString]);
-                    if(error == NULL) {
-                        switch(result) {
-                            case FBWebDialogResultDialogCompleted:
-                                NSLog(@"Request Sent");
-                                 callback(true);
-                                break;
-                            case FBWebDialogResultDialogNotCompleted:
-                                NSLog(@"Request Cancelled");
-                                 callback(false);
-                                break;
-                            default:
-                                break;
-                        }
-                    } else {
-                        callback(false);
-                    }
-        }];
-    
-    /*UIImageView *imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"fbwebDialogs_closeButton"]];
-        UIView *tempFrontView = [[[[UIApplication sharedApplication] keyWindow] subviews] lastObject];
-        [imageView setCenter:CGPointMake( tempFrontView.bounds.size.width * 0.94f, tempFrontView.bounds.size.height * 0.04f)];
-        [tempFrontView addSubview:imageView];
-        [imageView release];*/
 }
 
 -(NSInteger)getUserFriendsCount {
@@ -348,6 +315,39 @@ NSTimeInterval timeBeforeCancelling = 10.0;
                               NSLog(@"[FacebookManager requestGraphPath] Result: %@ Error: %@", result, [error localizedDescription]);
                               callback(error==nil);
                           }];
+}
+
+-(void) presentWebDialogRequestModallyWithMessage:(NSString *) message title:(NSString *) title parameters:(NSDictionary *) parameters
+                                         callback:(void(^)(BOOL)) callback {
+    NSLog(@"%s", __func__);
+    /*FBFrictionlessRecipientCache *friendCache = [[[FBFrictionlessRecipientCache alloc] init] autorelease];
+     [friendCache prefetchAndCacheForSession:self.session];*/
+    [FBWebDialogs presentRequestsDialogModallyWithSession:self.session message:message title:title parameters:parameters
+                                                  handler:^(FBWebDialogResult result, NSURL *resultURL, NSError *error){
+                                                      NSLog(@"%@", [resultURL absoluteString]);
+                                                      if(error == NULL) {
+                                                          switch(result) {
+                                                              case FBWebDialogResultDialogCompleted:
+                                                                  NSLog(@"Request Sent");
+                                                                  callback(![[resultURL absoluteString] isEqualToString:@"fbconnect://success"]);
+                                                                  break;
+                                                              case FBWebDialogResultDialogNotCompleted:
+                                                                  NSLog(@"Request Cancelled");
+                                                                  callback(false);
+                                                                  break;
+                                                              default:
+                                                                  break;
+                                                          }
+                                                      } else {
+                                                          callback(false);
+                                                      }
+                                                  }];
+    
+    /*UIImageView *imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"fbwebDialogs_closeButton"]];
+     UIView *tempFrontView = [[[[UIApplication sharedApplication] keyWindow] subviews] lastObject];
+     [imageView setCenter:CGPointMake( tempFrontView.bounds.size.width * 0.94f, tempFrontView.bounds.size.height * 0.04f)];
+     [tempFrontView addSubview:imageView];
+     [imageView release];*/
 }
 
 #pragma mark - Uploading photo and getting its info.

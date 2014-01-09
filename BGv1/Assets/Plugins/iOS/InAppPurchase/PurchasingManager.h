@@ -21,5 +21,6 @@ typedef void(^PurchaseResponseBlock)(NSString* productId, BOOL result, NSString*
 -(PurchasingManager*)init;
 
 -(void)purchaseItemId:(NSString*)productId withResultHandler:(PurchaseResponseBlock)handler;
+-(void)restorePurchasedItems: (PurchaseResponseBlock) handler;
 
 @end

@@ -155,20 +155,19 @@ NSString *errorMsg = @"Cannot Connect";
 
 #ifdef __IPHONE_6_0
 -(BOOL)shouldAutorotate{
-    return YES;
+    return NO;
 }
 -(NSUInteger) supportedInterfaceOrientations {
-    return UIInterfaceOrientationMaskLandscapeRight | UIInterfaceOrientationMaskLandscapeLeft;
+    return UIInterfaceOrientationMaskLandscapeRight;
 }
 -(UIInterfaceOrientation) preferredInterfaceOrientationForPresentation {
     return UIInterfaceOrientationLandscapeRight;
 }
 #else
 -(BOOL) shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation {
-    return (toInterfaceOrientation == UIInterfaceOrientationLandscapeRigh) || (toInterfaceOrientation == UIInterfaceOrientationLandscapeLeft);
+    return (toInterfaceOrientation == UIInterfaceOrientationLandscapeRight);
 }
 #endif
-
 
 -(void) dealloc {
     [activityIndicatorView release], activityIndicatorView = nil;
