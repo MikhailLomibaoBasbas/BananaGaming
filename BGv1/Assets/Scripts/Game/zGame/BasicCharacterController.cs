@@ -349,6 +349,10 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 			onCharacterStateStart = null;
 		onCharacterStateStart += eventListener;
 	}
+	public void RemoveCharacterStateListeners () {
+		onCharacterStateStart = null;
+		onCharacterStateFinished = null;
+	}
 
 	void StopCharacterStateWithDelay(float delay) {
 		Invoke("StopCharacterState", delay * 0.9f);

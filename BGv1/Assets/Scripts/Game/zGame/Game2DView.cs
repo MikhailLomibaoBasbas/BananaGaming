@@ -15,6 +15,15 @@ public class Game2DView : Basic2DView {
 	public CameraFollow getCameraFollow {get {return _cameraFollow;}}
 	
 	private int enemyCountPerType = 20;
+
+	private Tower _tower;
+	public Tower GetTower {
+		get {
+			if (_tower == null)
+				_tower = GetComponentInChildren<Tower> ();
+			return _tower;
+		}
+	}
 	
 	void Awake () {
 		_playerController = GetComponentInChildren<PlayerController>();

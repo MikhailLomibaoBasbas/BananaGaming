@@ -10,7 +10,7 @@ public class InputController : MonoBehaviour {
 	private GameObject navGO;
 
 		private Dictionary<TouchTracker,GameObject> copyTouch = new Dictionary<TouchTracker, GameObject>();
-	public delegate void OnNavMove (Vector3 normalizedDisplacement);
+	public delegate void OnNavMove (Vector3 normalizedDisplacement, bool pressed);
 	public event OnNavMove onNavMove;
 	public static InputController instance = null;
 
@@ -58,6 +58,14 @@ public class InputController : MonoBehaviour {
 		}
 	}
 
+	private void tappedFinished(GameObject go, TouchTracker touch) {
+		switch(go.name){
+		case "btnNav":
+			movePlayerFinished (go, touch);
+			break;
+		}
+	}
+
 	private void movePlayer(GameObject go, TouchTracker touch){
 				if (!touch.isEnded) {
 
@@ -75,9 +83,13 @@ public class InputController : MonoBehaviour {
 
 
 						if (onNavMove != null) {
-								onNavMove ((go.transform.localPosition - Vector3.zero).normalized);
+				onNavMove ((go.transform.localPosition - Vector3.zero).normalized, true);
 						}
 				} else
 						go.transform.localPosition = Vector3.zero;
+	}
+
+	private void movePlayerFinished (GameObject go, TouchTracker touch) {
+		onNavMove ((go.transform.localPosition - Vector3.zero).normalized, false);
 	}
 }

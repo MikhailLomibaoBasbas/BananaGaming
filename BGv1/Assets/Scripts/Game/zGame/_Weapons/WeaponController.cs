@@ -107,8 +107,24 @@ public class WeaponController : MonoBehaviour {
 				StartAOETargetAttack();
 			else
 				StartSingleTargetAttack();
+
+			PlayWeaponSound ();
 		}
 	}
+	private void PlayWeaponSound(){
+		switch(_weapon.type){
+		case Weapon.WeaponType.Pistol:
+			static_audiomanager.getInstance.play_sfx ("Audio/Sfx/handgun", transform.position);
+			break;
+		case Weapon.WeaponType.AK47:
+			static_audiomanager.getInstance.play_sfx ("Audio/Sfx/m4a1", transform.position);
+			break;
+		case Weapon.WeaponType.Shotgun:
+			static_audiomanager.getInstance.play_sfx ("Audio/Sfx/shotgun", transform.position);
+			break;
+		}
+	}
+
 	private IEnumerator startFireffects () {
 		_gunShotEffectGO.SetActive(true);
 		_recoilAnimationMashup.start(true);
