@@ -23,8 +23,8 @@ public class GameState : BasicGameState {
 		m_gameUIView = (GameUIView) viewUI;
 
 		_stageManager = new StageManager();
-		//static_audiomanager.getInstance.play_bgm ("Audio/Bgm/InGame");
-		AudioManager.GetInstance.PlayRandomBGMCombination();
+		static_audiomanager.getInstance.play_bgm ("Audio/Bgm/InGame");
+		//AudioManager.GetInstance.PlayRandomBGMCombination();
 		//StartStage(_stage = 10);
 		Invoke("Test", 0.1f);
 		AddListener();
@@ -59,12 +59,14 @@ public class GameState : BasicGameState {
 		m_game2DView.AddEnemiesDeadListener(OnEnemyDead);
 		m_gameUIView.onClickPause += OnClickPause;
 		m_gameUIView.onPressShoot += OnPressShoot;
+		m_gameUIView.onClickSwitch += OnClickSwitch;
 	}
 
 	private void RemoveListener () {
 		m_game2DView.RemoveEnemiesDeadListener(OnEnemyDead);
 		m_gameUIView.onClickPause -= OnClickPause;
 		m_gameUIView.onPressShoot -= OnPressShoot;
+		m_gameUIView.onClickSwitch -= OnClickSwitch;
 	}
 
 
@@ -74,7 +76,13 @@ public class GameState : BasicGameState {
 		Game.instance.PushState (GameStateType.PAUSE);
 	}
 
+	void OnClickSwitch(GameObject go){
+		m_game2DView.getPlayerController.ChangeWeapon ();
+	}
+
 	void OnPressShoot(GameObject go, bool press){
+		Debug.LogWarning (press);
+		m_game2DView.getPlayerController.Attack (press);
 	}
 
 	private void StartStage (int stg) {

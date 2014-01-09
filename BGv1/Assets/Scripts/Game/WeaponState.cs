@@ -7,7 +7,6 @@ public class WeaponState : BasicGameState {
 	public override void OnStart() {
 		viewUI = WeaponView.Create();
 		weaponView = (WeaponView)viewUI;
-
 		//static_audiomanager.getInstance.play_bgm ("Audio/Bgm/MainMenu");
 		AddGUIListeners();
 		base.OnStart();
@@ -32,14 +31,20 @@ public class WeaponState : BasicGameState {
 	}
 
 	void AddGUIListeners() {
-		(viewUI as WeaponView).onClickPlay += OnClickPlay;
-		(viewUI as WeaponView).onClickBack += OnClickBack;
+		weaponView.onClickPlay += OnClickPlay;
+		weaponView.onClickBack += OnClickBack;
+		weaponView.onClickHand += OnClickHand;
+		weaponView.onClickShot += OnClickShot;
+		weaponView.onClickAk += OnClickAk;
 	}
 
 	void RemoveGUIListeners() {
-		(viewUI as WeaponView).RemoveButtonClickHandlers ();
-		(viewUI as WeaponView).onClickPlay -= OnClickPlay;
-		(viewUI as WeaponView).onClickBack -= OnClickBack;
+		weaponView.RemoveButtonClickHandlers ();
+		weaponView.onClickPlay -= OnClickPlay;
+		weaponView.onClickBack -= OnClickBack;
+		weaponView.onClickHand -= OnClickHand;
+		weaponView.onClickShot -= OnClickShot;
+		weaponView.onClickAk -= OnClickAk;
 	}
 
 	void OnClickPlay(GameObject go) {
@@ -50,5 +55,23 @@ public class WeaponState : BasicGameState {
 	void OnClickBack(GameObject go) {
 		static_audiomanager.getInstance.play_sfx ("Audio/Sfx/Switch1", weaponView.transform.position);
 		Game.instance.PushState(GameStateType.MAIN_MENU);
+	}
+
+	void OnClickHand(GameObject go) {
+		static_audiomanager.getInstance.play_sfx ("Audio/Sfx/Switch1", weaponView.transform.position);
+		Game.instance.weaponInitial = Weapon.WeaponType.Pistol;
+		weaponView.EquipButton (go);
+	}
+
+	void OnClickShot(GameObject go) {
+		Game.instance.weaponInitial = Weapon.WeaponType.Shotgun;
+		static_audiomanager.getInstance.play_sfx ("Audio/Sfx/Switch1", weaponView.transform.position);
+		weaponView.EquipButton (go);
+	}
+
+	void OnClickAk(GameObject go) {
+		static_audiomanager.getInstance.play_sfx ("Audio/Sfx/Switch1", weaponView.transform.position);
+		Game.instance.weaponInitial = Weapon.WeaponType.AK47;
+		weaponView.EquipButton (go);
 	}
 }

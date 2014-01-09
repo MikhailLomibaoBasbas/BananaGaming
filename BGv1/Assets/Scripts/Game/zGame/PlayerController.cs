@@ -59,24 +59,44 @@ public class PlayerController : BasicCharacterController {
 		}
 		//_currentWeapon = _weaponControllerMap[currentWeaponType.ToString()];
 		InputController.instance.onNavMove += OnNavigationMove;
+		currentWeaponType = Game.instance.weaponInitial;
+		Debug.LogError ("Current weapon type : " + currentWeaponType);
 		ChangeWeapon(currentWeaponType);
 	}
-	private void OnNavigationMove(Vector3 normalizedDisplacement) {
-			Debug.Log (normalizedDisplacement);
-			if(!isMoving)
-				DoCharacterState(CharacterState.Move);
 
-			if(!_onKnifeBATCooldown && !_isAttackPressed) {
-				Vector3 tempScale = _originalScale;
-				tempScale.x *= 1f;
-				cachedTransform.localScale = tempScale;
-			}
+	private void OnNavigationMove(Vector3 normalizedDisplacement, bool pressed) {
+			Debug.Log (normalizedDisplacement);
+		if (pressed) {
+			if (!_isMoveKeysPressed)
+				_isMoveKeysPressed = true;
+			//FUCKING BUGGG HERE!!!
+
 			cachedTransform.position += normalizedDisplacement * getTranslateUnitsPerSecond * cachedDeltaTime;// * _currentAcceleration;
+			if (normalizedDisplacement.x < 0f) {
+				if (!_onKnifeBATCooldown && !_isAttackPressed) {
+					Vector3 tempScale = _originalScale;
+					tempScale.x *= 1f;
+					cachedTransform.localScale = tempScale;
+				}
+			} else {
+				if (!_onKnifeBATCooldown && !_isAttackPressed) {
+					Vector3 tempScale = _originalScale;
+					tempScale.x *= -1f;
+					cachedTransform.localScale = tempScale;
+				}
+			}
+
+			if (!isMoving)
+				DoCharacterState (CharacterState.Move);
+			OnCurrentAccelerationUpdate ();
+		} else {
+			_isMoveKeysPressed = false;
+		}
 	}
 
 	public override void OnUpdate () {
 		base.OnUpdate ();
-#if FALSE
+		#if FALSE
 		if(Input.GetMouseButton(0)) {
 			if(!_onKnifeBATCooldown) {
 				_currentWeapon.Attack();
@@ -101,6 +121,10 @@ public class PlayerController : BasicCharacterController {
 			ChangeWeapon();
 		}
 #endif
+		if (_isAttackPressed) {
+			_currentWeapon.Attack();
+		}
+
 
 		OnKnifeBATCooldownUpdate();
 	
@@ -115,7 +139,7 @@ public class PlayerController : BasicCharacterController {
 				_currentWeapon.Attack();
 			}
 		} else {
-			if(!_isAttackPressed)
+			if(_isAttackPressed)
 				_isAttackPressed = false;
 		}
 	}
@@ -201,7 +225,7 @@ public class PlayerController : BasicCharacterController {
 
 	}
 
-	private void ChangeWeapon () {
+	public void ChangeWeapon () {
 		foreach(WeaponController wp in _weaponControllerMap.Values) {
 			wp.Hide();
 		}

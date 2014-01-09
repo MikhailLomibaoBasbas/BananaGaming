@@ -39,6 +39,8 @@ public class Game : MonoSingleton<Game> {
 
 	private OptionData _optionData;
 
+	public Weapon.WeaponType weaponInitial;
+
 	public override void Init () {
 		DontDestroyOnLoad(gameObject);
 		InitializeGUI();
