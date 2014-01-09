@@ -40,16 +40,16 @@ public class MainMenuView : BasicView
 
 	public void SetMusicOn(bool isOn){
 		if (isOn)
-			GetChild (BTN_MUSIC).transform.FindChild ("Background").GetComponent<UISprite> ().spriteName = "on";
+			GetChild (BTN_MUSIC).transform.FindChild ("Background").GetComponent<UISprite> ().spriteName = "mon";
 		else
-			GetChild (BTN_MUSIC).transform.FindChild ("Background").GetComponent<UISprite> ().spriteName = "off";
+			GetChild (BTN_MUSIC).transform.FindChild ("Background").GetComponent<UISprite> ().spriteName = "moff";
 	}
 
 	public void SetSoundOn(bool isOn){
 		if (isOn)
-			GetChild (BTN_SOUND).transform.FindChild ("Background").GetComponent<UISprite> ().spriteName = "on";
+			GetChild (BTN_SOUND).transform.FindChild ("Background").GetComponent<UISprite> ().spriteName = "son";
 		else
-			GetChild (BTN_SOUND).transform.FindChild ("Background").GetComponent<UISprite> ().spriteName = "off";
+			GetChild (BTN_SOUND).transform.FindChild ("Background").GetComponent<UISprite> ().spriteName = "soff";
 	}
 
 }

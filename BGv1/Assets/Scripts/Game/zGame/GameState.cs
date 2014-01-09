@@ -51,11 +51,13 @@ public class GameState : BasicGameState {
 	private void AddListener () {
 		m_game2DView.AddEnemiesDeadListener(OnEnemyDead);
 		m_gameUIView.onClickPause += OnClickPause;
+		m_gameUIView.onPressShoot += OnPressShoot;
 	}
 
 	private void RemoveListener () {
 		m_game2DView.RemoveEnemiesDeadListener(OnEnemyDead);
 		m_gameUIView.onClickPause -= OnClickPause;
+		m_gameUIView.onPressShoot -= OnPressShoot;
 	}
 
 
@@ -63,6 +65,9 @@ public class GameState : BasicGameState {
 		Debug.Log ("Pause");
 		static_audiomanager.getInstance.play_sfx ("Audio/Sfx/Switch1", m_gameUIView.transform.position);
 		Game.instance.PushState (GameStateType.PAUSE);
+	}
+
+	void OnPressShoot(GameObject go, bool press){
 	}
 
 	private void StartStage (int stg) {

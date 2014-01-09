@@ -16,7 +16,7 @@ public class GameUIView : BasicView
 	private const string LBL_COIN = "AnchorTopRight/lblCoin";
 	private const string LBL_STAGE = "AnchorTop/lblStage";
 
-	public UIEventListener.VoidDelegate onClickShoot = null;
+	public UIEventListener.BoolDelegate onPressShoot = null;
 	public UIEventListener.VoidDelegate onClickAttack = null;
 	public UIEventListener.VoidDelegate onClickSwitch = null;
 	public UIEventListener.VoidDelegate onClickPause = null;
@@ -30,7 +30,7 @@ public class GameUIView : BasicView
 	}
 	
 	void Awake() {
-		UIEventListener.Get(GetChild(BTN_SHOOT)).onClick += OnClickPlay;
+		UIEventListener.Get(GetChild(BTN_SHOOT)).onPress += OnPressShoot;
 		UIEventListener.Get(GetChild(BTN_ATTACK)).onClick += OnClickAttack;
 		UIEventListener.Get(GetChild(BTN_SWITCH)).onClick += OnClickSwitch;
 		UIEventListener.Get(GetChild(BTN_PAUSE)).onClick += OnClickPause;
@@ -40,9 +40,9 @@ public class GameUIView : BasicView
 		lblCoin = GetChild (LBL_COIN).GetComponent<UILabel> ();
 	}
 
-	void OnClickPlay(GameObject go) {
-		if(onClickShoot != null)
-			onClickShoot(go);
+	void OnPressShoot(GameObject go, bool state) {
+		if(onPressShoot != null)
+			onPressShoot(go, state);
 	}
 
 	void OnClickAttack(GameObject go) {

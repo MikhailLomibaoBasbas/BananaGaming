@@ -683,15 +683,19 @@ public class iTween : MonoBehaviour{
 		}
 		
 		//set tempColor and base fromColor:
-		if(target.GetComponent(typeof(GUITexture))){
-			tempColor=fromColor=target.guiTexture.color;	
-		}else if(target.GetComponent(typeof(GUIText))){
-			tempColor=fromColor=target.guiText.material.color;
-		}else if(target.renderer){
-			tempColor=fromColor=target.renderer.material.color;
-		}else if(target.light){
-			tempColor=fromColor=target.light.color;
-		}
+				if (target.GetComponent (typeof(GUITexture))) {
+						tempColor = fromColor = target.guiTexture.color;	
+				} else if (target.GetComponent (typeof(GUIText))) {
+						tempColor = fromColor = target.guiText.material.color;
+				} else if (target.renderer) {
+						tempColor = fromColor = target.renderer.material.color;
+				} else if (target.light) {
+						tempColor = fromColor = target.light.color;
+				} else if (target.GetComponent (typeof(UILabel))) {
+						tempColor = fromColor = target.GetComponent<UILabel> ().color;
+				}else if (target.GetComponent (typeof(UISprite))) {
+						tempColor = fromColor = target.GetComponent<UISprite> ().color;
+				}
 		
 		//set augmented fromColor:
 		if(args.Contains("color")){
@@ -729,6 +733,10 @@ public class iTween : MonoBehaviour{
 			target.renderer.material.color=fromColor;
 		}else if(target.light){
 			target.light.color=fromColor;
+		}else if (target.GetComponent (typeof(UILabel))) {
+			target.GetComponent<UILabel> ().color=fromColor;
+		}else if (target.GetComponent (typeof(UISprite))) {
+			target.GetComponent<UISprite> ().color=fromColor;
 		}
 		
 		//set new color arg:
@@ -3326,7 +3334,13 @@ public class iTween : MonoBehaviour{
 		}else if(light){
 			colors = new Color[1,3];
 			colors[0,0] = colors[0,1] = light.color;	
-		}else{
+				}else if(GetComponent (typeof(UILabel))){	
+						colors = new Color[1,3];
+						colors[0,0] = colors[0,1] = GetComponent<UILabel>().color;	
+				}else if(GetComponent (typeof(UISprite))){	
+						colors = new Color[1,3];
+						colors[0,0] = colors[0,1] = GetComponent<UISprite>().color;	
+				}else{
 			colors = new Color[1,3]; //empty placeholder incase the GO is perhaps an empty holder or something similar
 		}
 		
@@ -4086,21 +4100,25 @@ public class iTween : MonoBehaviour{
 		*/
 		
 		//apply:
-		if(GetComponent(typeof(GUITexture))){
-			//guiTexture.color=colors[2];
-			guiTexture.color=colors[0,2];
-		}else if(GetComponent(typeof(GUIText))){
-			//guiText.material.color=colors[2];
-			guiText.material.color=colors[0,2];
-		}else if(renderer){
-			//renderer.material.color=colors[2];
-			for (int i = 0; i < colors.GetLength(0); i++) {
-				renderer.materials[i].SetColor(namedcolorvalue.ToString(),colors[i,2]);
-			}
-		}else if(light){
-			//light.color=colors[2];	
-			light.color=colors[0,2];
-		}
+				if (GetComponent (typeof(GUITexture))) {
+						//guiTexture.color=colors[2];
+						guiTexture.color = colors [0, 2];
+				} else if (GetComponent (typeof(GUIText))) {
+						//guiText.material.color=colors[2];
+						guiText.material.color = colors [0, 2];
+				} else if (renderer) {
+						//renderer.material.color=colors[2];
+						for (int i = 0; i < colors.GetLength (0); i++) {
+								renderer.materials [i].SetColor (namedcolorvalue.ToString (), colors [i, 2]);
+						}
+				} else if (light) {
+						//light.color=colors[2];	
+						light.color = colors [0, 2];
+				} else if (GetComponent (typeof(UILabel))) {
+						GetComponent<UILabel>().color = colors [0, 2];
+				}else if (GetComponent (typeof(UISprite))) {
+						GetComponent<UISprite>().color = colors [0, 2];
+				}
 		
 		//dial in:
 		if(percentage==1){
@@ -4118,6 +4136,10 @@ public class iTween : MonoBehaviour{
 			}else if(light){
 				//light.color=colors[1];	
 				light.color=colors[0,1];
+			}else if (GetComponent (typeof(UILabel))) {
+					GetComponent<UILabel>().color = colors[0,1];
+			}else if (GetComponent (typeof(UISprite))) {
+					GetComponent<UISprite>().color = colors[0,1];
 			}			
 		}
 	}	
@@ -4816,15 +4838,19 @@ public class iTween : MonoBehaviour{
 		}
 		
 		//init values:
-		if(target.GetComponent(typeof(GUITexture))){
-			colors[0] = colors[1] = target.guiTexture.color;
-		}else if(target.GetComponent(typeof(GUIText))){
-			colors[0] = colors[1] = target.guiText.material.color;
-		}else if(target.renderer){
-			colors[0] = colors[1] = target.renderer.material.color;
-		}else if(target.light){
-			colors[0] = colors[1] = target.light.color;	
-		}		
+				if (target.GetComponent (typeof(GUITexture))) {
+						colors [0] = colors [1] = target.guiTexture.color;
+				} else if (target.GetComponent (typeof(GUIText))) {
+						colors [0] = colors [1] = target.guiText.material.color;
+				} else if (target.renderer) {
+						colors [0] = colors [1] = target.renderer.material.color;
+				} else if (target.light) {
+						colors [0] = colors [1] = target.light.color;	
+				}else if(target.GetComponent (typeof(UILabel))){	
+						colors [0] = colors [1] = target.GetComponent<UILabel>().color;	
+				}else if(target.GetComponent (typeof(UISprite))){	
+						colors [0] = colors [1] = target.GetComponent<UISprite>().color;	
+				}
 		
 		//to values:
 		if (args.Contains("color")) {
@@ -4859,7 +4885,11 @@ public class iTween : MonoBehaviour{
 			target.renderer.material.color=colors[3];
 		}else if(target.light){
 			target.light.color=colors[3];	
-		}
+				}else if(target.GetComponent (typeof(UILabel))){	
+						target.GetComponent<UILabel>().color =colors[3];		
+				}else if(target.GetComponent (typeof(UISprite))){	
+						target.GetComponent<UISprite>().color =colors[3];	
+				}
 	}	
 	
 	/// <summary>
@@ -6040,6 +6070,8 @@ public class iTween : MonoBehaviour{
 	/// A <see cref="GameObject"/> for a reference to the CameraFade.
 	/// </returns>
 	public static GameObject CameraFadeAdd(){
+
+		Debug.LogError ("ASDAD");
 		if(cameraFade){
 			return null;
 		}else{			
