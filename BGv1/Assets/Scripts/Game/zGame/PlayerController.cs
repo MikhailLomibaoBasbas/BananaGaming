@@ -24,8 +24,7 @@ public class PlayerController : BasicCharacterController {
 	private CameraFollow _cameraFollow;
 
 
-	public Vector2 minClamp;
-	public Vector2 maxClamp;
+
 
 	private float _baseAttackTimeErrorMult = 1.5f;
 
@@ -56,6 +55,7 @@ public class PlayerController : BasicCharacterController {
 				_weaponControllerMap.Add(wp.name, wp);
 				//Debug.LogError(wp.name);
 			}
+
 		}
 		//_currentWeapon = _weaponControllerMap[currentWeaponType.ToString()];
 		InputController.instance.onNavMove += OnNavigationMove;
@@ -76,6 +76,7 @@ public class PlayerController : BasicCharacterController {
 
 	public override void OnUpdate () {
 		base.OnUpdate ();
+#if FALSE
 		if(Input.GetMouseButton(0)) {
 			if(!_onKnifeBATCooldown) {
 				_currentWeapon.Attack();
@@ -89,6 +90,7 @@ public class PlayerController : BasicCharacterController {
 				Invoke("DisableAttackCollider", _knifeBAT);
 			}
 		}
+
 		if(Input.GetMouseButtonDown(0)) {
 			_isAttackPressed = true;
 		}
@@ -98,10 +100,24 @@ public class PlayerController : BasicCharacterController {
 		if(Input.GetKeyDown(KeyCode.Q)) {
 			ChangeWeapon();
 		}
+#endif
+
 		OnKnifeBATCooldownUpdate();
-		UpdateClamp();
 	
 		UpdateMoveControls();
+	}
+
+	public void Attack (bool isPressed) {
+		if(isPressed) {
+			if(!_isAttackPressed)
+					_isAttackPressed = true;
+			if(!_onKnifeBATCooldown) {
+				_currentWeapon.Attack();
+			}
+		} else {
+			if(!_isAttackPressed)
+				_isAttackPressed = false;
+		}
 	}
 
 	private void UpdateMoveControls () {
@@ -146,12 +162,7 @@ public class PlayerController : BasicCharacterController {
 			OnCurrentAccelerationUpdate();
 		}
 	}
-
-	void UpdateClamp () {
-		Vector3 tempPos = transform.position;
-		transform.position = new Vector3(Mathf.Clamp(tempPos.x, minClamp.x, maxClamp.x),
-		                                 Mathf.Clamp(tempPos.y, minClamp.y, maxClamp.y));
-	}
+	
 
 	private void OnCurrentAccelerationUpdate () {
 		float accelerationCopy = _currentAcceleration;
@@ -215,6 +226,59 @@ public class PlayerController : BasicCharacterController {
 		}
 		_currentWeapon = _weaponControllerMap[currentWeaponType.ToString()];
 		_currentWeapon.Show();
+	}
+
+	private GameObject _exclamationPointGO = null;
+	public void NotifyDanger () {
+		StartCoroutine(StartNotifyDangerCoroutine());
+	}
+	private IEnumerator StartNotifyDangerCoroutine() {
+		if(_exclamationPointGO == null)
+			_exclamationPointGO = cachedTransform.FindChild("exclamationPoint").gameObject;
+		_exclamationPointGO.SetActive(true);
+		iTween.PunchScale(_exclamationPointGO, new Vector3(1.3f, 1.3f, 0), 0.5f);
+		yield return new WaitForSeconds(1.0f);
+		_exclamationPointGO.SetActive(false);
+	}
+
+	protected override void StartCollidedItemAction (GameObject go) {
+		Item item = go.GetComponent<Item>();
+		int val = item.GetValue(); // This is already with anim
+		float dur = item.duration;
+		switch(item.itemType) {
+		case Game.ItemType.Coin:
+
+			break;
+		case Game.ItemType.Haste:
+			Haste(dur, val);
+			break;
+		case Game.ItemType.Heal:
+			break;
+		case Game.ItemType.Rage:
+			break;
+		}
+	}
+
+	private void Haste (float dur, int val) {
+		StartCoroutine(HasteCoroutine(dur, val));
+	}
+	private IEnumerator HasteCoroutine (float dur, int val) {
+		moveSpeed += val;
+		yield return new WaitForSeconds(val);
+		moveSpeed += val;
+	}
+
+	private void Rage (float dur, int val) {
+		StartCoroutine(RageCoroutine(dur, val));
+	}
+	private IEnumerator RageCoroutine (float dur, int val) {
+		foreach(WeaponController wc in _weaponControllerMap.Values) {
+			wc.AddDamage(val);
+		}
+		yield return new WaitForSeconds(dur);
+		foreach(WeaponController wc in _weaponControllerMap.Values) {
+			wc.AddDamage(-val);
+		}
 	}
 
 

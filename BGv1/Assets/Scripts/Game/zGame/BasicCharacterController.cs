@@ -80,7 +80,8 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 
 	private float _attackDelayMult = 0.63f;
 
-
+	public Vector2 minClamp;
+	public Vector2 maxClamp;
 
 	#region Computed Values Getters
 	public float getTranslateUnitsPerSecond {
@@ -165,6 +166,7 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 	}
 	public virtual void OnUpdate () {	
 		cachedDeltaTime = Time.deltaTime;
+		UpdateClamp();
 		if(attackEnabled) {
 			if(isAttacking) {
 				UpdateAttackAction();
@@ -187,36 +189,44 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 			UpdateIdleAction();
 			return;
 		}
-
 		UpdateMoveAction();
 
 	}
 
+	void UpdateClamp () {
+		Vector3 tempPos = transform.position;
+		transform.position = new Vector3(Mathf.Clamp(tempPos.x, minClamp.x, maxClamp.x),
+		                                 Mathf.Clamp(tempPos.y, minClamp.y, maxClamp.y));
+	}
 
 	// Hurt Checker
-	void OnTriggerEnter2D (Collider2D collider) { // If this does not work. Try OnCollisionEnter2D(Collision2D collision)
-		GameObject colGO = collider.gameObject;
-		if(colGO.layer == hurtTrigger) {
-			int tempDmg = colGO.GetComponent<Projectile>().GetDamage();
-			health -= tempDmg;
-		
-			DoCharacterState( (health > 0) ? CharacterState.Hurt: CharacterState.Dead);
-			cachedTransform.position -= Vector3.right * (collider.transform.position - cachedTransform.position).normalized.x * flinchForce;
-			if(hasHurtInvulnerability)
-				Physics2D.IgnoreLayerCollision(hurtTrigger, gameObject.layer, true);
-			//colGO.SetActive(false);
-		} 
+	void OnTriggerEnter2D (Collider2D col2d) { // If this does not work. Try OnCollisionEnter2D(Collision2D collision)
+		CheckCollision(col2d.gameObject);
 	}
 	void OnCollisionEnter2D(Collision2D collision) {
-		GameObject colGO = collision.gameObject;
+		CheckCollision(collision.gameObject);
+	}
+	private void CheckCollision(GameObject colGO) {
 		if(colGO.layer == hurtTrigger) {
-			int tempDmg = colGO.GetComponent<Projectile>().GetDamage();
-			health -= tempDmg;
-			DoCharacterState( (health > 0) ? CharacterState.Hurt: CharacterState.Dead);
-			if(hasHurtInvulnerability)
-				Physics2D.IgnoreLayerCollision(hurtTrigger, gameObject.layer, true);
-			//colGO.SetActive(false);
+			StartCollideHurtAction(colGO);
 		}
+		switch(colGO.layer) {
+			case (int)Game.LayerType.Item:
+				StartCollidedItemAction(colGO);
+				break;
+		}
+	}
+	protected virtual void StartCollideHurtAction (GameObject go) {
+		Projectile tProj = go.GetComponent<Projectile>();
+		int tempDmg = tProj.GetDamage(go.transform);
+		health -= tempDmg;
+		
+		DoCharacterState( (health > 0) ? CharacterState.Hurt: CharacterState.Dead);
+		cachedTransform.position -= Vector3.right * (go.transform.position - cachedTransform.position).normalized.x * flinchForce;
+		if(hasHurtInvulnerability)
+			Physics2D.IgnoreLayerCollision(hurtTrigger, gameObject.layer, true);
+	}
+	protected virtual void StartCollidedItemAction (GameObject go) {
 	}
 	// End Hurt Check
 

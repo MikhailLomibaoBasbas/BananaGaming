@@ -230,6 +230,7 @@ public static class StaticManager_Helper {
 		for(int i = 0; i < (toNum - fromNum) + 1; i++) {
 			numbers.Add(fromNum + i);
 		}
+		//Debug.LogWarning(fromNum + " " + toNum);
 		int[] resultNumbers = new int[count];
 		for(int i = 0; i < count; i++) {
 			int randIndex = Random.Range(0, numbers.Count);

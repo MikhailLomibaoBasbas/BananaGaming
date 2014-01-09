@@ -13,8 +13,6 @@ public class Game2DView : Basic2DView {
 
 	private CameraFollow _cameraFollow;
 	public CameraFollow getCameraFollow {get {return _cameraFollow;}}
-
-
 	
 	private int enemyCountPerType = 20;
 	
@@ -47,8 +45,8 @@ public class Game2DView : Basic2DView {
 				ecCopy.cachedTransform.localPosition = ecCopy2.cachedTransform.localPosition = Vector3.zero;
 				_enemyControllers1.Add(ecCopy);
 				_enemyControllers2.Add(ecCopy2);
-				ecCopy.originalTarget = ecCopy2.originalTarget = getTowerTrans;
-				ecCopy.setCurrentTarget = ecCopy2.setCurrentTarget = getTowerTrans;
+				//ecCopy.originalTarget = ecCopy2.originalTarget = getTowerTrans;
+				//ecCopy.setCurrentTarget = ecCopy2.setCurrentTarget = getTowerTrans;
 			}
 			GameObject.Destroy(ec.gameObject);
 		}
@@ -120,35 +118,44 @@ public class Game2DView : Basic2DView {
 
 	public void SummonEnemyAtContainer1(EnemyController.EnemyType type, int count) {
 		int i = 0;
-		int[] randIndexPos = StaticManager_Helper.GetRandomNonRepeatingNumbers(count, -4, 4);
+		int[] randIndexPos = StaticManager_Helper.GetRandomNonRepeatingNumbers(count, -count/ 2, (count / 2) + (count % 2 == 1? 1:0));
 		int step = 7;
+		bool foundOne = false;
 		foreach(EnemyController ec in _enemyControllers1) {
-			if(i >= count)
+			if(i >= count) {
+				foundOne = true;
 				break;
+			}
 			if(ec.enemyType == type) {
 				if(!ec.enabled) {
 					ec.setActiveInScene(true, Vector3.up * (3 * Screen.height / 2) / step * randIndexPos[i], false);
 					i++;
 				}
 			}
-
 		}
+		if(!foundOne)
+			Debug.LogError("WHY");
 	}
-
 	public void SummonEnemyAtContainer2(EnemyController.EnemyType type, int count) {
 		int i = 0;
-		int[] randIndexPos = StaticManager_Helper.GetRandomNonRepeatingNumbers(count, -4, 4);
+		int[] randIndexPos = StaticManager_Helper.GetRandomNonRepeatingNumbers(count, -count/ 2, (count / 2) + (count % 2 == 1? 1:0));
 		int step = 9;
+		bool foundOne = false;
 		foreach(EnemyController ec in _enemyControllers2) {
+			if(i >= count) {
+				foundOne = true;
+				break;
+			}
 			if(ec.enemyType == type) {
 				if(!ec.enabled) {
 					ec.setActiveInScene(true, Vector3.up * (3 * Screen.height / 2) / step * randIndexPos[i], false);
 					i++;
 				}
 			}
-			if(i == count)
-				break;
+
 		}
+		if(!foundOne)
+			Debug.LogError("WHY");
 	}
 
 	public void RemoveAllEnemiesInScene() {

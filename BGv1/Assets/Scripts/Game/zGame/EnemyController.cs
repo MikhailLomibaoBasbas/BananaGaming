@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+﻿ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -15,7 +15,7 @@ public class EnemyController : BasicCharacterController {
 	}
 
 	private static string GetEnemyResourcePath(EnemyType type) {
-		return "Prefabs/2D/Enemy/Enemy" + type.ToString();
+		return "Prefabs/2D/_Enemy/Enemy" + type.ToString();
 	}
 	public static EnemyController Create (EnemyType type, GameObject parentObj) {
 		GameObject enemyGO = StaticManager_Helper.CreatePrefab(GetEnemyResourcePath(type), parentObj);
@@ -45,19 +45,22 @@ public class EnemyController : BasicCharacterController {
 			_currentTarget = value;
 		}
 	}
+	protected Vector3 _randomTargetDirectionNormalized;
+	private Vector3 _randomMoveDirBeforeTheOrigTargetDirNormalized;
 
 	private int _originalHealth;
 	public int getOriginalHealth {get{return _originalHealth;}}
 	private float _originalMoveSpeed;
 	public float getOriginalMoveSpeed {get{return _originalMoveSpeed;}}
 
-
-
+	
 	public EnemyType enemyType;
 	protected SpriteRenderer _spriteRenderer;
 
 	private CircleCollider2D _attackCircleCollider;
 	private EnemyProjectile _enemyProjectile;
+
+	private BoxCollider2D _boxCollider2D;
 
 
 	private float getTargetDistance {get {return Vector3.Distance(_currentTarget.position, cachedTransform.position);}}
@@ -65,17 +68,32 @@ public class EnemyController : BasicCharacterController {
 
 	public delegate void OnEnemyDeadFinished (int score);
 	public event OnEnemyDeadFinished onEnemyDeadFinished = null;
+	
+	private PlayerController _playerControllerInstance;
+
 
 	private bool _canMove = false;
+	public bool canMove {
+		get {
+			return _canMove;
+		}
+		set {
+			_canMove = value;
+			_currentMoveDurTime = 0;
+			//_currentMoveCoolTime = 0;
+
+		}
+	}
 
 	public override void Init () {
 		//Before Base Init Statements
 		//originalTarget = PlayerController.GetInstance.cachedTransform;
-		_currentTarget = originalTarget;
+		_boxCollider2D = collider2D as BoxCollider2D;
+		_playerControllerInstance = PlayerController.GetInstance;
+		InitEnemyTypes();
 		_originalHealth = health;
 		_originalMoveSpeed = moveSpeed;
 		base.Init ();
-
 		//After Base Init Statements
 		//_attackCircleCollider = transform.FindChild("attackCollider").GetComponent<CircleCollider2D>();
 		//_attackCircleCollider.enabled = false;
@@ -88,50 +106,80 @@ public class EnemyController : BasicCharacterController {
 		//move();
 	}
 
-	public void setActiveInScene (bool flag, Vector3 pos = default(Vector3), bool isGlobal = true, bool withDelay = true) {
-		float delay = (withDelay) ? Random.Range(0.5f, 1.0f): 0.1f;
-		//Debug.LogError(Time.time + " " + delay);
-		isActiveInGame = flag;
-		enabled = flag;
-		if(flag) {
-			health = _originalHealth;
-			gameObject.SetActive(flag);
-			if(pos != default(Vector3))
-				cachedTransform.SetPosition(pos, isGlobal);
-			iTween.ColorTo(gameObject, Color.white, delay);
-			Invoke("PostSetActiveScene_True", delay);
-		} else {
-			_canMove = false;
-			cachedCollider2D.enabled = false;
-			iTween.ColorTo(gameObject, Color.clear, delay);
-			Invoke("PostSetActiveInScene_False", delay);
+	private void InitEnemyTypes () {
+		//Debug.LogError("fds");
+		switch(enemyType) {
+		case EnemyType.Normal:
+		case EnemyType.Stealth:
+			_distanceThreshold = 250f;
+			originalTarget = _currentTarget = Tower.GetInstance.transform;
+			break;
+		case EnemyType.Aggressive:
+			originalTarget =  _currentTarget = _playerControllerInstance.cachedTransform;
+			break;
+		case EnemyType.Jumper:
+			_jumperAnimMashup = StaticAnimationsManager.getInstance.getAvailableAnimMashUp;
+			originalTarget =  _currentTarget = null;//PlayerController.GetInstance.cachedTransform;
+			break;
 		}
 	}
-	private void PostSetActiveScene_True() {
-		//Debug.LogError("fds");
-		_canMove = true;
-		cachedCollider2D.enabled  = true;
+
+
+	public void  setActiveInScene (bool flag, Vector3 pos = default(Vector3), bool isGlobal = true, bool withDelay = true) {
+		float delay = (withDelay) ? Random.Range(0.5f, 1.0f): 0.1f;
+		if(flag) {
+			_boxCollider2D.enabled = true;
+			enabled = true;
+			health = _originalHealth;
+			gameObject.SetActive(true);
+			if(pos != default(Vector3))
+				cachedTransform.SetPosition(pos, isGlobal);
+			Invoke("PorstSetActiveInScene_True", delay);
+		} else {
+			idle();
+			cachedCollider2D.enabled = false;
+			Invoke("PorstSetActiveInScene_False", delay);
+		}
+		//static_coroutine.getInstance.DoReflection(this, "PostSetActiveScene", new object[1]{flag}, delay);
+	}
+	private void PorstSetActiveInScene_True () {
+		cachedCollider2D.enabled = true;
 		move();
 	}
-	private void PostSetActiveInScene_False() {
-		gameObject.SetActive(false);
+	private void PorstSetActiveInScene_False () {
+		enabled = false;
 		cachedTransform.localPosition = Vector3.zero;
+		gameObject.SetActive(false);
 	}
 
 
 	private void move () {
+		canMove = true;
 		DoCharacterState(CharacterState.Move);
 		animator.SetFloat("Acceleration", 1f);
+		if(_currentTarget != null) {
+			_randomMoveDirBeforeTheOrigTargetDirNormalized = (_currentTarget.position - cachedTransform.position);
+		} else {
+			_randomMoveDirBeforeTheOrigTargetDirNormalized = _randomTargetDirectionNormalized;
+		}
+		float xRandPos = _randomMoveDirBeforeTheOrigTargetDirNormalized.x * 0.8f;
+		float yRandPos = _randomMoveDirBeforeTheOrigTargetDirNormalized.y * 0.8f;
+		//Debug.LogError(_randomMoveDirBeforeTheOrigTargetDirNormalized);
+		_randomMoveDirBeforeTheOrigTargetDirNormalized.x += Random.Range(-xRandPos, xRandPos);
+		_randomMoveDirBeforeTheOrigTargetDirNormalized.y += Random.Range(-yRandPos, yRandPos);
+		_randomMoveDirBeforeTheOrigTargetDirNormalized.Normalize();
+		Debug.LogWarning(_randomMoveDirBeforeTheOrigTargetDirNormalized);
 	}  
 
 	private void idle () {
 		animator.SetFloat("Acceleration", 0);
 		DoCharacterState(CharacterState.Idle);
-		_currentMoveDurTime = 0;
+		canMove = false;
 	}
 
 	private void attack () {
-		cachedTransform.localScale = new Vector3(_currentTarget.position.x < cachedTransform.position.x ? -1f: 1f, 1f ,1f);
+		if(_currentTarget != null)
+			cachedTransform.localScale =  new Vector3(_currentTarget.position.x < cachedTransform.position.x ? -1f: 1f, 1f ,1f);
 		DoCharacterState(CharacterState.Attack);
 		_enemyProjectile.Show(true);
 		//_attackCircleCollider.enabled = true;
@@ -141,27 +189,40 @@ public class EnemyController : BasicCharacterController {
 
 	public override void OnUpdate () {
 		base.OnUpdate ();
-		if(!isHurt && !isDead)
+		if(!isHurt && !isDead) {
 			UpdateMoveCooldownAction();
+
+		}
 		UpdateAttackCooldownAction();
+		//Debug.LogWarning(_currentMoveCoolTime);
 		UpdateEnemyBehaviour();
 
-		if((getTargetDistance < _distanceThreshold)) {
-			if(!_isAttackOnCooldown) {
-				attack();
+		if(_currentTarget != null) {
+			//Debug.LogWarning(getTargetDistance);
+			if((getTargetDistance < _distanceThreshold)) {
+				if(!_isAttackOnCooldown) {
+					attack();
+				}
 			}
 		}
 
 	}
 
 	private void UpdateMoveCooldownAction () {
-		if(getTargetDistance < _distanceThreshold )
-			return;
-		_currentMoveCoolTime += cachedDeltaTime;
+		if(_currentTarget != null) {
+			if(getTargetDistance < _distanceThreshold)
+				return;
+		}
 		if(_currentMoveCoolTime < moveCooldown) {
+			_currentMoveCoolTime += cachedDeltaTime;
 		} else {
-			move();
+			if(_currentTarget == null) {
+				_randomTargetDirectionNormalized = new Vector3(Random.Range(-400, 400), Random.Range(-400, 400));
+				//Debug.LogError(_randomTargetDirection.x - cachedTransform.position.x);
+				//Debug.LogError(_randomTargetDirection.y - cachedTransform.position.y);
+			}
 			_currentMoveCoolTime = 0;
+			move();
 		}
 	}
 
@@ -177,11 +238,16 @@ public class EnemyController : BasicCharacterController {
 	}
 
 	public override void UpdateMoveAction () {
-		if(!_canMove)
+		if(!canMove)
 			return;
 		_currentMoveDurTime += cachedDeltaTime;
 		if(_currentMoveDurTime < moveDuration) {
-			Vector3 normDir = (_currentTarget.position - cachedTransform.position).normalized;
+			Vector3 normDir = (_currentTarget != null) ? (_currentTarget.position - cachedTransform.position).normalized:
+				_randomTargetDirectionNormalized.normalized;
+			if(_currentMoveDurTime < (moveDuration / 2f)) {
+				normDir = _randomMoveDirBeforeTheOrigTargetDirNormalized.normalized;
+			}
+
 			cachedTransform.position += normDir * moveSpeed * cachedDeltaTime;
 			cachedTransform.localScale = new Vector3( ((normDir.x > 0) ? 1: -1), 1, 1);
 		} else {
@@ -196,6 +262,7 @@ public class EnemyController : BasicCharacterController {
 		case CharacterState.Hurt:
 			break;
 		case CharacterState.Attack:
+			_boxCollider2D.enabled = false;
 			_isAttackOnCooldown = true;
 			break;
 		}
@@ -235,26 +302,42 @@ public class EnemyController : BasicCharacterController {
 		}
 	}
 
+	private bool _aggressiveOnDistanceThreshold = false;
 	private void UpdateAggressiveEnemy () {
-		if((Vector3.Distance(cachedTransform.position, PlayerController.GetInstance.cachedTransform.position)) < 320f) {
-			if(_currentTarget != PlayerController.GetInstance.cachedTransform) {
-				_currentTarget = PlayerController.GetInstance.cachedTransform;
-				moveSpeed *= 2f;
-				UpdateCharacterStats();
+		if(!_aggressiveOnDistanceThreshold) {
+			if((Vector3.Distance(cachedTransform.position, _currentTarget.position/*_playerControllerInstance.cachedTransform.position*/)) < 320f) {
+				StartCoroutine(StartAggressiveBuffUpAnimCoroutine());
+				_aggressiveOnDistanceThreshold = true;
 			}
-
 		} else {
-			if(_currentTarget != originalTarget) {
-				_currentTarget = originalTarget;
-				moveSpeed /= 2f;
-				UpdateCharacterStats();
+			if((Vector3.Distance(cachedTransform.position, _currentTarget.position/*_playerControllerInstance.cachedTransform.position*/)) > 640f) {
+				StartCoroutine(StartAggressiveDeBuffUpAnimCoroutine());
+				_aggressiveOnDistanceThreshold = false;
 			}
 		}
 	}
+	private IEnumerator StartAggressiveBuffUpAnimCoroutine () {
+		idle();
+		iTween.PunchScale(gameObject, new Vector3(1.5f, 1.5f, 1), 0.5f);
+		yield return new WaitForSeconds(0.5f);
+		cachedTransform.localScale = new Vector3(1.5f, 1.5f, 1);
+		move();
+		moveSpeed *= 1.5f;
+		UpdateCharacterStats();
+	}
+	private IEnumerator StartAggressiveDeBuffUpAnimCoroutine () {
+		iTween.PunchScale(gameObject, new Vector3(0.8f, 0.8f, 1), 0.5f);
+		idle();
+		yield return new WaitForSeconds(0.5f);
+		move();
+		cachedTransform.localScale = new Vector3(1f, 1f, 1);
+		moveSpeed /= 1.5f;
+		UpdateCharacterStats();
+	}
 
 	private void UpdateStealthEnemy () {
-		float stealthThreshold = 600f;
-		float distance = (Vector3.Distance(cachedTransform.position, PlayerController.GetInstance.cachedTransform.position));
+		float stealthThreshold = 500f;
+		float distance = (Vector3.Distance(cachedTransform.position, _playerControllerInstance.cachedTransform.position));
 		float result =  distance / stealthThreshold > 1 ? 1: (distance / stealthThreshold) - 0.5f;
 		if(result < 0)
 			result = 0;
@@ -262,31 +345,52 @@ public class EnemyController : BasicCharacterController {
 		                                  result);
 	}
 
-	bool didJump = false;
+	AnimationsMashUp _jumperAnimMashup; 
+	private bool _canJump = false;
+	private float _jumpCooldown = 7f;
+	private float _jumpCurrTime;
 	private void UpdateJumper () {
-		float jumpThreshold = 800;
-		float distance = (Vector3.Distance(cachedTransform.position, PlayerController.GetInstance.cachedTransform.position));
-		if(distance < jumpThreshold) {
-			if(didJump)
-				return;
-			DoCharacterState(CharacterState.Attack);
-			didJump = true;
-			(collider2D as BoxCollider2D).enabled = false;
-			AnimationsMashUp animMashup = StaticAnimationsManager.getInstance.getAvailableAnimMashUp;
-			animMashup.target = cachedTransform;
-			animMashup.animationTime = 0.8f;
-			animMashup.setBezierAnim (true, 
-			                          new List<Vector2>(){
-				new Vector2(cachedTransform.position.x, cachedTransform.position.y),
-				new Vector2(Random.Range(PlayerController.GetInstance.cachedTransform.position.x, cachedTransform.position.x),
-				           cachedTransform.position.y + 200f),
-				new Vector2(PlayerController.GetInstance.cachedTransform.position.x, PlayerController.GetInstance.cachedTransform.position.y)
-					
-			});
-			animMashup.start ();
-			Invoke("JumpFinished", animMashup.animationTime);
+		float jumpThreshold = 1000;
+		float distance = (Vector3.Distance(cachedTransform.position, _playerControllerInstance.cachedTransform.position));
+		if(_canJump) {
+			if(distance < jumpThreshold) {
+				StartCoroutine(StartJumpCoroutine());
+			}
+		} else {
+			_jumpCurrTime += cachedDeltaTime;
+			if(_jumpCurrTime > _jumpCooldown) {
+				_canJump = true;
+				_jumpCurrTime = 0f;
+			}
 		}
 	}
-	private void JumpFinished(){(collider2D as BoxCollider2D).enabled = true;}
+	private IEnumerator StartJumpCoroutine () {
+		_canJump = false;
+		idle();
+		DoCharacterState(CharacterState.Idle);
+		//canMove = false;
+		_playerControllerInstance.NotifyDanger();
+		yield return new WaitForSeconds(1.0f);
+		_boxCollider2D.enabled = false;
+		attack();
+
+		_jumperAnimMashup.target = cachedTransform;
+		_jumperAnimMashup.animationTime = 0.5f;
+		_jumperAnimMashup.setBezierAnim (true, 
+		                          new List<Vector2>(){
+			new Vector2(cachedTransform.position.x, cachedTransform.position.y),
+			new Vector2(Random.Range(_playerControllerInstance.cachedTransform.position.x, cachedTransform.position.x),
+			            _playerControllerInstance.cachedTransform.position.y + 300f),
+						_playerControllerInstance.cachedTransform.position
+				
+		});
+		cachedTransform.localScale = new Vector3(_playerControllerInstance.cachedTransform.position.x < cachedTransform.position.x ? -1f: 1f, 
+		                                         1f, 1f);
+		_jumperAnimMashup.start ();
+		yield return new WaitForSeconds(_jumperAnimMashup.animationTime);
+		_boxCollider2D.enabled = true;
+		move();
+
+	}
 	#endregion
 }
