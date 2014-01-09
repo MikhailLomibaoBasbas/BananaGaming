@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+﻿﻿using UnityEngine;
 using System.Collections;
 
 public class GameState : BasicGameState {
@@ -21,7 +21,8 @@ public class GameState : BasicGameState {
 		viewUI = GameUIView.Create ();
 		m_game2DView = (Game2DView) view2D;
 		m_gameUIView = (GameUIView) viewUI;
-
+		m_game2DView.getPlayerController.SetCharacterStateFinishedEventListener (PlayerStateFinished);
+		m_game2DView.GetTower.AddTowerDeadListener (OnTowerHit);
 		_stageManager = new StageManager();
 		static_audiomanager.getInstance.play_bgm ("Audio/Bgm/InGame");
 		//AudioManager.GetInstance.PlayRandomBGMCombination();
@@ -52,6 +53,8 @@ public class GameState : BasicGameState {
 	}
 
 	public override void OnEnd () {
+		m_game2DView.getPlayerController.RemoveCharacterStateListeners ();
+		RemoveListener ();
 		base.OnEnd ();
 	}
 
@@ -67,6 +70,9 @@ public class GameState : BasicGameState {
 		m_gameUIView.onClickPause -= OnClickPause;
 		m_gameUIView.onPressShoot -= OnPressShoot;
 		m_gameUIView.onClickSwitch -= OnClickSwitch;
+
+		//m_game2DView.getPlayerController.SetCharacterStateFinishedEventListener (PlayerStateFinished);
+		m_game2DView.GetTower.RemoveListeners ();
 	}
 
 
@@ -141,7 +147,20 @@ public class GameState : BasicGameState {
 		}
 	}
 
+	public void PlayerStateFinished(BasicCharacterController.CharacterState state, BasicCharacterController ins) {
+		switch (state) {
+		case BasicCharacterController.CharacterState.Hurt:
+			//ins.health
+			break;
+		case BasicCharacterController.CharacterState.Dead:
+			break;
+
+		}
+	}
 
 
+	public void OnTowerHit (int health) {
+		m_gameUIView.setPlayerHealth (health);
+	}
 
 }

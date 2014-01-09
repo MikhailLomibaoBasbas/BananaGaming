@@ -78,7 +78,7 @@ public class GameUIView : BasicView
 
 	public void setTowerHealth(int damage){
 		int totalTowerHealth = 100;
-		float sliderVal =  totalTowerHealth - damage / totalTowerHealth; 
+		float sliderVal =  damage / totalTowerHealth; 
 
 		healthSlider.sliderValue = sliderVal;
 	}

@@ -12,6 +12,9 @@ public class Tower : MonoBehaviour {
 		}
 	}
 
+	public delegate void OnTowerHit (int health);
+	public event OnTowerHit onTowerHit;
+
 	public enum Features {
 		Fortify,
 		ReplenishHealth,
@@ -25,24 +28,43 @@ public class Tower : MonoBehaviour {
 
 	void Awake () {
 		_spriteRenderer = GetComponent<SpriteRenderer>();
+		_hurtTrigger = (int)hurtTriggerType;
 	}
 
 	private void Init () {
 	}
 
+	public void AddTowerDeadListener (OnTowerHit listener) {
+		if(onTowerHit != null)
+			onTowerHit = null;
+		onTowerHit += listener;
+	}
 
+	public void RemoveListeners () {
+		onTowerHit = null;
+	}
+	
 	void OnTriggerEnter2D(Collider2D col) {
-		Debug.LogError(col);
-		if(col.gameObject.layer == _hurtTrigger) {
-			health -= col.GetComponent<EnemyProjectile>().GetDamage(null);
-			StopAllCoroutines();
-			StartCoroutine(DamageAnimCoroutine());
+		Debug.LogError (col.gameObject.layer + " " + hurtTriggerType);
+		Damage (col.gameObject);
+	}
+
+	private void Damage (GameObject go) {
+		if(go.layer == _hurtTrigger) {
+			health -= go.GetComponent<EnemyProjectile>().GetDamage(null);
+			if (health > 0) {
+				StopAllCoroutines ();
+				StartCoroutine (DamageAnimCoroutine ());
+			}
+			Debug.LogError("Col " + go + "  health " + health);
+			if(onTowerHit != null)
+				onTowerHit (health);
 		}
 	}
 
 	private IEnumerator DamageAnimCoroutine () {
 		_spriteRenderer.color = Color.red;
-		yield return new WaitForSeconds(1.0f);
+		yield return new WaitForSeconds(0.1f);
 		_spriteRenderer.color = Color.white;
 	}
 

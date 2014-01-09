@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+﻿﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -60,7 +60,7 @@ public class PlayerController : BasicCharacterController {
 		//_currentWeapon = _weaponControllerMap[currentWeaponType.ToString()];
 		InputController.instance.onNavMove += OnNavigationMove;
 		currentWeaponType = Game.instance.weaponInitial;
-		Debug.LogError ("Current weapon type : " + currentWeaponType);
+		//Debug.LogError ("Current weapon type : " + currentWeaponType);
 		ChangeWeapon(currentWeaponType);
 	}
 
