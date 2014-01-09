@@ -164,5 +164,31 @@ public class Game2DView : Basic2DView {
 			_enemyControllers2[i].setActiveInScene(false);
 		}
 	}
+		List<EnemyController> _enemiesDisabledOnPause = new List<EnemyController>();
+		public void OnPauseCalled () {
+				getPlayerController.enabled = false;
+				for (int i = 0; i < _enemyControllers1.Count; i++) {
+						EnemyController ec = _enemyControllers1 [i];
+						if (ec.enabled) {
+								ec.setActiveInScene (false);
+								_enemiesDisabledOnPause.Add (ec);
+						}
+						ec = _enemyControllers2 [i];
+						if (ec.enabled) {
+								ec.setActiveInScene (false);
+								_enemiesDisabledOnPause.Add (ec);
+						}
+				}
+		}
+
+		public void OnResumeCalled () {
+				getPlayerController.enabled = true;
+				for (int i = 0; i < _enemiesDisabledOnPause.Count; i++) {
+						_enemiesDisabledOnPause [i].setActiveInScene(true);
+
+				}
+				_enemiesDisabledOnPause.Clear ();
+		}
+
 
 }

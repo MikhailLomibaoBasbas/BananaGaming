@@ -40,10 +40,14 @@ public class GameState : BasicGameState {
 	}
 
 	public override void OnPause () {
+		m_game2DView.OnPauseCalled ();
+				CancelInvoke ("SummonEnemies");
 		base.OnPause ();
 	}
 
 	public override void OnResume () {
+				m_game2DView.OnResumeCalled ();
+				Invoke ("SummonEnemies", _stageManager.GetRandomDelayEnemyWave);
 		base.OnResume ();
 	}
 

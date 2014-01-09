@@ -1,4 +1,4 @@
-﻿﻿using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -67,8 +67,8 @@ public class InputController : MonoBehaviour {
 						//posGO.x = Mathf.Clamp (posGO.x, -40f, 40f);
 						//posGO.y = Mathf.Clamp (posGO.y, -40f, 40f);
 						Vector3 dir = posGO - Vector3.zero;
-						if (dir.magnitude > 40)
-								posGO = dir.normalized * 40;
+						if (dir.magnitude > 100)
+								posGO = dir.normalized * 100;
 
 
 						go.transform.localPosition = posGO;

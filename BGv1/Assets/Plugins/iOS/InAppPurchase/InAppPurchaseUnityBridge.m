@@ -23,3 +23,15 @@ void _purchaseProductWithId(const char* productId) {
         [[MonoUtility getInstance] invokeMethod:callback withArgs:args];
     }];
 }
+
+void _restorePurchasedItems(){
+    [[PurchasingManager sharedInstance] restorePurchasedItems: ^(NSString* productIds, BOOL result, NSString* errors) {
+        MonoObject* methodName = [[MonoUtility getInstance] createMonoString:"_restorePurchasedItems"];
+        MonoObject* message = [[MonoUtility getInstance] createMonoString:[[NSString stringWithFormat:@"%@%@%@", productIds, MESSAGE_SEPARATOR, errors] UTF8String]];
+        BOOL success = result;
+        void* args[3] = {methodName, &success, message};
+        MonoMethod* callback = [[MonoUtility getInstance] getMethod:PURCHASING_UNLOCK_METHOD_NAME];
+        [[MonoUtility getInstance] invokeMethod:callback withArgs:args];
+    }];
+}
+
