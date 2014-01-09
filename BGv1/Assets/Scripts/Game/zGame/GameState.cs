@@ -23,17 +23,17 @@ public class GameState : BasicGameState {
 		m_gameUIView = (GameUIView) viewUI;
 
 		_stageManager = new StageManager();
-		//static_audiomanager.getInstance.play_bgm ("Audio/Bgm/InGame");
-		AudioManager.GetInstance.PlayRandomBGMCombination();
-		//StartStage(_stage = 10);
-		Invoke("Test", 0.1f);
+		static_audiomanager.getInstance.play_bgm ("Audio/Bgm/InGame");
+		//AudioManager.GetInstance.PlayRandomBGMCombination();
+		StartStage(_stage = 1);
+		//Invoke("Test", 0.1f);
 		AddListener();
 		base.OnStart ();
 	}
 	private void Test () {
 		//m_game2DView.SummonEnemyAtContainer1(EnemyController.EnemyType.Jumper, 1);
 		//m_game2DView.SummonEnemyAtContainer2(EnemyController.EnemyType.Aggressive, 1);
-		m_game2DView.SummonEnemyAtContainer1(EnemyController.EnemyType.Normal, 20);
+		//m_game2DView.SummonEnemyAtContainer1(EnemyController.EnemyType.Normal, 20);
 	}
 
 	public override void OnUpdate () {

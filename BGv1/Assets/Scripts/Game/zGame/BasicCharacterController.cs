@@ -211,13 +211,16 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 			StartCollideHurtAction(colGO);
 		}
 		switch(colGO.layer) {
-			case (int)Game.LayerType.Item:
+		case (int)Game.LayerType.Item:
+			//Debug.LogError ("ss");
 				StartCollidedItemAction(colGO);
 				break;
 		}
 	}
 	protected virtual void StartCollideHurtAction (GameObject go) {
 		Projectile tProj = go.GetComponent<Projectile>();
+		if (tProj == null)
+			tProj = go.transform.parent.GetComponent<Projectile> ();
 		int tempDmg = tProj.GetDamage(go.transform);
 		health -= tempDmg;
 		

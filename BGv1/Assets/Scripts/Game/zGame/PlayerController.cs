@@ -24,8 +24,6 @@ public class PlayerController : BasicCharacterController {
 	private CameraFollow _cameraFollow;
 
 
-
-
 	private float _baseAttackTimeErrorMult = 1.5f;
 
 	private bool _isAttackPressed;
@@ -76,7 +74,7 @@ public class PlayerController : BasicCharacterController {
 
 	public override void OnUpdate () {
 		base.OnUpdate ();
-#if FALSE
+#if UNITY_EDITOR
 		if(Input.GetMouseButton(0)) {
 			if(!_onKnifeBATCooldown) {
 				_currentWeapon.Attack();
@@ -246,15 +244,17 @@ public class PlayerController : BasicCharacterController {
 		int val = item.GetValue(); // This is already with anim
 		float dur = item.duration;
 		switch(item.itemType) {
-		case Game.ItemType.Coin:
-
+		case Game.ItemType.Silvercoin:
+		case Game.ItemType.Goldcoin:
 			break;
 		case Game.ItemType.Haste:
 			Haste(dur, val);
 			break;
 		case Game.ItemType.Heal:
+			health += val;
 			break;
 		case Game.ItemType.Rage:
+			Rage(dur, val);
 			break;
 		}
 	}
@@ -280,6 +280,8 @@ public class PlayerController : BasicCharacterController {
 			wc.AddDamage(-val);
 		}
 	}
+
+
 
 
 

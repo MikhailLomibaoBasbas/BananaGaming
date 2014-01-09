@@ -32,7 +32,7 @@ public class Tower : MonoBehaviour {
 
 
 	void OnTriggerEnter2D(Collider2D col) {
-		Debug.LogError(col);
+		Debug.LogError(col.gameObject.layer);
 		if(col.gameObject.layer == _hurtTrigger) {
 			health -= col.GetComponent<EnemyProjectile>().GetDamage(null);
 			StopAllCoroutines();

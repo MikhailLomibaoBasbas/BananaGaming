@@ -71,6 +71,8 @@ public class EnemyController : BasicCharacterController {
 	
 	private PlayerController _playerControllerInstance;
 
+	private GameObject _itemContainer;
+	private Dictionary<Game.ItemType, Item> _itemsMap;
 
 	private bool _canMove = false;
 	public bool canMove {
@@ -88,6 +90,13 @@ public class EnemyController : BasicCharacterController {
 	public override void Init () {
 		//Before Base Init Statements
 		//originalTarget = PlayerController.GetInstance.cachedTransform;
+		_itemContainer = Item.CreateItemContainer (gameObject);
+		_itemsMap = new Dictionary<Game.ItemType, Item> ();
+		Item[] items = _itemContainer.GetComponentsInChildren<Item> ();
+		for (int i = 0; i < items.Length; i++) {
+			_itemsMap.Add (items [i].itemType, items [i]);
+		}
+		_itemContainer.SetActive (false);
 		_boxCollider2D = collider2D as BoxCollider2D;
 		_playerControllerInstance = PlayerController.GetInstance;
 		InitEnemyTypes();
@@ -264,6 +273,25 @@ public class EnemyController : BasicCharacterController {
 		case CharacterState.Attack:
 			_boxCollider2D.enabled = false;
 			_isAttackOnCooldown = true;
+			break;
+		case CharacterState.Dead:
+			canMove = false;
+
+			int dropCheckVal = Random.Range (0, 100);
+			if (dropCheckVal < (int)Game.ItemType.Haste)
+				_itemsMap [Game.ItemType.Haste].DropItem ();
+
+			else if (dropCheckVal < (int)Game.ItemType.Heal)
+				_itemsMap [Game.ItemType.Heal].DropItem ();
+			
+			else if (dropCheckVal < (int)Game.ItemType.Rage)
+				_itemsMap [Game.ItemType.Rage].DropItem ();
+			
+			else if (dropCheckVal < (int)Game.ItemType.Silvercoin)
+				_itemsMap [Game.ItemType.Silvercoin].DropItem ();
+
+			else if (dropCheckVal < (int)Game.ItemType.Goldcoin)
+				_itemsMap [Game.ItemType.Goldcoin].DropItem ();
 			break;
 		}
 	}
