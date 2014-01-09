@@ -58,10 +58,19 @@ public class PlayerController : BasicCharacterController {
 			}
 		}
 		//_currentWeapon = _weaponControllerMap[currentWeaponType.ToString()];
+		InputController.instance.onNavMove += OnNavigationMove;
 		ChangeWeapon(currentWeaponType);
 	}
 	private void OnNavigationMove(Vector3 normalizedDisplacement) {
 			Debug.Log (normalizedDisplacement);
+			if(!isMoving)
+				DoCharacterState(CharacterState.Move);
+
+			if(!_onKnifeBATCooldown && !_isAttackPressed) {
+				Vector3 tempScale = _originalScale;
+				tempScale.x *= 1f;
+				cachedTransform.localScale = tempScale;
+			}
 			cachedTransform.position += normalizedDisplacement * getTranslateUnitsPerSecond * cachedDeltaTime;// * _currentAcceleration;
 	}
 
