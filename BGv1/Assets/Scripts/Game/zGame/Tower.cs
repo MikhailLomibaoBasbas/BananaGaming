@@ -44,7 +44,6 @@ public class Tower : MonoBehaviour {
 	}
 	
 	void OnTriggerEnter2D(Collider2D col) {
-		Debug.LogError (col.gameObject.layer + " " + hurtTriggerType);
 		Damage (col.gameObject);
 	}
 

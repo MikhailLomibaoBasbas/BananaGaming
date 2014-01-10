@@ -71,6 +71,8 @@ public class EnemyController : BasicCharacterController {
 	
 	private PlayerController _playerControllerInstance;
 
+	private GameObject _itemContainer;
+	private Dictionary<Game.ItemType, Item> _itemsMap;
 
 	private bool _canMove = false;
 	public bool canMove {
@@ -88,6 +90,13 @@ public class EnemyController : BasicCharacterController {
 	public override void Init () {
 		//Before Base Init Statements
 		//originalTarget = PlayerController.GetInstance.cachedTransform;
+		_itemContainer = Item.CreateItemContainer (gameObject);
+		_itemsMap = new Dictionary<Game.ItemType, Item> ();
+		Item[] items = _itemContainer.GetComponentsInChildren<Item> ();
+		for (int i = 0; i < items.Length; i++) {
+			_itemsMap.Add (items [i].itemType, items [i]);
+		}
+		_itemContainer.SetActive (false);
 		_boxCollider2D = collider2D as BoxCollider2D;
 		_playerControllerInstance = PlayerController.GetInstance;
 		InitEnemyTypes();
@@ -168,7 +177,7 @@ public class EnemyController : BasicCharacterController {
 		_randomMoveDirBeforeTheOrigTargetDirNormalized.x += Random.Range(-xRandPos, xRandPos);
 		_randomMoveDirBeforeTheOrigTargetDirNormalized.y += Random.Range(-yRandPos, yRandPos);
 		_randomMoveDirBeforeTheOrigTargetDirNormalized.Normalize();
-		Debug.LogWarning(_randomMoveDirBeforeTheOrigTargetDirNormalized);
+		//Debug.LogWarning(_randomMoveDirBeforeTheOrigTargetDirNormalized);
 	}  
 
 	private void idle () {
@@ -179,7 +188,7 @@ public class EnemyController : BasicCharacterController {
 
 	private void attack () {
 		if(_currentTarget != null)
-			cachedTransform.localScale =  new Vector3(_currentTarget.position.x < cachedTransform.position.x ? -1f: 1f, 1f ,1f);
+			cachedTransform.localScale =  new Vector3(_currentTarget.position.x < cachedTransform.position.x ? 1f: -1f, 1f ,1f);
 		DoCharacterState(CharacterState.Attack);
 		_enemyProjectile.Show(true);
 		//_attackCircleCollider.enabled = true;
@@ -249,7 +258,7 @@ public class EnemyController : BasicCharacterController {
 			}
 
 			cachedTransform.position += normDir * moveSpeed * cachedDeltaTime;
-			cachedTransform.localScale = new Vector3( ((normDir.x > 0) ? 1: -1), 1, 1);
+			cachedTransform.localScale = new Vector3( ((normDir.x > 0) ? -1: 1), 1, 1);
 		} else {
 			_currentMoveDurTime = 0;
 			idle();
@@ -260,10 +269,30 @@ public class EnemyController : BasicCharacterController {
 		base.CharacterStateStarted(state);
 		switch(state) {
 		case CharacterState.Hurt:
+			StaticAnimationsManager.getInstance.setBlinkingAnimation (false, cachedTransform, 0.2f, cWrapMode.Once);
 			break;
 		case CharacterState.Attack:
-			_boxCollider2D.enabled = false;
+			//_boxCollider2D.enabled = false;
 			_isAttackOnCooldown = true;
+			break;
+		case CharacterState.Dead:
+			canMove = false;
+
+			int dropCheckVal = Random.Range (0, 100);
+			if (dropCheckVal < (int)Game.ItemType.Haste)
+				_itemsMap [Game.ItemType.Haste].DropItem ();
+
+			else if (dropCheckVal < (int)Game.ItemType.Heal)
+				_itemsMap [Game.ItemType.Heal].DropItem ();
+			
+			else if (dropCheckVal < (int)Game.ItemType.Rage)
+				_itemsMap [Game.ItemType.Rage].DropItem ();
+			
+			else if (dropCheckVal < (int)Game.ItemType.Silvercoin)
+				_itemsMap [Game.ItemType.Silvercoin].DropItem ();
+
+			else if (dropCheckVal < (int)Game.ItemType.Goldcoin)
+				_itemsMap [Game.ItemType.Goldcoin].DropItem ();
 			break;
 		}
 	}
@@ -341,7 +370,9 @@ public class EnemyController : BasicCharacterController {
 		float result =  distance / stealthThreshold > 1 ? 1: (distance / stealthThreshold) - 0.5f;
 		if(result < 0)
 			result = 0;
-		_spriteRenderer.color = Color.Lerp(Color.white, Color.clear, 
+		Debug.Log (distance + " " + result + " " + _spriteRenderer.gameObject);
+
+		_spriteRenderer.color = Color.Lerp(Color.grey, Color.clear, 
 		                                  result);
 	}
 

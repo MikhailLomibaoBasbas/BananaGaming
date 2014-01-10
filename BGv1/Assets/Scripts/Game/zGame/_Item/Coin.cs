@@ -8,7 +8,8 @@ public class Coin : Item {
 	}
 	public CoinType coinType;
 	public override void Init () {
-		itemType = Game.ItemType.Coin;
+		itemType = coinType == CoinType.Silver ? Game.ItemType.Silvercoin:
+			Game.ItemType.Goldcoin;
 		base.Init ();
 		value = (int)coinType;
 	}	

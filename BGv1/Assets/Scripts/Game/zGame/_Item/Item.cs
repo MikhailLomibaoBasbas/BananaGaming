@@ -3,6 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class Item : MonoBehaviour {
+
+	private const string PREFAB_PATH = "Prefabs/2D/_Item/ItemContainer";
+	public static GameObject CreateItemContainer (GameObject parent) {
+		return StaticManager_Helper.CreatePrefab (PREFAB_PATH, parent);
+	}
+
 	[System.NonSerialized]public Game.ItemType itemType;
 	public Transform originalParent;
 	public Transform dropParent;
@@ -29,7 +35,7 @@ public class Item : MonoBehaviour {
 			_cachedTransform = transform;
 			_boxCollider2D = collider2D as BoxCollider2D;
 			InitAnimMashup();
-			Invoke("DropItem", 0.5f);
+			//Invoke("DropItem", 0.5f);
 			_isInitialized = true;
 		}
 	}
@@ -42,6 +48,7 @@ public class Item : MonoBehaviour {
 	}
 
 	public virtual void DropItem () {
+		gameObject.SetActive(true);
 		_cachedTransform.parent = dropParent;
 		Vector2 pos = _cachedTransform.position;
 		_animMashup.setBezierAnim(true, new List<Vector2>(){ pos, pos + (Vector2.up * 100) , 
@@ -63,6 +70,7 @@ public class Item : MonoBehaviour {
 		yield return new WaitForSeconds(_animMashup.animationTime);
 		_boxCollider2D.enabled = true;
 		_cachedTransform.parent = originalParent;
+		_cachedTransform.localPosition = Vector3.zero;
 		gameObject.SetActive(false);
 		Color color = _spriteRenderer.color;
 		color.a = 1.0f;
@@ -71,6 +79,12 @@ public class Item : MonoBehaviour {
 	}
 
 	protected virtual void OnPickedUpAnimationFinished () {
+	}
+
+	void OnCollisionEnter2D (Collision2D collision) {
+	}
+
+	void OnTriggerEnter2D (Collider2D collision) {
 	}
 }
 

@@ -87,7 +87,7 @@ public class GameUIView : BasicView
 		float sliderVal =  (float)damage / (float)totalTowerHealth; 
 		Debug.Log ("VALUE : " + sliderVal);
 
-		healthSlider.sliderValue = sliderVal;
+		towerSlider.sliderValue = sliderVal;
 	}
 
 	public void setCoinCount(int coin){
