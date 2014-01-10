@@ -7,6 +7,7 @@ public class GameOverState : BasicGameState {
 	public override void OnStart() {
 		viewUI = GameOverView.Create();
 		gameOverView = (GameOverView)viewUI;
+		fade_animation.begin (gameOverView.gameObject, FadeType.FadeIn, Color.clear, 0.2f, null, null, null, true);
 		AudioManager.GetInstance.PlayKhailSpecial ();
 		//static_audiomanager.getInstance.play_bgm ("Audio/Bgm/MainMenu");
 		AddGUIListeners();
@@ -18,6 +19,7 @@ public class GameOverState : BasicGameState {
 	}
 
 	public override void OnEnd() {
+		fade_animation.begin (gameOverView.gameObject, FadeType.FadeOut, Color.clear, 0.2f, null, null, null, true);
 		AudioManager.GetInstance.StopBGMAll ();
 		RemoveGUIListeners();
 		base.OnEnd();

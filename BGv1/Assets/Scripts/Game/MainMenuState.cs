@@ -7,7 +7,7 @@ public class MainMenuState : BasicGameState {
 	public override void OnStart() {
 		viewUI = MainMenuView.Create();
 		mMenuView = (MainMenuView)viewUI;
-
+		fade_animation.begin (mMenuView.gameObject, FadeType.FadeIn, Color.clear, 0.2f, null, null, null, true);
 		static_audiomanager.getInstance.play_bgm ("Audio/Bgm/MainMenu");
 		AddGUIListeners();
 		base.OnStart();
@@ -18,6 +18,7 @@ public class MainMenuState : BasicGameState {
 	}
 	
 	public override void OnEnd() {
+		fade_animation.begin (mMenuView.gameObject, FadeType.FadeOut, Color.clear, 0.2f, null, null, null, true);
 		RemoveGUIListeners();
 		base.OnEnd();
 	}
