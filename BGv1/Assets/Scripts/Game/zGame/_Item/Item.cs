@@ -55,20 +55,27 @@ public class Item : MonoBehaviour {
 				});
 		tAnimMashup.start(false);
 		randNumber = Random.Range (0, 100);
+		Invoke("ItemWasntPickedUp", 4f);
 	}
 
 	public virtual int GetValue () {
+		CancelInvoke ();
+		StopAllCoroutines ();
 		StartCoroutine(StartPickedUpAnimationCoroutine());
 		return value;
+	}
+
+	private void ItemWasntPickedUp () {
+		StartCoroutine(StartPickedUpAnimationCoroutine ());
 	}
 
 	private IEnumerator StartPickedUpAnimationCoroutine () {
 		_boxCollider2D.enabled = false;
 		AnimationsMashUp tAnimMashup = StaticAnimationsManager.getInstance.getAvailableAnimMashUp;
 		tAnimMashup.target = _cachedTransform;
+		tAnimMashup.animationTime = 0.7f;
 		tAnimMashup.setMoveAnim(_cachedTransform.position, _cachedTransform.position + Vector3.up * 200, true);
 		tAnimMashup.setFadeAnim(1.0f, 0f);
-		tAnimMashup.animationTime = 0.9f;
 		tAnimMashup.start (false);
 		yield return new WaitForSeconds(tAnimMashup.animationTime);
 		_boxCollider2D.enabled = true;

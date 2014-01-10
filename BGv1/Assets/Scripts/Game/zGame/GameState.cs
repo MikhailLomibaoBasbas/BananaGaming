@@ -35,7 +35,7 @@ public class GameState : BasicGameState {
 		_comboAnimationsMashup = StaticAnimationsManager.getInstance.getAvailableAnimMashUp;
 		_comboAnimationsMashup.target = m_gameUIView.getGOCombo.transform;
 		_comboAnimationsMashup.animationTime = 0.3f;
-		_comboAnimationsMashup.setScaleAnim (Vector3.one * 1.2f, Vector3.one);
+		_comboAnimationsMashup.setScaleAnim (Vector3.one * 1.0f, Vector3.one * 0.75f);
 		m_gameUIView.getGOCombo.SetActive (false);
 		m_gameUIView.getGOPowerup.SetActive (false);
 		StartStage(_stage);

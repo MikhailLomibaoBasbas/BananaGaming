@@ -271,7 +271,7 @@ public class PlayerController : BasicCharacterController {
 		switch(item.itemType) {
 		case Game.ItemType.Silvercoin:
 		case Game.ItemType.Goldcoin:
-			Game.instance.coins += item.value;
+			GameState.instance.OnGetCoin (val);
 			break;
 		case Game.ItemType.Haste:
 			Haste (dur, val);
