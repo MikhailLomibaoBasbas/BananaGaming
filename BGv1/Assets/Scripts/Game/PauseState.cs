@@ -52,12 +52,13 @@ public class PauseState : BasicGameState {
 
 	void OnClickShop(GameObject go) {
 		static_audiomanager.getInstance.play_sfx ("Audio/Sfx/Switch1", pauseView.transform.position);
+		stateManager.PopState ();
 		Game.instance.PushState(GameStateType.SHOP);
 	}
 
 	void OnClickMain(GameObject go) {
 		static_audiomanager.getInstance.play_sfx ("Audio/Sfx/Switch1", pauseView.transform.position);
 		stateManager.PopState ();	
-		Game.instance.PushState(GameStateType.GAME_OVER);
+		Game.instance.PushState(GameStateType.MAIN_MENU);
 	}
 }

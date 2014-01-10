@@ -14,7 +14,8 @@ public class GameState : BasicGameState {
 	private int _enemiesKilled;
 	private int _enemiesSummonedThisStage;
 	private int _enemiesKilledThisStage;
-	
+
+	private int _towerHealth = 100;
 
 	public override void OnStart () {
 		view2D = Game2DView.Create();
@@ -22,12 +23,14 @@ public class GameState : BasicGameState {
 		m_game2DView = (Game2DView) view2D;
 		m_gameUIView = (GameUIView) viewUI;
 		m_game2DView.getPlayerController.SetCharacterStateFinishedEventListener (PlayerStateFinished);
-		m_game2DView.GetTower.AddTowerDeadListener (OnTowerHit);
+		m_game2DView.GetTower.AddTowerDeadListener( OnTowerHit );
 		_stageManager = new StageManager();
 		static_audiomanager.getInstance.play_bgm ("Audio/Bgm/InGame");
 		//AudioManager.GetInstance.PlayRandomBGMCombination();
 		//StartStage(_stage = 10);
 		Invoke("Test", 0.1f);
+		m_gameUIView.setPlayerHealth (_towerHealth);
+		ShowStage ();
 		AddListener();
 		base.OnStart ();
 	}
@@ -47,12 +50,14 @@ public class GameState : BasicGameState {
 	}
 
 	public override void OnResume () {
-				m_game2DView.OnResumeCalled ();
-				Invoke ("SummonEnemies", _stageManager.GetRandomDelayEnemyWave);
+		m_game2DView.OnResumeCalled ();
+		Invoke ("SummonEnemies", _stageManager.GetRandomDelayEnemyWave);
 		base.OnResume ();
 	}
 
 	public override void OnEnd () {
+		m_game2DView.OnPauseCalled ();
+		m_game2DView.getCameraFollow.isActive = false;
 		m_game2DView.getPlayerController.RemoveCharacterStateListeners ();
 		RemoveListener ();
 		base.OnEnd ();
@@ -153,14 +158,28 @@ public class GameState : BasicGameState {
 			//ins.health
 			break;
 		case BasicCharacterController.CharacterState.Dead:
+				stateManager.PopState ();	
+				Game.instance.PushState (GameStateType.GAME_OVER);
 			break;
 
 		}
 	}
 
-
 	public void OnTowerHit (int health) {
-		m_gameUIView.setPlayerHealth (health);
+		m_gameUIView.setTowerHealth (health);
+		if (health <= 0f) {
+			stateManager.PopState ();	
+			Game.instance.PushState (GameStateType.GAME_OVER);
+		}
 	}
 
+	public void ShowStage(){
+		iTween.MoveTo (m_gameUIView.getGOStage, iTween.Hash ("y", 0f, "time", 1f, "islocal", true,
+			"easetype", iTween.EaseType.spring ,"oncomplete", "FinishedShowStage", "oncompletetarget", transform.gameObject));
+	}
+
+	private void FinishedShowStage(){
+		iTween.MoveTo (m_gameUIView.getGOStage, iTween.Hash ("y", 600f, "time", 1f, "delay", 1f, "islocal", true,
+			"easetype", iTween.EaseType.spring));//,"oncomplete", "FinishedShowStage", "oncompletetarget", transform.gameObject));
+	}
 }

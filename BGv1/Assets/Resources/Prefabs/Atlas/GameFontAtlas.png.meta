@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 0e1f0cab631ed40809d73c19fb32446d
+guid: cef1f0c376da846d7aaf1523a07a9d34
 TextureImporter:
   serializedVersion: 2
   mipmaps:
     mipMapMode: 0
-    enableMipMap: 1
+    enableMipMap: 0
     linearTexture: 0
     correctGamma: 0
     fadeOut: 0
@@ -30,19 +30,15 @@ TextureImporter:
   nPOTScale: 1
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 0
+  spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: .5, y: .5}
   spritePixelsToUnits: 100
-  alphaIsTransparency: 0
-  textureType: 0
-  buildTargetSettings:
-  - buildTarget: iPhone
-    maxTextureSize: 2048
-    textureFormat: -2
-    compressionQuality: 50
+  alphaIsTransparency: 1
+  textureType: 8
+  buildTargetSettings: []
   spriteSheet:
     sprites: []
   spritePackingTag: 

@@ -14,7 +14,9 @@ public class GameUIView : BasicView
 	private const string SLIDER_TOWERHEALTH = "AnchorTopLeft/TowerStatus/TowerHealth";
 
 	private const string LBL_COIN = "AnchorTopRight/lblCoin";
-	private const string LBL_STAGE = "AnchorTop/lblStage";
+	private const string LBL_STAGE = "AnchorCenter/Stage/lblStage";
+
+	private const string GO_STAGE = "AnchorCenter/Stage";
 
 	public UIEventListener.BoolDelegate onPressShoot = null;
 	public UIEventListener.VoidDelegate onClickAttack = null;
@@ -38,6 +40,10 @@ public class GameUIView : BasicView
 		healthSlider = GetChild (SLIDER_PLAYERHEALTH).GetComponent<UISlider> ();
 		towerSlider = GetChild (SLIDER_TOWERHEALTH).GetComponent<UISlider> ();
 		lblCoin = GetChild (LBL_COIN).GetComponent<UILabel> ();
+	}
+
+	public GameObject getGOStage{
+		get{  return GetChild (GO_STAGE); }
 	}
 
 	void OnPressShoot(GameObject go, bool state) {
@@ -78,7 +84,8 @@ public class GameUIView : BasicView
 
 	public void setTowerHealth(int damage){
 		int totalTowerHealth = 100;
-		float sliderVal =  damage / totalTowerHealth; 
+		float sliderVal =  (float)damage / (float)totalTowerHealth; 
+		Debug.Log ("VALUE : " + sliderVal);
 
 		healthSlider.sliderValue = sliderVal;
 	}

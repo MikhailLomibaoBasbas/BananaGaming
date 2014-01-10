@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+﻿﻿using UnityEngine;
 using System.Collections;
 
 public class Tower : MonoBehaviour {
@@ -13,7 +13,7 @@ public class Tower : MonoBehaviour {
 	}
 
 	public delegate void OnTowerHit (int health);
-	public event OnTowerHit onTowerHit;
+	public event OnTowerHit onTowerHit = null;
 
 	public enum Features {
 		Fortify,
@@ -35,9 +35,8 @@ public class Tower : MonoBehaviour {
 	}
 
 	public void AddTowerDeadListener (OnTowerHit listener) {
-		if(onTowerHit != null)
-			onTowerHit = null;
-		onTowerHit += listener;
+		if(onTowerHit == null)
+			onTowerHit += listener;
 	}
 
 	public void RemoveListeners () {
@@ -56,7 +55,7 @@ public class Tower : MonoBehaviour {
 				StopAllCoroutines ();
 				StartCoroutine (DamageAnimCoroutine ());
 			}
-			Debug.LogError("Col " + go + "  health " + health);
+			//Debug.LogError("Col " + go + "  health " + health);
 			if(onTowerHit != null)
 				onTowerHit (health);
 		}
