@@ -355,7 +355,7 @@ public class ChangeColorAnimation: CommonAnimation {
 		if (mtarget != null) {
 			m_commonAnimationComponents = new FadeAnimationV2Components (target = mtarget);
 		} else
-			Debug.LogError ("Target is null");
+			Debug.LogWarning (this.name + "Target is null");
 	}
 
 	public void setColor (Color color) {

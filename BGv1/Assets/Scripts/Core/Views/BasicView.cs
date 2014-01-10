@@ -138,7 +138,7 @@ public class BasicView : MonoBehaviour, IView
 	public virtual void Show(bool animated) {
 		if(animated) {
 			switch(transitionType) {
-				case ViewTransitionType.Default:
+				//case ViewTransitionType.Default:
 				case ViewTransitionType.TweenFromLeft:
 				case ViewTransitionType.TweenFromRight:
 					if (gameObject.activeSelf) {
@@ -159,7 +159,7 @@ public class BasicView : MonoBehaviour, IView
 	public virtual void Hide(bool animated) {
 		if(animated) {
 			switch(transitionType) {
-			case ViewTransitionType.Default:
+			//case ViewTransitionType.Default:
 			case ViewTransitionType.TweenToLeft:
 				TweenToLeft("Disable");
 				break;
@@ -176,7 +176,7 @@ public class BasicView : MonoBehaviour, IView
 	public virtual void Close(bool animated) {
 		if(animated) {
 			switch(transitionType) {
-			case ViewTransitionType.Default:
+			//case ViewTransitionType.Default:
 			case ViewTransitionType.TweenToRight:
 				TweenToRight("DelayedDestroy");
 				break;
@@ -188,7 +188,7 @@ public class BasicView : MonoBehaviour, IView
 		}else{
 			GameObject.Destroy(gameObject);
 		}
-		transitionType = ViewTransitionType.Default;
+		//transitionType = ViewTransitionType.Default;
 	}
 	
 	public void Enable() {
@@ -204,7 +204,7 @@ public class BasicView : MonoBehaviour, IView
 	}
 	
 	public void DelayedDestroy() {
-		GameObject.Destroy(gameObject, 1f);
+		GameObject.Destroy(gameObject, 0.5f);
 	}
 
 	public void Destroy() {
@@ -233,6 +233,8 @@ public class BasicView : MonoBehaviour, IView
 		case ViewTransitionType.TweenToRight:
 			break;
 		default:
+			if(onComplete != null)
+				Invoke (onComplete, 0.1f);
 			break;
 		}
 	}

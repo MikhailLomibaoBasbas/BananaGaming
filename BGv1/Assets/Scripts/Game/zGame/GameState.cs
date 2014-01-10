@@ -1,4 +1,4 @@
-﻿﻿using UnityEngine;
+﻿﻿﻿using UnityEngine;
 using System.Collections;
 
 public class GameState : BasicGameState {
@@ -27,22 +27,22 @@ public class GameState : BasicGameState {
 		_stageManager = new StageManager();
 		static_audiomanager.getInstance.play_bgm ("Audio/Bgm/InGame");
 		//AudioManager.GetInstance.PlayRandomBGMCombination();
-		//StartStage(_stage = 10);
-
-		Invoke("Test", 0.1f);
-		m_gameUIView.setPlayerHealth (m_game2DView.getPlayerController.health);
-		m_gameUIView.setTowerHealth (m_game2DView.GetTower.health);
-		ShowStage (_stage);
-		ShowCombo (1, Vector3.zero);
+	
+		StartStage(_stage);
 		AddListener();
+		Invoke("SecondOnStart", 0.5f);
 		base.OnStart ();
 	}
-	private void Test () {
+	private void SecondOnStart () {
+		ShowStage (_stage);
+		ShowCombo (1, Vector3.zero);
+		m_gameUIView.setPlayerHealth (m_game2DView.getPlayerController.health);
+		m_gameUIView.setTowerHealth (m_game2DView.GetTower.health);
 		//m_game2DView.SummonEnemyAtContainer1(EnemyController.EnemyType.Jumper, 1);
 		//m_game2DView.SummonEnemyAtContainer2(EnemyController.EnemyType.Aggressive, 1);
 		//m_game2DView.SummonEnemyAtContainer1(EnemyController.EnemyType.Normal, 4);
 
-		m_game2DView.SummonEnemyAtContainer2(EnemyController.EnemyType.Stealth, 5);
+		//m_game2DView.SummonEnemyAtContainer2(EnemyController.EnemyType.Stealth, 5);
 	}
 
 	public override void OnUpdate () {
@@ -121,7 +121,7 @@ public class GameState : BasicGameState {
 		Debug.LogWarning("HAYOP HAYOP HAYOP!!!");
 		Debug.LogWarning("--Enemies to Summon: " + enemiesToSummon);
 		for(int i = _enemiesSummonedThisStage; i < _enemiesSummonedThisStage + enemiesToSummon; i++) {
-			Debug.Log(i + " " +  _stageManager.GetRequiredKills) ;
+			//Debug.Log(i + " " +  _stageManager.GetRequiredKills) ;
 			//Debug.LogWarning(_stageManager.GetEnemyArrangedDistribution.Length);
 			if(i >= _stageManager.GetRequiredKills) {
 				break;
@@ -165,8 +165,8 @@ public class GameState : BasicGameState {
 			//ins.health
 			break;
 		case BasicCharacterController.CharacterState.Dead:
-				stateManager.PopState ();	
-				Game.instance.PushState (GameStateType.GAME_OVER);
+
+				Game.instance.ChangeState (GameStateType.GAME_OVER);
 			break;
 
 		}
@@ -175,7 +175,6 @@ public class GameState : BasicGameState {
 	public void OnTowerHit (int health) {
 		m_gameUIView.setTowerHealth (health);
 		if (health <= 0f) {
-			stateManager.PopState ();	
 			Game.instance.PushState (GameStateType.GAME_OVER);
 		}
 	}

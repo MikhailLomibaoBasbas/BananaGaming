@@ -10,7 +10,7 @@ public class BasicGameState : MonoBehaviour, IState
 	public IView view2D {get; set;}
 	
 	public virtual void OnStart() {
-		if(viewUI != null) viewUI.Show(false);
+		if(viewUI != null) viewUI.Show(true);
 		if(view2D != null) view2D.Show(false);
 	}
 	
@@ -18,13 +18,13 @@ public class BasicGameState : MonoBehaviour, IState
 	}
 	
 	public virtual void OnPause() {
-		if(viewUI != null) viewUI.Hide(false);
+		if(viewUI != null) viewUI.Hide(true);
 		if(view2D != null) view2D.Hide(false);
 		enabled = false;
 	}
 	
 	public virtual void OnResume() {
-		if(viewUI != null) viewUI.Show(false);
+		if(viewUI != null) viewUI.Show(true);
 		if(view2D != null) view2D.Show(false);
 		enabled = true;
 	}
@@ -34,7 +34,7 @@ public class BasicGameState : MonoBehaviour, IState
 	}
 	
 	public virtual void OnEnd() {
-		if(viewUI != null) viewUI.Close(false);
+		if(viewUI != null) viewUI.Close(true);
 		if(view2D != null) view2D.Close(false);
 		Destroy(this);
 	}

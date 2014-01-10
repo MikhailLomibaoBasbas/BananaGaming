@@ -127,7 +127,7 @@ public class EnemyController : BasicCharacterController {
 			originalTarget =  _currentTarget = _playerControllerInstance.cachedTransform;
 			break;
 		case EnemyType.Jumper:
-			_jumperAnimMashup = StaticAnimationsManager.getInstance.getAvailableAnimMashUp;
+			//_jumperAnimMashup = StaticAnimationsManager.getInstance.getAvailableAnimMashUp;
 			originalTarget =  _currentTarget = null;//PlayerController.GetInstance.cachedTransform;
 			break;
 		}
@@ -157,6 +157,7 @@ public class EnemyController : BasicCharacterController {
 	}
 	private void PorstSetActiveInScene_False () {
 		enabled = false;
+		_spriteRenderer.color = Color.white;
 		cachedTransform.localPosition = Vector3.zero;
 		gameObject.SetActive(false);
 	}
@@ -264,12 +265,26 @@ public class EnemyController : BasicCharacterController {
 			idle();
 		}
 	}
+
+	private void DoNormalStealthHurtAnim () {
+		AnimationsMashUp animMashup = StaticAnimationsManager.getInstance.getAvailableAnimMashUp;
+		animMashup.target = cachedTransform;
+		animMashup.animationTime = defaultAnimTime;
+		animMashup.setFadeAnim (1.0f, 0.0f, 1.0f, 0.0f, 1.0f);
+		animMashup.start ();
+	}
 	
 	protected override void CharacterStateStarted (CharacterState state) {
 		base.CharacterStateStarted(state);
 		switch(state) {
 		case CharacterState.Hurt:
-			StaticAnimationsManager.getInstance.setBlinkingAnimation (false, cachedTransform, 0.2f, cWrapMode.Once);
+			switch (enemyType) {
+			case EnemyType.Normal:
+			case EnemyType.Stealth:
+				DoNormalStealthHurtAnim ();
+				break;
+			}
+			//StaticAnimationsManager.getInstance.setBlinkingAnimation (false, cachedTransform, 0.2f, cWrapMode.Once);
 			break;
 		case CharacterState.Attack:
 			//_boxCollider2D.enabled = false;
@@ -312,6 +327,7 @@ public class EnemyController : BasicCharacterController {
 			if(onEnemyDeadFinished != null)
 				onEnemyDeadFinished(score);
 			setActiveInScene(false);
+
 			break;
 		}
 	}
@@ -370,7 +386,7 @@ public class EnemyController : BasicCharacterController {
 		float result =  distance / stealthThreshold > 1 ? 1: (distance / stealthThreshold) - 0.5f;
 		if(result < 0)
 			result = 0;
-		Debug.Log (distance + " " + result + " " + _spriteRenderer.gameObject);
+		//Debug.Log (distance + " " + result + " " + _spriteRenderer.gameObject);
 
 		_spriteRenderer.color = Color.Lerp(Color.grey, Color.clear, 
 		                                  result);
@@ -405,9 +421,10 @@ public class EnemyController : BasicCharacterController {
 		_boxCollider2D.enabled = false;
 		attack();
 
-		_jumperAnimMashup.target = cachedTransform;
-		_jumperAnimMashup.animationTime = 0.5f;
-		_jumperAnimMashup.setBezierAnim (true, 
+		AnimationsMashUp tAnimMashup = StaticAnimationsManager.getInstance.getAvailableAnimMashUp;
+		tAnimMashup.target = cachedTransform;
+		tAnimMashup.animationTime = 0.5f;
+		tAnimMashup.setBezierAnim (true, 
 		                          new List<Vector2>(){
 			new Vector2(cachedTransform.position.x, cachedTransform.position.y),
 			new Vector2(Random.Range(_playerControllerInstance.cachedTransform.position.x, cachedTransform.position.x),
@@ -417,8 +434,8 @@ public class EnemyController : BasicCharacterController {
 		});
 		cachedTransform.localScale = new Vector3(_playerControllerInstance.cachedTransform.position.x < cachedTransform.position.x ? -1f: 1f, 
 		                                         1f, 1f);
-		_jumperAnimMashup.start ();
-		yield return new WaitForSeconds(_jumperAnimMashup.animationTime);
+		tAnimMashup.start (false);
+		yield return new WaitForSeconds(tAnimMashup.animationTime);
 		_boxCollider2D.enabled = true;
 		move();
 
