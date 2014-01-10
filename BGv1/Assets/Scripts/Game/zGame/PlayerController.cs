@@ -93,8 +93,9 @@ public class PlayerController : BasicCharacterController {
 	}
 
 	public override void OnUpdate () {
+		//Debug.Log(currentState);
 		base.OnUpdate ();
-		#if FALSE
+		#if UNITY_EDITOR
 		if(Input.GetMouseButton(0)) {
 			if(!_onKnifeBATCooldown) {
 				_currentWeapon.Attack();
@@ -288,8 +289,10 @@ public class PlayerController : BasicCharacterController {
 	}
 	private IEnumerator HasteCoroutine (float dur, int val) {
 		moveSpeed += val;
+		UpdateCharacterStats ();
 		yield return new WaitForSeconds(val);
-		moveSpeed += val;
+		moveSpeed -= val;
+		UpdateCharacterStats ();
 	}
 
 	private void Rage (float dur, int val) {

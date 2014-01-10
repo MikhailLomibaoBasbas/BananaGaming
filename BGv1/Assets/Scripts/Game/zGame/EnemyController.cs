@@ -177,7 +177,7 @@ public class EnemyController : BasicCharacterController {
 		_randomMoveDirBeforeTheOrigTargetDirNormalized.x += Random.Range(-xRandPos, xRandPos);
 		_randomMoveDirBeforeTheOrigTargetDirNormalized.y += Random.Range(-yRandPos, yRandPos);
 		_randomMoveDirBeforeTheOrigTargetDirNormalized.Normalize();
-		Debug.LogWarning(_randomMoveDirBeforeTheOrigTargetDirNormalized);
+		//Debug.LogWarning(_randomMoveDirBeforeTheOrigTargetDirNormalized);
 	}  
 
 	private void idle () {
@@ -188,7 +188,7 @@ public class EnemyController : BasicCharacterController {
 
 	private void attack () {
 		if(_currentTarget != null)
-			cachedTransform.localScale =  new Vector3(_currentTarget.position.x < cachedTransform.position.x ? -1f: 1f, 1f ,1f);
+			cachedTransform.localScale =  new Vector3(_currentTarget.position.x < cachedTransform.position.x ? 1f: -1f, 1f ,1f);
 		DoCharacterState(CharacterState.Attack);
 		_enemyProjectile.Show(true);
 		//_attackCircleCollider.enabled = true;
@@ -258,7 +258,7 @@ public class EnemyController : BasicCharacterController {
 			}
 
 			cachedTransform.position += normDir * moveSpeed * cachedDeltaTime;
-			cachedTransform.localScale = new Vector3( ((normDir.x > 0) ? 1: -1), 1, 1);
+			cachedTransform.localScale = new Vector3( ((normDir.x > 0) ? -1: 1), 1, 1);
 		} else {
 			_currentMoveDurTime = 0;
 			idle();
@@ -269,9 +269,10 @@ public class EnemyController : BasicCharacterController {
 		base.CharacterStateStarted(state);
 		switch(state) {
 		case CharacterState.Hurt:
+			StaticAnimationsManager.getInstance.setBlinkingAnimation (false, cachedTransform, 0.2f, cWrapMode.Once);
 			break;
 		case CharacterState.Attack:
-			_boxCollider2D.enabled = false;
+			//_boxCollider2D.enabled = false;
 			_isAttackOnCooldown = true;
 			break;
 		case CharacterState.Dead:
@@ -369,7 +370,9 @@ public class EnemyController : BasicCharacterController {
 		float result =  distance / stealthThreshold > 1 ? 1: (distance / stealthThreshold) - 0.5f;
 		if(result < 0)
 			result = 0;
-		_spriteRenderer.color = Color.Lerp(Color.white, Color.clear, 
+		Debug.Log (distance + " " + result + " " + _spriteRenderer.gameObject);
+
+		_spriteRenderer.color = Color.Lerp(Color.grey, Color.clear, 
 		                                  result);
 	}
 

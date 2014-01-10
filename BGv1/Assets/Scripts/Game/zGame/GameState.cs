@@ -26,7 +26,8 @@ public class GameState : BasicGameState {
 		_stageManager = new StageManager();
 		static_audiomanager.getInstance.play_bgm ("Audio/Bgm/InGame");
 		//AudioManager.GetInstance.PlayRandomBGMCombination();
-		StartStage(_stage = 8);
+		//StartStage(_stage = 8);
+		Invoke ("Test", 0.5f);
 
 		AddListener();
 		base.OnStart ();
@@ -34,7 +35,9 @@ public class GameState : BasicGameState {
 	private void Test () {
 		//m_game2DView.SummonEnemyAtContainer1(EnemyController.EnemyType.Jumper, 1);
 		//m_game2DView.SummonEnemyAtContainer2(EnemyController.EnemyType.Aggressive, 1);
-		//m_game2DView.SummonEnemyAtContainer1(EnemyController.EnemyType.Normal, 20);
+		//m_game2DView.SummonEnemyAtContainer1(EnemyController.EnemyType.Normal, 4);
+
+		m_game2DView.SummonEnemyAtContainer2(EnemyController.EnemyType.Stealth, 5);
 	}
 
 	public override void OnUpdate () {
@@ -87,7 +90,7 @@ public class GameState : BasicGameState {
 	}
 
 	void OnPressShoot(GameObject go, bool press){
-		Debug.LogWarning (press);
+		//Debug.LogWarning (press);
 		m_game2DView.getPlayerController.Attack (press);
 	}
 
@@ -160,7 +163,7 @@ public class GameState : BasicGameState {
 
 
 	public void OnTowerHit (int health) {
-		//Debug.LogError
+		//Debug.LogError (health);
 		m_gameUIView.setTowerHealth (health);
 	}
 

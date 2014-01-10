@@ -58,7 +58,7 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 
 	private CharacterState lastState;
 	public CharacterState currentState;
-	protected Renderer mRenderer;
+	//protected Renderer mRenderer;
 	protected Vector2 originalPos;
 
 	bool isOccupied;
@@ -124,7 +124,7 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 		cachedCollider2D = collider2D;
 		animator = GetComponent<Animator>();
 		animator.speed = 1f;
-		mRenderer = GetComponentInChildren<Renderer>();
+		//mRenderer = GetComponentInChildren<Renderer>();
 		isActiveInGame = true;
 		currentState = CharacterState.None;
 		originalPos = cachedTransform.position;
@@ -159,8 +159,8 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 
 	void Update () {
 		if(isActiveInGame) {
-			if(!mRenderer.isVisible && currentState != CharacterState.Move)
-				return;
+			//if(!mRenderer.isVisible && currentState != CharacterState.Move)
+				//return;
 			OnUpdate();
 		}
 	}
@@ -363,7 +363,7 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 	void StopCharacterState() {
 		DoCharacterStateFinishedEvent();
 		isOccupied = false;
-		if(onCharacterStateFinished == null)
+		//if(onCharacterStateFinished == null) PARANG NEED TO NA EWAN
 			DoCharacterState(CharacterState.Idle);
 
 	}
