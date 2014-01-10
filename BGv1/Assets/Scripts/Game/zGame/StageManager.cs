@@ -8,7 +8,7 @@ public class StageManager {
 	private Vector2 _minMaxDelayInSecPerWave = new Vector2(5, 10); 
 	private int _maxWave = 4;
 	private int _baseRequiredKills = 5;
-	private int _requiredKillsIncrementPerStage = 3;
+	private int _requiredKillsIncrementPerStage = 2;
 
 	
 	private int _unlockedMonstersCount;
@@ -77,7 +77,7 @@ public class StageManager {
 		float cRatio = 1;
 		int i = 1;
 		while (i < _unlockedMonstersCount) {
-			cRatio *= 0.7f;
+			cRatio *= 0.8f;
 			ratio[i] = ocRatio - cRatio;
 			ocRatio = cRatio;
 			//Debug.LogError(i + " " + ratio[i]);

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+﻿﻿using UnityEngine;
 using System.Collections;
 
 public class GameState : BasicGameState {
@@ -14,7 +14,8 @@ public class GameState : BasicGameState {
 	private int _enemiesKilled;
 	private int _enemiesSummonedThisStage;
 	private int _enemiesKilledThisStage;
-	
+
+	private int _towerHealth = 100;
 
 	public override void OnStart () {
 		view2D = Game2DView.Create();
@@ -22,17 +23,20 @@ public class GameState : BasicGameState {
 		m_game2DView = (Game2DView) view2D;
 		m_gameUIView = (GameUIView) viewUI;
 		m_game2DView.getPlayerController.SetCharacterStateFinishedEventListener (PlayerStateFinished);
-		m_game2DView.GetTower.AddTowerDeadListener (OnTowerHit);
+		m_game2DView.GetTower.AddTowerDeadListener( OnTowerHit );
 		_stageManager = new StageManager();
 		static_audiomanager.getInstance.play_bgm ("Audio/Bgm/InGame");
 		//AudioManager.GetInstance.PlayRandomBGMCombination();
 		StartStage(_stage = 8);
 		//Invoke ("Test", 0.5f);
-
 		AddListener();
+		Invoke("SecondOnStart", 0.5f);
 		base.OnStart ();
 	}
-	private void Test () {
+	private void SecondOnStart () {
+		ShowStage ();
+		m_gameUIView.setPlayerHealth (m_game2DView.getPlayerController.health);
+		m_gameUIView.setTowerHealth (m_game2DView.GetTower.health);
 		//m_game2DView.SummonEnemyAtContainer1(EnemyController.EnemyType.Jumper, 1);
 		//m_game2DView.SummonEnemyAtContainer2(EnemyController.EnemyType.Aggressive, 1);
 		//m_game2DView.SummonEnemyAtContainer1(EnemyController.EnemyType.Normal, 4);
@@ -50,12 +54,14 @@ public class GameState : BasicGameState {
 	}
 
 	public override void OnResume () {
-				m_game2DView.OnResumeCalled ();
-				Invoke ("SummonEnemies", _stageManager.GetRandomDelayEnemyWave);
+		m_game2DView.OnResumeCalled ();
+		Invoke ("SummonEnemies", _stageManager.GetRandomDelayEnemyWave);
 		base.OnResume ();
 	}
 
 	public override void OnEnd () {
+		m_game2DView.OnPauseCalled ();
+		m_game2DView.getCameraFollow.isActive = false;
 		m_game2DView.getPlayerController.RemoveCharacterStateListeners ();
 		RemoveListener ();
 		base.OnEnd ();
@@ -153,18 +159,31 @@ public class GameState : BasicGameState {
 	public void PlayerStateFinished(BasicCharacterController.CharacterState state, BasicCharacterController ins) {
 		switch (state) {
 		case BasicCharacterController.CharacterState.Hurt:
+			m_gameUIView.setPlayerHealth (ins.health);
 			//ins.health
 			break;
 		case BasicCharacterController.CharacterState.Dead:
+
+				Game.instance.ChangeState (GameStateType.GAME_OVER);
 			break;
 
 		}
 	}
 
-
 	public void OnTowerHit (int health) {
-		//Debug.LogError (health);
 		m_gameUIView.setTowerHealth (health);
+		if (health <= 0f) {
+			Game.instance.PushState (GameStateType.GAME_OVER);
+		}
 	}
 
+	public void ShowStage(){
+		iTween.MoveTo (m_gameUIView.getGOStage, iTween.Hash ("y", 0f, "time", 1f, "islocal", true,
+			"easetype", iTween.EaseType.spring ,"oncomplete", "FinishedShowStage", "oncompletetarget", transform.gameObject));
+	}
+
+	private void FinishedShowStage(){
+		iTween.MoveTo (m_gameUIView.getGOStage, iTween.Hash ("y", 600f, "time", 1f, "delay", 1f, "islocal", true,
+			"easetype", iTween.EaseType.spring));//,"oncomplete", "FinishedShowStage", "oncompletetarget", transform.gameObject));
+	}
 }
