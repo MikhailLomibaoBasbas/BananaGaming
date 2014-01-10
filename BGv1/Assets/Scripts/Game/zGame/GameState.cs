@@ -3,10 +3,12 @@ using System.Collections;
 
 public class GameState : BasicGameState {
 
+	public static GameState instance;
+
 	private Game2DView m_game2DView;
 	private GameUIView m_gameUIView;
 	private StageManager _stageManager;
-	private int _stage;
+	private int _stage = 1;
 
 	private int _score;
 
@@ -20,6 +22,7 @@ public class GameState : BasicGameState {
 	AnimationsMashUp _comboAnimationsMashup;
 
 	public override void OnStart () {
+		instance = this;
 		view2D = Game2DView.Create();
 		viewUI = GameUIView.Create ();
 		m_game2DView = (Game2DView) view2D;
@@ -30,6 +33,7 @@ public class GameState : BasicGameState {
 		static_audiomanager.getInstance.play_bgm ("Audio/Bgm/InGame");
 		//AudioManager.GetInstance.PlayRandomBGMCombination();
 		_comboAnimationsMashup = StaticAnimationsManager.getInstance.getAvailableAnimMashUp;
+		_comboAnimationsMashup.target = m_gameUIView.getGOCombo.transform;
 		_comboAnimationsMashup.animationTime = 0.3f;
 		_comboAnimationsMashup.setScaleAnim (Vector3.one * 1.2f, Vector3.one);
 		m_gameUIView.getGOCombo.SetActive (false);
@@ -165,6 +169,7 @@ public class GameState : BasicGameState {
 			CancelInvoke ("CancelComboCounter");
 			combo++;
 			m_gameUIView.setHit (combo);
+			_comboAnimationsMashup.start (true);
 			Invoke ("CancelComboCounter", 3f);
 				break;
 		case BasicCharacterController.CharacterState.Dead:
@@ -207,6 +212,10 @@ public class GameState : BasicGameState {
 		if (health <= 0f) {
 			Game.instance.PushState (GameStateType.GAME_OVER);
 		}
+	}
+
+	public void OnGetCoin (int val) { // DINAYA TONG HINAYUPAK NA TO.. TANGGALIN AGADDD
+		m_gameUIView.setCoinCount (Game.instance.coins += val);
 	}
 
 	public void ShowStage(int stage){

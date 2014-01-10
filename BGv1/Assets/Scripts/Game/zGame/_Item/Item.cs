@@ -21,6 +21,8 @@ public class Item : MonoBehaviour {
 
 	protected BoxCollider2D _boxCollider2D;
 
+	protected int randNumber;
+
 	void Awake () {
 		Init ();
 	}
@@ -52,6 +54,7 @@ public class Item : MonoBehaviour {
 			(pos - (new Vector2(Random.Range(-100f,100f), 50f)))
 				});
 		tAnimMashup.start(false);
+		randNumber = Random.Range (0, 100);
 	}
 
 	public virtual int GetValue () {
@@ -63,8 +66,9 @@ public class Item : MonoBehaviour {
 		_boxCollider2D.enabled = false;
 		AnimationsMashUp tAnimMashup = StaticAnimationsManager.getInstance.getAvailableAnimMashUp;
 		tAnimMashup.target = _cachedTransform;
-		tAnimMashup.setMoveAnim(transform.position, transform.position + Vector3.up * 120f, true);
+		tAnimMashup.setMoveAnim(_cachedTransform.position, _cachedTransform.position + Vector3.up * 200, true);
 		tAnimMashup.setFadeAnim(1.0f, 0f);
+		tAnimMashup.animationTime = 0.9f;
 		tAnimMashup.start (false);
 		yield return new WaitForSeconds(tAnimMashup.animationTime);
 		_boxCollider2D.enabled = true;

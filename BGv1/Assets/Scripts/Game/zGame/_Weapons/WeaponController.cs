@@ -157,11 +157,13 @@ public class WeaponController : MonoBehaviour {
 				break;
 			}
 		}
+
 	}
 
 
-	public void AddDamage(int damage) {
-		_weapon.damage += damage;
+	public void AddDamage(int dmg) {
+		GetComponent<SpriteRenderer> ().color = dmg > 0 ? Color.red : Color.white;
+		_weapon.damage += dmg;
 	}
 
 }

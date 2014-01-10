@@ -271,6 +271,7 @@ public class PlayerController : BasicCharacterController {
 		switch(item.itemType) {
 		case Game.ItemType.Silvercoin:
 		case Game.ItemType.Goldcoin:
+			Game.instance.coins += item.value;
 			break;
 		case Game.ItemType.Haste:
 			Haste(dur, val);
@@ -285,19 +286,20 @@ public class PlayerController : BasicCharacterController {
 	}
 
 	private void Haste (float dur, int val) {
-		Debug.LogError ("fds");
+		//Debug.LogError ("fds");
 		StartCoroutine(HasteCoroutine(dur, val));
 	}
 	private IEnumerator HasteCoroutine (float dur, int val) {
 		moveSpeed += val;
 		UpdateCharacterStats ();
-		yield return new WaitForSeconds(val);
+		GetComponent<SpriteRenderer> ().color = Color.cyan;
+		yield return new WaitForSeconds(dur);
 		moveSpeed -= val;
 		UpdateCharacterStats ();
+		GetComponent<SpriteRenderer> ().color = Color.white;
 	}
 
 	private void Rage (float dur, int val) {
-		Debug.LogError ("fds");
 		StartCoroutine(RageCoroutine(dur, val));
 	}
 	private IEnumerator RageCoroutine (float dur, int val) {

@@ -42,7 +42,20 @@ public class Game : MonoSingleton<Game> {
 
 	public Weapon.WeaponType weaponInitial;
 
+	private int _coins = 0;
+	public int coins {
+		set {
+			_coins = value; 
+			PlayerPrefs.SetInt ("coins", value); 
+		}
+		get {
+			return _coins;
+		}
+
+	}
+
 	public override void Init () {
+		coins = PlayerPrefs.GetInt ("coins");
 		DontDestroyOnLoad(gameObject);
 		InitializeGUI();
 		InitializeState();
