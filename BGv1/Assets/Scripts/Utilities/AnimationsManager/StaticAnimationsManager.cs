@@ -33,18 +33,22 @@ public class StaticAnimationsManager {
 	public AnimationsMashUp getAvailableAnimMashUp {
 		get {
 			AnimationsMashUp tempMashup = null;
-			for (int i = 0; i < mashUpCount; i++) {
+			for (int i = 0; i < _animMashUpList.Count; i++) {
+
 				tempMashup = _animMashUpList [i];
-				if (!tempMashup.isAnimating && !_activeAnimMashUpMap.ContainsKey(tempMashup.name)) {
+				Debug.LogWarning (tempMashup.name + " " + (tempMashup.target == null));
+				if (/*!tempMashup.isAnimating && !tempMashup.isActive*/tempMashup.target == null && !_activeAnimMashUpMap.ContainsKey(tempMashup.name)) {
+					Debug.LogWarning (_activeAnimMashUpMap.Count);
 					tempMashup.Clean ();
 					_activeAnimMashUpMap.Add (tempMashup.name, tempMashup);
 					break;
-				}
-				tempMashup = null;
+				} else
+					tempMashup = null;
 			}
 			if (tempMashup == null) {
 				GameObject tempGO = StaticManager_Helper.CreateChild (container, ANIM_MASHUP_NAME + (_animMashUpList.Count + 1));
 				_animMashUpList.Add(tempMashup = tempGO.AddComponent<AnimationsMashUp>());
+				_activeAnimMashUpMap.Add (tempMashup.name, tempMashup);
 			}
 			return tempMashup;//_availableAnimMashUp;
 		}
@@ -56,6 +60,7 @@ public class StaticAnimationsManager {
 		if (_activeAnimMashUpMap.ContainsKey (name)) {
 			if (willStopAnimation)
 				mashup.stop ();
+			mashup.Clean ();
 			_activeAnimMashUpMap.Remove (name);
 		}
 	}

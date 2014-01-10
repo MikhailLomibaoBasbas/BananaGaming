@@ -26,8 +26,8 @@ public class GameState : BasicGameState {
 		_stageManager = new StageManager();
 		static_audiomanager.getInstance.play_bgm ("Audio/Bgm/InGame");
 		//AudioManager.GetInstance.PlayRandomBGMCombination();
-		//StartStage(_stage = 8);
-		Invoke ("Test", 0.5f);
+		StartStage(_stage = 8);
+		//Invoke ("Test", 0.5f);
 
 		AddListener();
 		base.OnStart ();
@@ -37,7 +37,7 @@ public class GameState : BasicGameState {
 		//m_game2DView.SummonEnemyAtContainer2(EnemyController.EnemyType.Aggressive, 1);
 		//m_game2DView.SummonEnemyAtContainer1(EnemyController.EnemyType.Normal, 4);
 
-		m_game2DView.SummonEnemyAtContainer2(EnemyController.EnemyType.Stealth, 5);
+		//m_game2DView.SummonEnemyAtContainer2(EnemyController.EnemyType.Stealth, 5);
 	}
 
 	public override void OnUpdate () {
@@ -113,7 +113,7 @@ public class GameState : BasicGameState {
 		Debug.LogWarning("HAYOP HAYOP HAYOP!!!");
 		Debug.LogWarning("--Enemies to Summon: " + enemiesToSummon);
 		for(int i = _enemiesSummonedThisStage; i < _enemiesSummonedThisStage + enemiesToSummon; i++) {
-			Debug.Log(i + " " +  _stageManager.GetRequiredKills) ;
+			//Debug.Log(i + " " +  _stageManager.GetRequiredKills) ;
 			//Debug.LogWarning(_stageManager.GetEnemyArrangedDistribution.Length);
 			if(i >= _stageManager.GetRequiredKills) {
 				break;

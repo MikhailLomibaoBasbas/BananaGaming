@@ -10,6 +10,12 @@ using System.Collections.Generic;
 [RequireComponent(typeof(BezierCurveAnimation))]
 public class AnimationsMashUp : MonoBehaviour {
 
+	void Awake () {
+		target = null;
+		animationTime = 0.5f;
+		wrapMode = cWrapMode.Once;
+	}
+
 	private float _animationTime = 2.0f;
 	public float animationTime {
 		get {
@@ -46,16 +52,14 @@ public class AnimationsMashUp : MonoBehaviour {
 	Transform _target = null;
 	public Transform target {
 		set {
-			if (value != null) {
-				getScaleAnim.changeTarget (value);
-				getFadeAnim.changeTarget (value);
-				getRotateAnim.changeTarget (value);
-				getMoveAnim.changeTarget (value);
-				getChangeColorAnim.changeTarget (value);
-				getSplineAnim.changeTarget (value);
-				getbezierAnim.changeTarget (value);
-				_target = value;
-			}
+			getScaleAnim.changeTarget (value);
+			getFadeAnim.changeTarget (value);
+			getRotateAnim.changeTarget (value);
+			getMoveAnim.changeTarget (value);
+			getChangeColorAnim.changeTarget (value);
+			getSplineAnim.changeTarget (value);
+			getbezierAnim.changeTarget (value);
+			_target = value;
 		}
 		get {
 			return _target;
@@ -68,11 +72,11 @@ public class AnimationsMashUp : MonoBehaviour {
 			        getMoveAnim.isAnimating || getRotateAnim.isAnimating || getbezierAnim.isAnimating );
 		}
 	}
-
+	
 	public bool isActive {
 		get {
 			return isChangeColorActive || isScaleActive || isFadeActive || isMoveActive || isRotateActive
-				|| isAnimating;
+				|| isBezierActive || isSplineActive;
 		} 
 	}
 
@@ -97,13 +101,15 @@ public class AnimationsMashUp : MonoBehaviour {
 
 	public void Clean () {
 		isChangeColorActive = isScaleActive = isFadeActive = isMoveActive = isRotateActive = isBezierActive = false;
-		getScaleAnim.Clean ();
-		getFadeAnim.Clean ();
-		getSplineAnim.Clean ();
-		getMoveAnim.Clean ();
-		getChangeColorAnim.Clean ();
-		getbezierAnim.Clean ();
-		getRotateAnim.Clean ();
+		target = null;
+		Debug.LogWarning (name);
+		//getScaleAnim.Clean ();
+		//getFadeAnim.Clean ();
+		//getSplineAnim.Clean ();
+		//getMoveAnim.Clean ();
+		//getChangeColorAnim.Clean ();
+		//getbezierAnim.Clean ();
+		//getRotateAnim.Clean ();
 	}
 
 	public void start(bool cachedAnimations = false, float delay = 0.0f, object classPtr = null, string callbackFcnName = null, object[] parameters = null,
@@ -111,12 +117,13 @@ public class AnimationsMashUp : MonoBehaviour {
 
 		if (isScaleActive) {
 			getScaleAnim.startDelayed(true, delay);
-			isScaleActive = cachedAnimations;
+			//isScaleActive = cachedAnimations;
 		}
 
 		if (isFadeActive) {
+			//Debug.LogError ("sss" + getFadeAnim.target);
 			getFadeAnim.startDelayed (true, delay);
-			isFadeActive = cachedAnimations;
+			//isFadeActive = cachedAnimations;
 		}
 
 		if (isMoveActive) {
@@ -126,35 +133,53 @@ public class AnimationsMashUp : MonoBehaviour {
 
 		if (isRotateActive) {
 			getRotateAnim.startDelayed (true, delay);
-			isRotateActive = cachedAnimations;
+			//isRotateActive = cachedAnimations;
 		}
 
 		if (isChangeColorActive) {
 			getChangeColorAnim.startDelayed (true, delay);
-			isChangeColorActive = cachedAnimations;
+			//isChangeColorActive = cachedAnimations;
 		}
 
 		if (isSplineActive) {
 
 			getSplineAnim.startDelayed (true, delay);
-			isSplineActive = cachedAnimations;
+			//isSplineActive = cachedAnimations;
 		}
 
 		if (isBezierActive) {
 			//Debug.LogError(gameObject + " " + target);
 			getbezierAnim.startDelayed (true, delay);
-			isBezierActive = cachedAnimations;
+			//isBezierActive = cachedAnimations;
 		}
 
 		if (wrapMode == cWrapMode.Once) {
 			if (classPtr != null)
 				static_coroutine.getInstance.DoReflection (classPtr, callbackFcnName, parameters, delay + animationTime);
+			StartCoroutine (cachedAnimationsActiveCoroutine (cachedAnimations, delay + animationTime));
 		}
+	}
 
+	private IEnumerator cachedAnimationsActiveCoroutine (bool cachedAnimations, float delayTime) {
+		yield return new WaitForSeconds (delayTime);
+		//Debug.LogWarning (target.name + " CAched? " + cachedAnimations + " " + this.name);
+		if (!cachedAnimations) {
+			//Clean ();
+			StaticAnimationsManager.getInstance.removeFromStack (this);
+		}
 	}
 
 	ScaleAnimation scaleAnim = null;
-	bool isScaleActive = false;
+	bool _isScaleActive = false;
+	bool isScaleActive {
+		set {
+			getScaleAnim.enabled = value;
+			_isScaleActive = value;
+		}
+		get {
+			return _isScaleActive;
+		}
+	}
 	public ScaleAnimation getScaleAnim {
 		get {
 			if (scaleAnim == null) {
@@ -165,7 +190,16 @@ public class AnimationsMashUp : MonoBehaviour {
 	}
 
 	FadeAnimationV2 fadeAnim = null;
-	bool isFadeActive = false;
+	bool _isFadeActive = false;
+	bool isFadeActive {
+		set {
+			getFadeAnim.enabled = value;
+			_isFadeActive = value;
+		}
+		get {
+			return _isFadeActive;
+		}
+	}
 	public FadeAnimationV2 getFadeAnim {
 		get {
 			if (fadeAnim == null) {
@@ -176,7 +210,16 @@ public class AnimationsMashUp : MonoBehaviour {
 	}
 
 	RotateAnimation rotateAnim = null;
-	bool isRotateActive = false;
+	bool _isRotateActive = false;
+	bool isRotateActive {
+		set {
+			getRotateAnim.enabled = value;
+			_isRotateActive = value;
+		}
+		get {
+			return _isRotateActive;
+		}
+	}
 	public RotateAnimation getRotateAnim {
 		get {
 			if (rotateAnim == null) {
@@ -187,7 +230,16 @@ public class AnimationsMashUp : MonoBehaviour {
 	}
 
 	MoveAnimationV2 moveAnim = null;
-	bool isMoveActive = false;
+	bool _isMoveActive = false;
+	bool isMoveActive {
+		set {
+			getMoveAnim.enabled = value;
+			_isMoveActive = value;
+		}
+		get {
+			return _isMoveActive;
+		}
+	}
 	public MoveAnimationV2 getMoveAnim {
 		get {
 			if (moveAnim  == null) {
@@ -198,7 +250,16 @@ public class AnimationsMashUp : MonoBehaviour {
 	}
 
 	ChangeColorAnimation changeColorAnim = null;
-	bool isChangeColorActive = false;
+	bool _isChangeColorActive = false;
+	bool isChangeColorActive {
+		set {
+			getChangeColorAnim.enabled = value;
+			_isChangeColorActive = value;
+		}
+		get {
+			return _isChangeColorActive;
+		}
+	}
 	public ChangeColorAnimation getChangeColorAnim {
 		get {
 			if (changeColorAnim == null) {
@@ -209,7 +270,16 @@ public class AnimationsMashUp : MonoBehaviour {
 	}
 
 	SplineAnimation splineAnim = null;
-	bool isSplineActive = false;
+	bool _isSplineActive = false;
+	bool isSplineActive {
+		set {
+			getbezierAnim.enabled = value;
+			_isSplineActive = value;
+		}
+		get {
+			return _isSplineActive;
+		}
+	}
 	public SplineAnimation getSplineAnim {
 		get {
 			if (splineAnim == null) {
@@ -220,7 +290,16 @@ public class AnimationsMashUp : MonoBehaviour {
 	}
 
 	BezierCurveAnimation bezierAnim = null;
-	bool isBezierActive = false;
+	bool _isBezierActive = false;
+	bool isBezierActive {
+		set {
+			getbezierAnim.enabled = value;
+			_isBezierActive = value;
+		}
+		get {
+			return _isBezierActive;
+		}
+	}
 	public BezierCurveAnimation getbezierAnim {
 		get {
 			if (bezierAnim == null) {

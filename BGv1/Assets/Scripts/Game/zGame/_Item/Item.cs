@@ -34,27 +34,24 @@ public class Item : MonoBehaviour {
 			_spriteRenderer = GetComponent<SpriteRenderer>();
 			_cachedTransform = transform;
 			_boxCollider2D = collider2D as BoxCollider2D;
-			InitAnimMashup();
+			//InitAnimMashup();
 			//Invoke("DropItem", 0.5f);
 			_isInitialized = true;
 		}
 	}
 
 
-	protected virtual void InitAnimMashup () {
-		_animMashup = StaticAnimationsManager.getInstance.getAvailableAnimMashUp;
-		_animMashup.target = transform;
-		_animMashup.animationTime = 0.55f;
-	}
-
 	public virtual void DropItem () {
 		gameObject.SetActive(true);
 		_cachedTransform.parent = dropParent;
 		Vector2 pos = _cachedTransform.position;
-		_animMashup.setBezierAnim(true, new List<Vector2>(){ pos, pos + (Vector2.up * 100) , 
+		AnimationsMashUp tAnimMashup = StaticAnimationsManager.getInstance.getAvailableAnimMashUp;
+		tAnimMashup.target = _cachedTransform;
+		tAnimMashup.animationTime = 0.5f;
+		tAnimMashup.setBezierAnim(true, new List<Vector2>(){ pos, pos + (Vector2.up * 100) , 
 			(pos - (new Vector2(Random.Range(-100f,100f), 50f)))
 				});
-		_animMashup.start(false);
+		tAnimMashup.start(false);
 	}
 
 	public virtual int GetValue () {
@@ -64,10 +61,12 @@ public class Item : MonoBehaviour {
 
 	private IEnumerator StartPickedUpAnimationCoroutine () {
 		_boxCollider2D.enabled = false;
-		_animMashup.setMoveAnim(transform.position, transform.position + Vector3.up * 120f, true);
-		_animMashup.setFadeAnim(1.0f, 0f);
-		_animMashup.start(false);
-		yield return new WaitForSeconds(_animMashup.animationTime);
+		AnimationsMashUp tAnimMashup = StaticAnimationsManager.getInstance.getAvailableAnimMashUp;
+		tAnimMashup.target = _cachedTransform;
+		tAnimMashup.setMoveAnim(transform.position, transform.position + Vector3.up * 120f, true);
+		tAnimMashup.setFadeAnim(1.0f, 0f);
+		tAnimMashup.start (false);
+		yield return new WaitForSeconds(tAnimMashup.animationTime);
 		_boxCollider2D.enabled = true;
 		_cachedTransform.parent = originalParent;
 		_cachedTransform.localPosition = Vector3.zero;
