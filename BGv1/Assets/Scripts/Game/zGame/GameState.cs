@@ -1,4 +1,4 @@
-﻿﻿using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 
 public class GameState : BasicGameState {
@@ -32,7 +32,7 @@ public class GameState : BasicGameState {
 		_comboAnimationsMashup = StaticAnimationsManager.getInstance.getAvailableAnimMashUp;
 		_comboAnimationsMashup.animationTime = 0.3f;
 		_comboAnimationsMashup.setScaleAnim (Vector3.one * 1.2f, Vector3.one);
-
+		m_gameUIView.getGOCombo.SetActive (false);
 		StartStage(_stage);
 		AddListener();
 		Invoke("SecondOnStart", 0.5f);
@@ -40,7 +40,7 @@ public class GameState : BasicGameState {
 	}
 	private void SecondOnStart () {
 		ShowStage (_stage);
-		ShowCombo (1, Vector3.zero);
+		//ShowCombo (1, Vector3.zero);
 		m_gameUIView.setPlayerHealth (m_game2DView.getPlayerController.health);
 		m_gameUIView.setTowerHealth (m_game2DView.GetTower.health);
 		//m_game2DView.SummonEnemyAtContainer1(EnemyController.EnemyType.Jumper, 1);
@@ -159,6 +159,7 @@ public class GameState : BasicGameState {
 	}
 
 	private void OnEnemyStateStart (BasicCharacterController.CharacterState state, BasicCharacterController instance) {
+		Debug.LogWarning (state);
 		switch (state) {
 		case BasicCharacterController.CharacterState.Hurt:
 			CancelInvoke ("CancelComboCounter");

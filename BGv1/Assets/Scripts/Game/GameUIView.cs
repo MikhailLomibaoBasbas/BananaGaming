@@ -119,6 +119,7 @@ public class GameUIView : BasicView
 	}
 
 	public void setHit(int hit, Vector3 pos = default(Vector3)){
+		Debug.Log ("fdsfds");
 		//getGOCombo.transform.localPosition = pos; // To follow
 		getGOCombo.SetActive (true);
 		lblHit.text = hit.ToString ();
