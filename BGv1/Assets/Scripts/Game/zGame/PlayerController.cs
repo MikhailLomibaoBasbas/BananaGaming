@@ -279,6 +279,11 @@ public class PlayerController : BasicCharacterController {
 			break;
 		case Game.ItemType.Heal:
 			health += val;
+			int tempHealth = 0;
+			if (health > 100)
+				tempHealth = health - 100;
+			GameState.instance.setPlayerHealth (health);
+			GameState.instance.addTowerHealth (tempHealth);
 			GameState.instance.OnPowerUpTaken ((item as Heal).healType.ToString (), Color.white);
 			StartCoroutine(HealCoroutine(dur));
 			break;

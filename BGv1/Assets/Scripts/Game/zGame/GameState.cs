@@ -8,7 +8,7 @@ public class GameState : BasicGameState {
 	private Game2DView m_game2DView;
 	private GameUIView m_gameUIView;
 	private StageManager _stageManager;
-	private int _stage = 1;
+	private int _stage = 10;
 
 	private int _score;
 
@@ -38,6 +38,7 @@ public class GameState : BasicGameState {
 		_comboAnimationsMashup.setScaleAnim (Vector3.one * 1.0f, Vector3.one * 0.75f);
 		m_gameUIView.getGOCombo.SetActive (false);
 		m_gameUIView.getGOPowerup.SetActive (false);
+
 		StartStage(_stage);
 		AddListener();
 		Invoke("SecondOnStart", 0.5f);
@@ -48,6 +49,7 @@ public class GameState : BasicGameState {
 		//ShowCombo (1, Vector3.zero);
 		m_gameUIView.setPlayerHealth (m_game2DView.getPlayerController.health);
 		m_gameUIView.setTowerHealth (m_game2DView.GetTower.health);
+		m_gameUIView.setTowerHealth (50);
 		//m_game2DView.SummonEnemyAtContainer1(EnemyController.EnemyType.Jumper, 1);
 		//m_game2DView.SummonEnemyAtContainer2(EnemyController.EnemyType.Aggressive, 1);
 		//m_game2DView.SummonEnemyAtContainer1(EnemyController.EnemyType.Normal, 4);
@@ -186,6 +188,7 @@ public class GameState : BasicGameState {
 		}
 	}
 
+
 	public void PlayerStateFinished(BasicCharacterController.CharacterState state, BasicCharacterController ins) {
 		switch (state) {
 		case BasicCharacterController.CharacterState.Hurt:
@@ -208,6 +211,15 @@ public class GameState : BasicGameState {
 		}
 	}
 	#region MGA PAPALITAN PA
+	public void setPlayerHealth (int val) {
+		m_gameUIView.setPlayerHealth (val);
+	}
+	public void addTowerHealth (int val) {
+		int newVal = val + m_game2DView.GetTower.health;
+		if (newVal > 100)
+			newVal = 100;
+		m_gameUIView.setTowerHealth (newVal);
+	}
 	public void OnGetCoin (int val) { // DINAYA TONG HINAYUPAK NA TO.. TANGGALIN AGADDD ; ; ; / . . / . ,
 		m_gameUIView.setCoinCount (Game.instance.coins += val);
 	}

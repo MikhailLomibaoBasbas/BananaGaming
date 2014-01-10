@@ -15,4 +15,9 @@ public class EnemyProjectile : Projectile {
 	public override void Hide () {
 		SetActiveInScene(false);
 	}
+
+	public override int GetDamage (Transform projTrans){
+		Hide ();
+		return _damage;
+	}
 }
