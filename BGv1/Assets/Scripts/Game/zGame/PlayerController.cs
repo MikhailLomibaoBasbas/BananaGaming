@@ -274,15 +274,24 @@ public class PlayerController : BasicCharacterController {
 			Game.instance.coins += item.value;
 			break;
 		case Game.ItemType.Haste:
-			Haste(dur, val);
+			Haste (dur, val);
+			GameState.instance.OnPowerUpTaken ((item as Haste).hasteType.ToString (), Color.cyan);
 			break;
 		case Game.ItemType.Heal:
 			health += val;
+			GameState.instance.OnPowerUpTaken ((item as Heal).healType.ToString (), Color.white);
+			StartCoroutine(HealCoroutine(dur));
 			break;
 		case Game.ItemType.Rage:
 			Rage(dur, val);
+			GameState.instance.OnPowerUpTaken ((item as Rage).rageType.ToString (), Color.red);
 			break;
 		}
+	}
+
+	private IEnumerator HealCoroutine (float dur) {
+		yield return new WaitForSeconds (dur);
+		//GameState.instance.OnPowerupTakenFinished ();
 	}
 
 	private void Haste (float dur, int val) {
@@ -297,6 +306,7 @@ public class PlayerController : BasicCharacterController {
 		moveSpeed -= val;
 		UpdateCharacterStats ();
 		GetComponent<SpriteRenderer> ().color = Color.white;
+		//GameState.instance.OnPowerupTakenFinished ();
 	}
 
 	private void Rage (float dur, int val) {
@@ -310,6 +320,7 @@ public class PlayerController : BasicCharacterController {
 		foreach(WeaponController wc in _weaponControllerMap.Values) {
 			wc.AddDamage(-val);
 		}
+		//GameState.instance.OnPowerupTakenFinished ();
 	}
 
 

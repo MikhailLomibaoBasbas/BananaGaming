@@ -61,7 +61,7 @@ public class ShotgunProjectile : Projectile {
 		//CancelInvoke("Hide");
 		if(trans != null)
 			trans.SetGameObjectActive(false);
-
+		GameState.instance.AddComboCounter ();
 		//_updateEnabled = false;
 		//Hide();
 		//int tempDamage = _spriteRenderer.bounds.size.x;

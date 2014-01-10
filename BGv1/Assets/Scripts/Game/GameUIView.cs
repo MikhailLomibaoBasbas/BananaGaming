@@ -19,6 +19,7 @@ public class GameUIView : BasicView
 
 	private const string GO_STAGE = "AnchorCenter/Stage";
 	private const string GO_COMBO = "AnchorCenter/Combo";
+	private const string GO_POWERUP = "AnchorCenter/Powerup";
 
 	public UIEventListener.BoolDelegate onPressShoot = null;
 	public UIEventListener.VoidDelegate onClickAttack = null;
@@ -48,6 +49,7 @@ public class GameUIView : BasicView
 		lblPoints = GetChild (LBL_POINTS).GetComponent<UILabel> ();
 		lblStage = GetChild (GO_STAGE).GetComponentInChildren<UILabel> ();
 		lblHit = GetChild (GO_COMBO).GetComponentInChildren<UILabel> ();
+		GameObject pugo = getGOPowerup;
 	}
 
 	public GameObject getGOStage{
@@ -57,9 +59,23 @@ public class GameUIView : BasicView
 	private GameObject _GOCombo;
 	public GameObject getGOCombo{
 		get{  
-			if(_GOCombo == null)
+			if (_GOCombo == null) {
 				_GOCombo = GetChild (GO_COMBO); 
+			
+			}
 			return _GOCombo;
+		}
+	}
+
+	private GameObject _GOPowerup;
+	private UILabel _lblPowerup;
+	public GameObject getGOPowerup {
+		get{  
+			if (_GOPowerup == null) {
+				_GOPowerup = GetChild (GO_POWERUP); 
+				_lblPowerup = _GOPowerup.transform.FindChild ("Label").GetComponent<UILabel>();
+			}
+			return _GOPowerup;
 		}
 	}
 
@@ -123,6 +139,11 @@ public class GameUIView : BasicView
 		//getGOCombo.transform.localPosition = pos; // To follow
 		getGOCombo.SetActive (true);
 		lblHit.text = hit.ToString ();
+	}
+
+	public void setPowerupName(string name, Color color) {
+		_lblPowerup.text = name;
+		_lblPowerup.color = color;
 	}
 }
 

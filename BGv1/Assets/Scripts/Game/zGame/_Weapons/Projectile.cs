@@ -84,6 +84,7 @@ public class Projectile : MonoBehaviour {
 	}
 	public virtual int GetDamage (Transform projTrans) {
 		CancelInvoke("Hide");
+		GameState.instance.AddComboCounter ();
 		//_animator.SetTrigger("BloodSplat", true);
 		//Invoke("Hide", _time);
 		Hide();

@@ -37,6 +37,7 @@ public class GameState : BasicGameState {
 		_comboAnimationsMashup.animationTime = 0.3f;
 		_comboAnimationsMashup.setScaleAnim (Vector3.one * 1.2f, Vector3.one);
 		m_gameUIView.getGOCombo.SetActive (false);
+		m_gameUIView.getGOPowerup.SetActive (false);
 		StartStage(_stage);
 		AddListener();
 		Invoke("SecondOnStart", 0.5f);
@@ -156,21 +157,13 @@ public class GameState : BasicGameState {
 		_stageManager.RefreshValuesForNextWave();
 	}
 
-	private int combo;
-	private void CancelComboCounter () {
-		combo = 0;
-		m_gameUIView.getGOCombo.SetActive (false);
-	}
+
 
 	private void OnEnemyStateStart (BasicCharacterController.CharacterState state, BasicCharacterController instance) {
 		Debug.LogWarning (state);
 		switch (state) {
 		case BasicCharacterController.CharacterState.Hurt:
-			CancelInvoke ("CancelComboCounter");
-			combo++;
-			m_gameUIView.setHit (combo);
-			_comboAnimationsMashup.start (true);
-			Invoke ("CancelComboCounter", 3f);
+			//AddComboCounter ();
 				break;
 		case BasicCharacterController.CharacterState.Dead:
 			OnEnemyDead ((instance as EnemyController).score);
@@ -207,16 +200,41 @@ public class GameState : BasicGameState {
 		}
 	}
 
+
 	public void OnTowerHit (int health) {
 		m_gameUIView.setTowerHealth (health);
 		if (health <= 0f) {
 			Game.instance.PushState (GameStateType.GAME_OVER);
 		}
 	}
-
-	public void OnGetCoin (int val) { // DINAYA TONG HINAYUPAK NA TO.. TANGGALIN AGADDD
+	#region MGA PAPALITAN PA
+	public void OnGetCoin (int val) { // DINAYA TONG HINAYUPAK NA TO.. TANGGALIN AGADDD ; ; ; / . . / . ,
 		m_gameUIView.setCoinCount (Game.instance.coins += val);
 	}
+
+	public void OnPowerUpTaken(string name, Color color) { // ISA RIN TONG HINAYUPAK NA TO
+		CancelInvoke ("OnPowerupTakenFinished");
+		iTween.PunchScale (m_gameUIView.getGOPowerup, Vector3.one * 1.25f, 0.5f);
+		m_gameUIView.getGOPowerup.SetActive (true);
+		m_gameUIView.setPowerupName (name, color);
+		Invoke ("OnPowerupTakenFinished", 1.5f);
+	}
+	public void OnPowerupTakenFinished () { // AT ITO RIN
+		m_gameUIView.getGOPowerup.SetActive (false);
+	}
+	private int combo;
+	private void CancelComboCounter () {
+		combo = 0;
+		m_gameUIView.getGOCombo.SetActive (false);
+	}
+	public void AddComboCounter () {
+		CancelInvoke ("CancelComboCounter");
+		combo++;
+		m_gameUIView.setHit (combo);
+		_comboAnimationsMashup.start (true);
+		Invoke ("CancelComboCounter", 3f);
+	}
+	#endregion
 
 	public void ShowStage(int stage){
 		m_gameUIView.setStageNum (stage);
