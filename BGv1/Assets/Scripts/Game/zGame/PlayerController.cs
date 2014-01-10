@@ -285,6 +285,7 @@ public class PlayerController : BasicCharacterController {
 	}
 
 	private void Haste (float dur, int val) {
+		Debug.LogError ("fds");
 		StartCoroutine(HasteCoroutine(dur, val));
 	}
 	private IEnumerator HasteCoroutine (float dur, int val) {
@@ -296,6 +297,7 @@ public class PlayerController : BasicCharacterController {
 	}
 
 	private void Rage (float dur, int val) {
+		Debug.LogError ("fds");
 		StartCoroutine(RageCoroutine(dur, val));
 	}
 	private IEnumerator RageCoroutine (float dur, int val) {

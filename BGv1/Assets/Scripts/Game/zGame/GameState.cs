@@ -1,4 +1,4 @@
-﻿﻿﻿using UnityEngine;
+﻿﻿using UnityEngine;
 using System.Collections;
 
 public class GameState : BasicGameState {
@@ -17,6 +17,8 @@ public class GameState : BasicGameState {
 
 	private int _towerHealth = 100;
 
+	AnimationsMashUp _comboAnimationsMashup;
+
 	public override void OnStart () {
 		view2D = Game2DView.Create();
 		viewUI = GameUIView.Create ();
@@ -27,7 +29,10 @@ public class GameState : BasicGameState {
 		_stageManager = new StageManager();
 		static_audiomanager.getInstance.play_bgm ("Audio/Bgm/InGame");
 		//AudioManager.GetInstance.PlayRandomBGMCombination();
-	
+		_comboAnimationsMashup = StaticAnimationsManager.getInstance.getAvailableAnimMashUp;
+		_comboAnimationsMashup.animationTime = 0.3f;
+		_comboAnimationsMashup.setScaleAnim (Vector3.one * 1.2f, Vector3.one);
+
 		StartStage(_stage);
 		AddListener();
 		Invoke("SecondOnStart", 0.5f);
@@ -64,19 +69,20 @@ public class GameState : BasicGameState {
 		m_game2DView.OnPauseCalled ();
 		m_game2DView.getCameraFollow.isActive = false;
 		m_game2DView.getPlayerController.RemoveCharacterStateListeners ();
+		StaticAnimationsManager.getInstance.removeFromStack (_comboAnimationsMashup);
 		RemoveListener ();
 		base.OnEnd ();
 	}
 
 	private void AddListener () {
-		m_game2DView.AddEnemiesDeadListener(OnEnemyDead);
+		m_game2DView.AddEnemiesStateStartListener(OnEnemyStateStart);
 		m_gameUIView.onClickPause += OnClickPause;
 		m_gameUIView.onPressShoot += OnPressShoot;
 		m_gameUIView.onClickSwitch += OnClickSwitch;
 	}
 
 	private void RemoveListener () {
-		m_game2DView.RemoveEnemiesDeadListener(OnEnemyDead);
+		m_game2DView.RemoveEnemiesStateStartListener(OnEnemyStateStart);
 		m_gameUIView.onClickPause -= OnClickPause;
 		m_gameUIView.onPressShoot -= OnPressShoot;
 		m_gameUIView.onClickSwitch -= OnClickSwitch;
@@ -146,8 +152,31 @@ public class GameState : BasicGameState {
 		_stageManager.RefreshValuesForNextWave();
 	}
 
+	private int combo;
+	private void CancelComboCounter () {
+		combo = 0;
+		m_gameUIView.getGOCombo.SetActive (false);
+	}
+
+	private void OnEnemyStateStart (BasicCharacterController.CharacterState state, BasicCharacterController instance) {
+		switch (state) {
+		case BasicCharacterController.CharacterState.Hurt:
+			CancelInvoke ("CancelComboCounter");
+			combo++;
+			m_gameUIView.setHit (combo);
+			Invoke ("CancelComboCounter", 3f);
+				break;
+		case BasicCharacterController.CharacterState.Dead:
+			OnEnemyDead ((instance as EnemyController).score);
+				break;
+		}
+	}
+
+
+
 	private void OnEnemyDead(int score) {
 		_score += score;
+		m_gameUIView.setPointCount (_score);
 		_enemiesKilled++;
 		_enemiesKilledThisStage++;
 		Debug.LogWarning("Enemies Killed: " + _enemiesKilledThisStage);

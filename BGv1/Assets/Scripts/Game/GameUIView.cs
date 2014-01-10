@@ -54,8 +54,13 @@ public class GameUIView : BasicView
 		get{  return GetChild (GO_STAGE); }
 	}
 
+	private GameObject _GOCombo;
 	public GameObject getGOCombo{
-		get{  return GetChild (GO_COMBO); }
+		get{  
+			if(_GOCombo == null)
+				_GOCombo = GetChild (GO_COMBO); 
+			return _GOCombo;
+		}
 	}
 
 	void OnPressShoot(GameObject go, bool state) {
@@ -113,8 +118,9 @@ public class GameUIView : BasicView
 		lblStage.text = stage.ToString ();
 	}
 
-	public void setHit(int hit, Vector3 pos){
-		GetChild (GO_COMBO).transform.localPosition = pos;
+	public void setHit(int hit, Vector3 pos = default(Vector3)){
+		//getGOCombo.transform.localPosition = pos; // To follow
+		getGOCombo.SetActive (true);
 		lblHit.text = hit.ToString ();
 	}
 }

@@ -108,20 +108,20 @@ public class Game2DView : Basic2DView {
 	}
 
 
-	public void AddEnemiesDeadListener (EnemyController.OnEnemyDeadFinished listener) {
+	public void AddEnemiesStateStartListener (BasicCharacterController.OnCharacterStateStart listener) {
 		foreach(EnemyController ec in _enemyControllers1) {
-			ec.onEnemyDeadFinished += listener;
+			ec.SetCharacterStateStartEventListener(listener);
 		}
 		foreach(EnemyController ec in _enemyControllers2) {
-			ec.onEnemyDeadFinished += listener;
+			ec.SetCharacterStateStartEventListener(listener);
 		}
 	}
-	public void RemoveEnemiesDeadListener (EnemyController.OnEnemyDeadFinished listener) {
+	public void RemoveEnemiesStateStartListener (BasicCharacterController.OnCharacterStateStart listener) {
 		foreach(EnemyController ec in _enemyControllers1) {
-			ec.onEnemyDeadFinished -= listener;
+			ec.SetCharacterStateStartEventListener(listener);
 		}
 		foreach(EnemyController ec in _enemyControllers2) {
-			ec.onEnemyDeadFinished -= listener;
+			ec.SetCharacterStateStartEventListener(listener);
 		}
 	}
 

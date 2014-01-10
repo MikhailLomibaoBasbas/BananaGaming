@@ -49,7 +49,7 @@ public class ShotgunProjectile : Projectile {
 					Transform tlb = _leadBalls[i];
 					//Debug.LogError(i + " " + tlb.forward);
 					if(tlb.gameObject.activeSelf)
-						tlb.position += (_isRight ? 1f: -1f) * tlb.right * (_distance / _time) * tDeltaTime;
+						tlb.position += (_isRight ? 1f: -1f) * tlb.right * (_distance / _time) * tDeltaTime * (((float)i+1)/_leadBallsLength);
 				}
 			} else {
 				Hide();
