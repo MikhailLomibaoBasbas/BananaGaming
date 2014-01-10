@@ -14,9 +14,11 @@ public class GameUIView : BasicView
 	private const string SLIDER_TOWERHEALTH = "AnchorTopLeft/TowerStatus/TowerHealth";
 
 	private const string LBL_COIN = "AnchorTopRight/lblCoin";
+	private const string LBL_POINTS = "AnchorTopRight/lblPoints";
 	private const string LBL_STAGE = "AnchorCenter/Stage/lblStage";
 
 	private const string GO_STAGE = "AnchorCenter/Stage";
+	private const string GO_COMBO = "AnchorCenter/Combo";
 
 	public UIEventListener.BoolDelegate onPressShoot = null;
 	public UIEventListener.VoidDelegate onClickAttack = null;
@@ -26,6 +28,9 @@ public class GameUIView : BasicView
 	protected UISlider healthSlider;
 	protected UISlider towerSlider;
 	protected UILabel lblCoin;
+	protected UILabel lblPoints;
+	protected UILabel lblStage;
+	protected UILabel lblHit;
 
 	public static GameUIView Create() {
 		return Create<GameUIView>(IN_GAME_PANEL);
@@ -40,10 +45,17 @@ public class GameUIView : BasicView
 		healthSlider = GetChild (SLIDER_PLAYERHEALTH).GetComponent<UISlider> ();
 		towerSlider = GetChild (SLIDER_TOWERHEALTH).GetComponent<UISlider> ();
 		lblCoin = GetChild (LBL_COIN).GetComponent<UILabel> ();
+		lblPoints = GetChild (LBL_POINTS).GetComponent<UILabel> ();
+		lblStage = GetChild (GO_STAGE).GetComponentInChildren<UILabel> ();
+		lblHit = GetChild (GO_COMBO).GetComponentInChildren<UILabel> ();
 	}
 
 	public GameObject getGOStage{
 		get{  return GetChild (GO_STAGE); }
+	}
+
+	public GameObject getGOCombo{
+		get{  return GetChild (GO_COMBO); }
 	}
 
 	void OnPressShoot(GameObject go, bool state) {
@@ -91,6 +103,19 @@ public class GameUIView : BasicView
 
 	public void setCoinCount(int coin){
 		lblCoin.text = coin.ToString ();
+	}
+
+	public void setPointCount(int points){
+		lblPoints.text = points.ToString ();
+	}
+
+	public void setStageNum(int stage){
+		lblStage.text = stage.ToString ();
+	}
+
+	public void setHit(int hit, Vector3 pos){
+		GetChild (GO_COMBO).transform.localPosition = pos;
+		lblHit.text = hit.ToString ();
 	}
 }
 

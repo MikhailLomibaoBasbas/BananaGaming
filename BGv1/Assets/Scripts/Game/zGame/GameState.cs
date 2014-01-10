@@ -1,4 +1,4 @@
-﻿﻿﻿using UnityEngine;
+﻿﻿using UnityEngine;
 using System.Collections;
 
 public class GameState : BasicGameState {
@@ -32,7 +32,8 @@ public class GameState : BasicGameState {
 		Invoke("Test", 0.1f);
 		m_gameUIView.setPlayerHealth (m_game2DView.getPlayerController.health);
 		m_gameUIView.setTowerHealth (m_game2DView.GetTower.health);
-		ShowStage ();
+		ShowStage (_stage);
+		ShowCombo (1, Vector3.zero);
 		AddListener();
 		base.OnStart ();
 	}
@@ -102,6 +103,7 @@ public class GameState : BasicGameState {
 
 	private void StartStage (int stg) {
 		m_game2DView.getPlayerController.minClamp = (stg > 5) ? new Vector2(-1500, -650): new Vector2(-100, -650);
+		ShowStage (stg);
 		_stageManager.SetStage(stg);
 		m_gameUIView.GetStageLabel.text = stg.ToString();
 		_enemiesKilledThisStage = 0;
@@ -178,7 +180,8 @@ public class GameState : BasicGameState {
 		}
 	}
 
-	public void ShowStage(){
+	public void ShowStage(int stage){
+		m_gameUIView.setStageNum (stage);
 		iTween.MoveTo (m_gameUIView.getGOStage, iTween.Hash ("y", 0f, "time", 1f, "islocal", true,
 			"easetype", iTween.EaseType.spring ,"oncomplete", "FinishedShowStage", "oncompletetarget", transform.gameObject));
 	}
@@ -186,5 +189,17 @@ public class GameState : BasicGameState {
 	private void FinishedShowStage(){
 		iTween.MoveTo (m_gameUIView.getGOStage, iTween.Hash ("y", 600f, "time", 1f, "delay", 1f, "islocal", true,
 			"easetype", iTween.EaseType.spring));//,"oncomplete", "FinishedShowStage", "oncompletetarget", transform.gameObject));
+	}
+
+	public void ShowCombo(int hit, Vector3 pos){
+		m_gameUIView.setHit (hit, pos);
+		iTween.ScaleTo (m_gameUIView.getGOCombo, iTween.Hash ("scale", Vector3.one * 0.5f, "time", 0.3f, "islocal", true,
+			"easetype", iTween.EaseType.spring ,"oncomplete", "FinishedShowCombo", "oncompletetarget", transform.gameObject));
+	}
+
+	private void FinishedShowCombo(){
+		m_gameUIView.setHit (0, Vector3.zero);
+		iTween.ScaleTo (m_gameUIView.getGOCombo, iTween.Hash ("scale", Vector3.zero, "time", 0.3f, "islocal", true,
+			"easetype", iTween.EaseType.spring));// ,"oncomplete", "FinishedShowCombo", "oncompletetarget", transform.gameObject));
 	}
 }
