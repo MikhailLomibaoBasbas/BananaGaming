@@ -8,7 +8,7 @@ public class GameState : BasicGameState {
 	private Game2DView m_game2DView;
 	private GameUIView m_gameUIView;
 	private StageManager _stageManager;
-	private int _stage = 10;
+	private int _stage = 1;
 
 	private int _score;
 
@@ -49,7 +49,9 @@ public class GameState : BasicGameState {
 		//ShowCombo (1, Vector3.zero);
 		m_gameUIView.setPlayerHealth (m_game2DView.getPlayerController.health);
 		m_gameUIView.setTowerHealth (m_game2DView.GetTower.health);
-		m_gameUIView.setTowerHealth (50);
+		m_gameUIView.setCoinCount (0);
+		m_gameUIView.setPointCount (0);
+		//m_gameUIView.setTowerHealth (50);
 		//m_game2DView.SummonEnemyAtContainer1(EnemyController.EnemyType.Jumper, 1);
 		//m_game2DView.SummonEnemyAtContainer2(EnemyController.EnemyType.Aggressive, 1);
 		//m_game2DView.SummonEnemyAtContainer1(EnemyController.EnemyType.Normal, 4);
