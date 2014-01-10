@@ -75,17 +75,16 @@ public class GameUIView : BasicView
 		}
 	}
 
-	public void setPlayerHealth(int damage){
+	public void setPlayerHealth(int health){
 		int totalHealth = 100;
-		float sliderVal =  totalHealth - damage / totalHealth; 
+		float sliderVal =  (float)health / (float)totalHealth; 
 
 		healthSlider.sliderValue = sliderVal;
 	}
 
-	public void setTowerHealth(int damage){
+	public void setTowerHealth(int health){
 		int totalTowerHealth = 100;
-		float sliderVal =  (float)damage / (float)totalTowerHealth; 
-		Debug.Log ("VALUE : " + sliderVal);
+		float sliderVal =  (float)health/ (float)totalTowerHealth; 
 
 		towerSlider.sliderValue = sliderVal;
 	}

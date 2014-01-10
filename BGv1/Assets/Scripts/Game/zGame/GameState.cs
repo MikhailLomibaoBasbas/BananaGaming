@@ -1,4 +1,4 @@
-﻿﻿using UnityEngine;
+﻿﻿﻿using UnityEngine;
 using System.Collections;
 
 public class GameState : BasicGameState {
@@ -30,7 +30,8 @@ public class GameState : BasicGameState {
 		//StartStage(_stage = 10);
 
 		Invoke("Test", 0.1f);
-		m_gameUIView.setPlayerHealth (_towerHealth);
+		m_gameUIView.setPlayerHealth (m_game2DView.getPlayerController.health);
+		m_gameUIView.setTowerHealth (m_game2DView.GetTower.health);
 		ShowStage ();
 		AddListener();
 		base.OnStart ();
@@ -158,6 +159,7 @@ public class GameState : BasicGameState {
 	public void PlayerStateFinished(BasicCharacterController.CharacterState state, BasicCharacterController ins) {
 		switch (state) {
 		case BasicCharacterController.CharacterState.Hurt:
+			m_gameUIView.setPlayerHealth (ins.health);
 			//ins.health
 			break;
 		case BasicCharacterController.CharacterState.Dead:
