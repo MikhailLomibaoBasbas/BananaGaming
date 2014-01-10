@@ -43,7 +43,8 @@ public class static_audiomanager {
 	{
 		instance_gameObject = new GameObject("z_audiomanager");
 		GameObject.DontDestroyOnLoad(instance_gameObject);	
-		instance_gameObject.AddComponent<AudioListener>();
+		if(GameObject.FindObjectOfType(typeof(AudioListener)) as AudioListener == null)
+			instance_gameObject.AddComponent<AudioListener>();
 			
 		
 		for (int x = 0 ; x < sfx_base_count; x++)

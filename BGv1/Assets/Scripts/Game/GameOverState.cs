@@ -7,7 +7,7 @@ public class GameOverState : BasicGameState {
 	public override void OnStart() {
 		viewUI = GameOverView.Create();
 		gameOverView = (GameOverView)viewUI;
-
+		AudioManager.GetInstance.PlayKhailSpecial ();
 		//static_audiomanager.getInstance.play_bgm ("Audio/Bgm/MainMenu");
 		AddGUIListeners();
 		base.OnStart();
@@ -18,6 +18,7 @@ public class GameOverState : BasicGameState {
 	}
 
 	public override void OnEnd() {
+		AudioManager.GetInstance.StopBGMAll ();
 		RemoveGUIListeners();
 		base.OnEnd();
 	}

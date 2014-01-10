@@ -95,6 +95,7 @@ public class EnemyController : BasicCharacterController {
 		Item[] items = _itemContainer.GetComponentsInChildren<Item> ();
 		for (int i = 0; i < items.Length; i++) {
 			_itemsMap.Add (items [i].itemType, items [i]);
+
 		}
 		_itemContainer.SetActive (false);
 		_boxCollider2D = collider2D as BoxCollider2D;
@@ -365,9 +366,9 @@ public class EnemyController : BasicCharacterController {
 		idle();
 		iTween.PunchScale(gameObject, new Vector3(1.5f, 1.5f, 1), 0.5f);
 		yield return new WaitForSeconds(0.5f);
-		cachedTransform.localScale = new Vector3(1.5f, 1.5f, 1);
+		//cachedTransform.localScale = new Vector3(1.5f, 1.5f, 1);
 		move();
-		moveSpeed *= 1.5f;
+		moveSpeed *= 1.3f;
 		UpdateCharacterStats();
 	}
 	private IEnumerator StartAggressiveDeBuffUpAnimCoroutine () {
@@ -376,7 +377,7 @@ public class EnemyController : BasicCharacterController {
 		yield return new WaitForSeconds(0.5f);
 		move();
 		cachedTransform.localScale = new Vector3(1f, 1f, 1);
-		moveSpeed /= 1.5f;
+		moveSpeed /= 1.3f;
 		UpdateCharacterStats();
 	}
 

@@ -41,6 +41,7 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 	public float moveSpeed;
 	public bool attackEnabled;
 	public bool bloodEnabled;
+	private Transform _bloodContainers;
 	private Animator[] _bloodSplatterAnimators;
 	public float rcDistanceToAttack; //For Raycast
 	public float flinchForce;
@@ -144,9 +145,8 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 	}
 	private void InitBloodSplatter () {
 		if(bloodEnabled) {
-			Transform tempBSContainer = null;
-			if((tempBSContainer = cachedTransform.FindChild("_BloodSplatterContainer")) != null) {
-				_bloodSplatterAnimators = tempBSContainer.GetComponentsInChildren<Animator>();
+			if((_bloodContainers = cachedTransform.FindChild("_BloodSplatterContainer")) != null) {
+				_bloodSplatterAnimators = _bloodContainers.GetComponentsInChildren<Animator>();
 				for(int i = 0; i < _bloodSplatterAnimators.Length; i++) {
 					_bloodSplatterAnimators[i].SetGameObjectActive(false);
 				}
@@ -495,12 +495,15 @@ public class BasicCharacterController : MonoBehaviour, ICharacterController {
 				string triggerStr = Random.Range(0, 100) < 70 ? "Splat1": "Splat2";
 				//Debug.LogError(triggerStr);
 				bsAnimator.SetTrigger(triggerStr);
+				bsAnimator.transform.parent = Game.instance.game2DRoot.transform;
 				break;
 			}
 		}
 		if(bsAnimator == null)
 			yield break;
 		yield return new WaitForSeconds(44f / 60f);
+		bsAnimator.transform.parent = _bloodContainers;
+		bsAnimator.transform.localPosition = Vector3.zero;
 		bsAnimator.SetGameObjectActive(false);
 	}
 	#endregion

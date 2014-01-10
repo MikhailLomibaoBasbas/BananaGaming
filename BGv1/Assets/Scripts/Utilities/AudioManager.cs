@@ -85,7 +85,8 @@ public class AudioManager {
 	private AudioManager() {
 		Dictionary<BGMType, AudioClip> pooledBgmMap = getBgmMap;
 		AudioSource pooledAC = getBgmAudioSource;
-		getContainer.AddComponent<AudioListener>();
+		if(AudioListener.FindObjectOfType(typeof(AudioListener)) as AudioListener == null)
+			getContainer.AddComponent<AudioListener>();
 	}
 	
 	public void PlayBGM(BGMType type, bool loop = true, float volume = 1f) {
